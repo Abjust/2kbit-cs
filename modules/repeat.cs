@@ -96,7 +96,7 @@ namespace Net_2kBot.Modules
                                 {
                                     if (Global.time_now - Global.last_repeat <= Global.repeat_interval)
                                     {
-                                        if (Global.repeat_count < Global.repeat_threshold)
+                                        if (Global.repeat_count <= Global.repeat_threshold)
                                         {
                                             Global.last_repeat = Global.time_now;
                                             await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
