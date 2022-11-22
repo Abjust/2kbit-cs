@@ -8,16 +8,7 @@
         public static string[]? ops;
         public static string[]? blocklist;
         public static string path = Directory.GetCurrentDirectory();
-        public static string[] ignores =
-                {
-                    "748029973",
-                    "2265453790",
-                    "2286003479",
-                    "3594648576",
-                    "3573523379",
-                    "1351158016",
-                    "3604629098"
-                };
+        public static string[]? ignores;
         public static string api_key = "";
         public static string qq = "";
         public static string verify_key = "";
