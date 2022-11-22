@@ -104,7 +104,14 @@ namespace Net_2kBot.Modules
                                         }
                                         else
                                         {
-                                            await receiver.SendMessageAsync("警告：2kbot已执行动态管理机制！（主动复读功能将被暂时禁用 "+Global.repeat_cd+" 秒）");
+                                            try
+                                            {
+                                                await receiver.SendMessageAsync("警告：2kbot已执行动态管理机制！（主动复读功能将被暂时禁用 " + Global.repeat_cd + " 秒）");
+                                            }
+                                            catch
+                                            {
+                                                Console.WriteLine("群消息发送失败");
+                                            }
                                             Global.last_repeatctrl = Global.time_now;
                                             Global.repeat_count = 0;
                                         }
