@@ -22,8 +22,8 @@ namespace Net_2kBot
             MiraiBot bot = new()
             {
                 Address = "localhost:8080",
-                QQ = global.qq,
-                VerifyKey = global.verify_key
+                QQ = Global.qq,
+                VerifyKey = Global.verify_key
             };
             // 注意: `LaunchAsync`是一个异步方法，请确保`Main`方法的返回值为`Task`
             await bot.LaunchAsync();
@@ -32,14 +32,16 @@ namespace Net_2kBot
             // 若文件不存在则创建
             if (!System.IO.File.Exists("ops.txt")) System.IO.File.Create("ops.txt").Close();
             if (!System.IO.File.Exists("blocklist.txt")) System.IO.File.Create("blocklist.txt").Close();
+            if(!System.IO.File.Exists("ignores.txt")) System.IO.File.Create("blocklist.txt").Close();
             // 在这里添加你的代码，比如订阅消息/事件之类的
             // 持续更新op/黑名单
             bot.MessageReceived
             .OfType<GroupMessageReceiver>()
             .Subscribe(_ =>
             {
-                global.ops = System.IO.File.ReadAllLines("ops.txt");
-                global.blocklist = System.IO.File.ReadAllLines("blocklist.txt");
+                Global.ops = System.IO.File.ReadAllLines("ops.txt");
+                Global.blocklist = System.IO.File.ReadAllLines("blocklist.txt");
+                Global.ignores = System.IO.File.ReadAllLines("ignores.txt");
                 Thread.Sleep(500);
             });
             // 戳一戳效果
@@ -179,7 +181,7 @@ namespace Net_2kBot
                 {
                     Console.WriteLine("群消息发送失败");
                 }
-                if (global.blocklist != null && global.blocklist.Contains(receiver.Member.Group.Id))
+                if (Global.blocklist != null && Global.blocklist.Contains(receiver.Member.Group.Id))
                 {
                     try
                     {
@@ -217,7 +219,7 @@ namespace Net_2kBot
                 if (x.MessageChain.GetPlainMessage() == "/surprise")
                 {
                     MessageChain? chain = new MessageChainBuilder()
-                         .VoiceFromPath(global.path + "/ysxb.slk")
+                         .VoiceFromPath(Global.path + "/ysxb.slk")
                          .Build();
                     try
                     {
@@ -289,7 +291,7 @@ namespace Net_2kBot
                     string result1 = x.MessageChain.ToJsonString();
                     JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
                     string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (global.ignores.Contains(x.Sender.Id) == false)
+                    if (Global.ignores.Contains(x.Sender.Id) == false)
                     {
                         switch (text.Length)
                         {
@@ -659,6 +661,33 @@ namespace Net_2kBot
                         }
                     }
                 }
+                // 屏蔽消息
+                if (x.MessageChain.GetPlainMessage().StartsWith("/ignore"))
+                {
+                    string result1 = x.MessageChain.ToJsonString();
+                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
+                    string[] text = ja[1]["text"]!.ToString().Split(" ");
+                    if (text.Length == 2)
+                    {
+                        if (ja.Count == 3)
+                        {
+                            string target = ja[2]["target"]!.ToString();
+                            admin.Ignore(x.Sender.Id, target, x.GroupId);
+                        }
+                        else
+                        {
+                            admin.Ignore(x.Sender.Id, text[1], x.GroupId);
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
+                        }
+                        catch { }
+                    }
+                }
                 // 同步黑名单
                 if (x.MessageChain.GetPlainMessage() == ("/sync"))
                 {
@@ -680,7 +709,7 @@ namespace Net_2kBot
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "机器人版本：b1.0.7\r\n上次更新日期：2022/7/31\r\n更新内容：添加了/rsync和/merge指令");
+                        "机器人版本：b1.0.8\r\n上次更新日期：2022/11/22\r\n更新内容：优化静态管理机制，新增/ignore指令");
                     }
                     catch
                     {
