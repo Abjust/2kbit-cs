@@ -34,13 +34,16 @@ namespace Net_2kBot
             if (!System.IO.File.Exists("blocklist.txt")) System.IO.File.Create("blocklist.txt").Close();
             if(!System.IO.File.Exists("ignores.txt")) System.IO.File.Create("ignores.txt").Close();
             // 在这里添加你的代码，比如订阅消息/事件之类的
-            // 持续更新op/黑名单
+            // 持续更新数据
             bot.MessageReceived
             .OfType<GroupMessageReceiver>()
             .Subscribe(_ =>
             {
+                // 更新机器人管理员名单
                 Global.ops = System.IO.File.ReadAllLines("ops.txt");
+                // 更新黑名单
                 Global.blocklist = System.IO.File.ReadAllLines("blocklist.txt");
+                // 更新屏蔽列表
                 Global.ignores = System.IO.File.ReadAllLines("ignores.txt");
                 Thread.Sleep(500);
             });
@@ -81,6 +84,20 @@ namespace Net_2kBot
                     // 拒绝邀请
                     await RequestManager.HandleNewInvitationRequestedAsync(e, NewInvitationRequestHandlers.Reject, "");
                     Console.WriteLine("机器人已拒绝加入 " + e.GroupId);
+                }
+            });
+            // 侦测加群请求
+            bot.EventReceived
+            .OfType<NewMemberRequestedEvent>()
+            .Subscribe(async e =>
+            {
+                if (Global.blocklist != null && Global.blocklist.Contains(e.FromId))
+                {
+                    try
+                    {
+                        await e.RejectAsync();
+                    }
+                    catch { }
                 }
             });
             // 侦测改名
@@ -181,32 +198,6 @@ namespace Net_2kBot
                 {
                     Console.WriteLine("群消息发送失败");
                 }
-                if (Global.blocklist != null && Global.blocklist.Contains(receiver.Member.Group.Id))
-                {
-                    try
-                    {
-                        await GroupManager.KickAsync(receiver.Member.Id, receiver.Member.Group.Id);
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(receiver.Member.Group.Id, receiver.Member.Id + " 在黑名单内，已经被踢出！");
-                        }
-                        catch
-                        {
-                            Console.WriteLine("群消息发送失败");
-                        }
-                    }
-                    catch
-                    {
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(receiver.Member.Group.Id, receiver.Member.Id + " 在黑名单内，但是无法踢出！（可能是没有足够权限）");
-                        }
-                        catch
-                        {
-                            Console.WriteLine("群消息发送失败");
-                        }
-                    }
-                }
             });
             // bot对接收消息的处理
             bot.MessageReceived
@@ -231,7 +222,7 @@ namespace Net_2kBot
                     }
                 }
                 // 随机图片
-                if (x.MessageChain.GetPlainMessage() == "/rphoto")
+                if (x.MessageChain.GetPlainMessage() == "/photo")
                 {
                     Random r = new();
                     string url;
@@ -291,7 +282,7 @@ namespace Net_2kBot
                     string result1 = x.MessageChain.ToJsonString();
                     JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
                     string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (Global.ignores.Contains(x.Sender.Id) == false)
+                    if (Global.ignores != null && Global.ignores.Contains(x.Sender.Id) == false)
                     {
                         switch (text.Length)
                         {
@@ -709,7 +700,7 @@ namespace Net_2kBot
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "机器人版本：b1.0.8-r1\r\n上次更新日期：2022/11/22\r\n更新内容：修复了/ignore指令存在的小bug");
+                        "机器人版本：b1.1.0-r1\r\n上次更新日期：2022/11/23\r\n更新内容：修改了动态管理机制的参数（阈值改为10秒内5次，超阈值后禁用300秒）");
                     }
                     catch
                     {
