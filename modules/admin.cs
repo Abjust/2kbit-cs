@@ -334,7 +334,7 @@ namespace Net_2kBot.Modules
         {
             if (Global.ops != null && Global.ops.Contains(executor))
             {
-                if (Global.ops.Contains(victim) == false)
+                if (Global.ignores != null && Global.ignores.Contains(victim) == false)
                 {
                     using StreamWriter file = new("ignores.txt", append: true);
                     await file.WriteLineAsync("\r\n" + victim);
