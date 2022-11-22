@@ -32,7 +32,7 @@ namespace Net_2kBot
             // 若文件不存在则创建
             if (!System.IO.File.Exists("ops.txt")) System.IO.File.Create("ops.txt").Close();
             if (!System.IO.File.Exists("blocklist.txt")) System.IO.File.Create("blocklist.txt").Close();
-            if(!System.IO.File.Exists("ignores.txt")) System.IO.File.Create("blocklist.txt").Close();
+            if(!System.IO.File.Exists("ignores.txt")) System.IO.File.Create("ignores.txt").Close();
             // 在这里添加你的代码，比如订阅消息/事件之类的
             // 持续更新op/黑名单
             bot.MessageReceived
@@ -79,7 +79,7 @@ namespace Net_2kBot
                 else
                 {
                     // 拒绝邀请
-                    await RequestManager.HandleNewInvitationRequestedAsync(e, NewInvitationRequestHandlers.Reject, "我都还没准备好，我为什么要进来？");
+                    await RequestManager.HandleNewInvitationRequestedAsync(e, NewInvitationRequestHandlers.Reject, "");
                     Console.WriteLine("机器人已拒绝加入 " + e.GroupId);
                 }
             });
@@ -709,7 +709,7 @@ namespace Net_2kBot
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "机器人版本：b1.0.8\r\n上次更新日期：2022/11/22\r\n更新内容：优化静态管理机制，新增/ignore指令");
+                        "机器人版本：b1.0.8-r1\r\n上次更新日期：2022/11/22\r\n更新内容：修复了/ignore指令存在的小bug");
                     }
                     catch
                     {
