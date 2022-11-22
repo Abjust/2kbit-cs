@@ -35,7 +35,7 @@ namespace Net_2kBot.Modules
                         try
                         {
                             string results = "";
-                            if (global.ignores.Contains(receiver.Sender.Id) == false)
+                            if (Global.ignores != null && Global.ignores.Contains(receiver.Sender.Id) == false)
                             {
                                 for (int i = 1; i < result.Length; i++)
                                 {
@@ -83,7 +83,7 @@ namespace Net_2kBot.Modules
                     }
                 }
                 // 主动复读
-                else if (global.ignores.Contains(receiver.Sender.Id) == false)
+                else if (Global.ignores != null && Global.ignores.Contains(receiver.Sender.Id) == false)
                 {
                     foreach (string item in repeatwords)
                     {

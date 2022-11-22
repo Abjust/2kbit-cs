@@ -15,7 +15,7 @@ namespace Net_2kBot.Modules
         {
             if (@base is GroupMessageReceiver receiver)
             {
-                if (global.ops != null && global.ops.Contains(executor))
+                if (Global.ops != null && Global.ops.Contains(executor))
                 {
                     RestClient client = new("http://101.42.94.97/blacklist");
                     RestRequest request = new("look", Method.Get);
@@ -56,7 +56,7 @@ namespace Net_2kBot.Modules
         {
             if (@base is GroupMessageReceiver receiver)
             {
-                if (global.ops != null && global.ops.Contains(executor))
+                if (Global.ops != null && Global.ops.Contains(executor))
                 {
                     RestClient client = new("http://101.42.94.97/blacklist");
                     RestRequest request = new("look", Method.Get);
@@ -64,14 +64,14 @@ namespace Net_2kBot.Modules
                     RestResponse response = await client.ExecuteAsync(request);
                     JObject jo = (JObject)JsonConvert.DeserializeObject(response.Content!)!;  //正常获取jobject
                     List<string> blocklist2 = new List<string> {""};
-                    if (global.blocklist != null)
+                    if (Global.blocklist != null)
                     {
-                        for (int i = 0; i < global.blocklist.Length; i++)
+                        for (int i = 0; i < Global.blocklist.Length; i++)
                         {
-                            if (!jo["data"]!.Contains(global.blocklist[i]))
+                            if (!jo["data"]!.Contains(Global.blocklist[i]))
                             {
                                 RestClient client1 = new("http://101.42.94.97/blacklist");
-                                RestRequest request1 = new("up?uid=" + global.blocklist[i] + "&key=" + global.api_key, Method.Post);
+                                RestRequest request1 = new("up?uid=" + Global.blocklist[i] + "&key=" + Global.api_key, Method.Post);
                                 request.Timeout = 10000;
                                 await client1.ExecuteAsync(request1);
                             }
@@ -84,14 +84,14 @@ namespace Net_2kBot.Modules
                             }
                         }
                         blocklist2.Remove("");
-                        var diff = new HashSet<string>(global.blocklist);
+                        var diff = new HashSet<string>(Global.blocklist);
                         diff.SymmetricExceptWith(blocklist2);
                         string diff1 = String.Join(", ", diff);
                         string[] diff2 = diff1.Split(",");
                         foreach (string s in diff2)
                         {
                             RestClient client2 = new("http://101.42.94.97/blacklist");
-                            RestRequest request2 = new("del?uid=" + s + "&key=" + global.api_key, Method.Delete);
+                            RestRequest request2 = new("del?uid=" + s + "&key=" + Global.api_key, Method.Delete);
                             request.Timeout = 10000;
                             await client2.ExecuteAsync(request2);
                         }
@@ -123,7 +123,7 @@ namespace Net_2kBot.Modules
         {
             if (@base is GroupMessageReceiver receiver)
             {
-                if (global.ops != null && global.ops.Contains(executor))
+                if (Global.ops != null && Global.ops.Contains(executor))
                 {
                     RestClient client = new("http://101.42.94.97/blacklist");
                     RestRequest request = new("look", Method.Get);
@@ -132,7 +132,7 @@ namespace Net_2kBot.Modules
                     JObject jo = (JObject)JsonConvert.DeserializeObject(response.Content!)!;  //正常获取jobject
                     using StreamWriter file = new("blocklist.txt", append: true);
                     List<string> blocklist2 = new List<string> {""};
-                    if (global.blocklist != null)
+                    if (Global.blocklist != null)
                     {
                         foreach (string? s in jo["data"]!)
                         {
@@ -142,7 +142,7 @@ namespace Net_2kBot.Modules
                             }
                         }
                         blocklist2.Remove("");
-                        var diff = new HashSet<string>(global.blocklist);
+                        var diff = new HashSet<string>(Global.blocklist);
                         diff.SymmetricExceptWith(blocklist2);
                         string diff1 = String.Join(", ", diff);
                         string[] diff2 = diff1.Split(",");
@@ -151,11 +151,11 @@ namespace Net_2kBot.Modules
                             if (!jo["data"]!.Contains(s))
                             {
                                 RestClient client1 = new("http://101.42.94.97/blacklist");
-                                RestRequest request1 = new("up?uid=" + s + "&key=" + global.api_key, Method.Post);
+                                RestRequest request1 = new("up?uid=" + s + "&key=" + Global.api_key, Method.Post);
                                 request.Timeout = 10000;
                                 await client1.ExecuteAsync(request1);
                             }
-                            else if (!global.blocklist.Contains(s))
+                            else if (!Global.blocklist.Contains(s))
                             {
                                 await file.WriteLineAsync(s);
                             }
@@ -163,7 +163,7 @@ namespace Net_2kBot.Modules
                         file.Close();
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(receiver.GroupId, "合并黑名单并双向同步成功！");
+                            await MessageManager.SendGroupMessageAsync(receiver.GroupId, "合并黑名单成功！");
                         }
                         catch
                         {
