@@ -89,14 +89,40 @@ namespace Net_2kBot.Modules
                     {
                         if (item.Equals(receiver.MessageChain.GetPlainMessage()))
                         {
-                            try
+                            Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                            if (Global.time_now - Global.last_repeatctrl >= Global.repeat_cd)
                             {
-                                await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                try
+                                {
+                                    if (Global.time_now - Global.last_repeat <= Global.repeat_interval)
+                                    {
+                                        if (Global.repeat_count < Global.repeat_threshold)
+                                        {
+                                            Global.last_repeat = Global.time_now;
+                                            await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                            Global.repeat_count++;
+                                        }
+                                        else
+                                        {
+                                            await receiver.SendMessageAsync("警告：2kbot已执行动态管理机制！（主动复读功能将被暂时禁用 "+Global.repeat_cd+" 秒）");
+                                            Global.last_repeatctrl = Global.time_now;
+                                            Global.repeat_count = 0;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Global.repeat_count = 0;
+                                        Global.last_repeat = Global.time_now;
+                                        await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                        Global.repeat_count++;
+                                    }
+                                }
+                                catch
+                                {
+                                    break;
+                                }
                             }
-                            catch
-                            {
-                                break;
-                            }
+                            
                         }
                     }
                 }

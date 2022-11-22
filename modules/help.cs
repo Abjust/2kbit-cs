@@ -40,7 +40,7 @@ namespace Net_2kBot.Modules
                 };
                 var contents = new List<string>
                 {
-                    "群管功能\r\n禁言：/mute <QQ号或at> [时间] （以分钟算）\r\n解禁：/unmute <QQ号或at>\r\n踢出：/kick <QQ号或at>\r\n加黑：/block <QQ号或at>\r\n解黑：/unblock <QQ号或at>\r\n给予管理员：/op <QQ号或at>\r\n剥夺管理员：/deop <QQ号或at>\r\n从Hanbot同步黑名单：/sync\r\n将黑名单反向同步给Hanbot：/rsync\r\n合并黑名单：/merge\r\n屏蔽消息（拉灰）：/ignore <QQ号或at>\r\n（上述功能都需要机器人管理员）",
+                    "群管功能\r\n禁言：/mute <QQ号或at> [时间] （以分钟算）\r\n解禁：/unmute <QQ号或at>\r\n踢出：/kick <QQ号或at>\r\n加黑：/block <QQ号或at>\r\n解黑：/unblock <QQ号或at>\r\n屏蔽消息（加灰）：/ignore <QQ号或at>\r\n给予管理员：/op <QQ号或at>\r\n剥夺管理员：/deop <QQ号或at>\r\n从Hanbot同步黑名单：/sync\r\n将黑名单反向同步给Hanbot：/rsync\r\n合并黑名单：/merge\r\n（上述功能都需要机器人管理员）",
                     "该指令用于复述文本\r\n用法：/echo <文本>",
                     "该指令用于叫人\r\n用法：/call <QQ号或at> [次数]",
                     "发送“精神疾病”或者“心理疾病”并按照后续出现的选项发送相应文字即可获得科普文本",
