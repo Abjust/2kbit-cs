@@ -1,0 +1,31 @@
+name: 功能优化建议
+description: 选这个，帮助2kbot变得更完美！
+title: '[建议]: '
+labels: ["建议"]
+assignees: ["Abjust"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### （模板来源：[HanBot](https://github.com/daizihan233/HanBot)）
+        ---
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 请确定您做到了以下内容
+      options:
+        - label: "我确定这是一个有意义的Issue。"
+          required: true
+  - type: input
+    id: name
+    attributes:
+      label: 新功能名称
+  - type: textarea
+    id: description
+    attributes:
+      label: 新功能描述
+  - type: textarea
+    id: why
+    attributes:
+      label: 为什么提出这个建议？
