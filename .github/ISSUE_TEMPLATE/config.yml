@@ -1,1 +1,5 @@
 blank_issues_enabled: false
+contact_links:
+  - name: 讨论区
+    url: https://github.com/Abjust/2kbot/discussions/
+    about: 可以来这里水贴(bushi)，或者提问一些问题，当然这些问题可以没有任何意义，比如说闲聊
