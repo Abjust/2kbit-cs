@@ -1,11 +1,11 @@
 name: 有虫子在机器人身上爬（悲）
-about: 选这个，帮助2kbot变得更好！
-title: "[BUG?!]"
+description: 选这个，帮助2kbot变得更好！
+title: '[BUG?!]：'
 labels: ["Bug?"]
 assignees: ["Abjust"]
 
 body:
-    - type: markdown
+  - type: markdown
     attributes:
       value: |
         ## 首先，感谢你为2kbot提出意见！
@@ -19,8 +19,14 @@ body:
         链接: [《提问的智慧》](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)
         ### （模板参照：HanBot）
         ---
-        
-    - type: textarea
+    
+  - type: markdown
+    attributes:
+      value: |
+        ## 提供信息
+        好的，那我们现在开始吧！
+    
+  - type: textarea
         id: part1
         attributes:
           label: 简明描述
@@ -28,14 +34,14 @@ body:
         validations:
           required: true
 
-    - type: textarea
+  - type: textarea
         id: part2
         attributes:
           label: 如何重现
           description: 这个bug是怎样重现的？
           value: 我不到啊
 
-    - type: textarea
+  - type: textarea
         id: what-happened
         attributes:
           label: 期望现象
@@ -43,13 +49,13 @@ body:
         validations:
           required: true
 
-    - type: textarea
+  - type: textarea
         id: what-happened
         attributes:
           label: 补充说明
           description: 还有什么想说的吗？
 
-    - type: checkboxes
+  - type: checkboxes
         id: terms
         attributes:
           label: 请对下列选项进行确认。
