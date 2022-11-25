@@ -1,22 +1,22 @@
 ﻿using Mirai.Net.Sessions.Http.Managers;
+using MySql.Data.MySqlClient;
 using RestSharp;
-using System.Diagnostics;
 
 namespace Net_2kBot.Modules
 {
     public class Admin
     {
         // 禁言功能
-        public async void Mute(string executor, string victim, string group, int minutes)
+        public static async void Mute(string executor, string victim, string group, int minutes)
         {
-            if (Global.ops != null && Global.ops.Contains(executor))
+            if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.ops.Contains(victim) == false)
+                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") || Global.g_ops != null && Global.g_ops.Contains(victim))
                 {
                     try
                     {
                         await GroupManager.MuteAsync(victim, group, minutes * 60);
-                        await MessageManager.SendGroupMessageAsync(group, "已尝试将 " + victim + " 禁言 " + minutes + " 分钟");
+                        await MessageManager.SendGroupMessageAsync(group, $"已尝试将 {victim} 禁言 {minutes} 分钟");
                     }
                     catch
                     {
@@ -30,8 +30,8 @@ namespace Net_2kBot.Modules
                             {
                                 Console.WriteLine("执行失败！正在调用api...");
                             }
-                            RestClient client = new("http://101.42.94.97/guser");
-                            RestRequest request = new("nobb?uid=" + victim + "&gid=" + group + "&tim=" + minutes * 60 + "&key=" + Global.api_key, Method.Post);
+                            RestClient client = new($"{Global.api}/guser");
+                            RestRequest request = new($"nobb?uid={victim}&gid={group}&tim={minutes * 60}&key={Global.api_key}", Method.Post);
                             request.Timeout = 10000;
                             RestResponse response = await client.ExecuteAsync(request);
                             Console.WriteLine(response.Content);
@@ -53,14 +53,14 @@ namespace Net_2kBot.Modules
             }
         }
         // 解禁功能
-        public async void Unmute(string executor, string victim, string group)
+        public static async void Unmute(string executor, string victim, string group)
         {
-            if (Global.ops != null && Global.ops.Contains(executor))
+            if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
                 try
                 {
                     await GroupManager.UnMuteAsync(victim, group);
-                    await MessageManager.SendGroupMessageAsync(group, "已尝试将 " + victim + " 解除禁言");
+                    await MessageManager.SendGroupMessageAsync(group, "已尝试将 {victim} 解除禁言");
                 }
                 catch
                 {
@@ -74,8 +74,8 @@ namespace Net_2kBot.Modules
                         {
                             Console.WriteLine("执行失败！正在调用api...");
                         }
-                        RestClient client = new("http://101.42.94.97/guser");
-                        RestRequest request = new("nobb?uid=" + victim + "&gid=" + group + "&tim=0&key=" + Global.api_key, Method.Post);
+                        RestClient client = new($"{Global.api}/guser");
+                        RestRequest request = new($"nobb?uid={victim}&gid={group}&tim=0&key={Global.api_key}", Method.Post);
                         request.Timeout = 10000;
                         RestResponse response = await client.ExecuteAsync(request);
                         Console.WriteLine(response.Content);
@@ -92,16 +92,16 @@ namespace Net_2kBot.Modules
             }
         }
         // 踢人功能
-        public async void Kick(string executor, string victim, string group)
+        public static async void Kick(string executor, string victim, string group)
         {
-            if (Global.ops != null && Global.ops.Contains(executor))
+            if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.ops.Contains(victim) == false)
+                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") || Global.g_ops != null && Global.g_ops.Contains(victim))
                 {
                     try
                     {
                         await GroupManager.KickAsync(victim, group);
-                        await MessageManager.SendGroupMessageAsync(group, "已尝试将 " + victim + " 踢出");
+                        await MessageManager.SendGroupMessageAsync(group, $"已尝试将 {victim} 踢出");
                     }
                     catch
                     {
@@ -115,8 +115,8 @@ namespace Net_2kBot.Modules
                             {
                                 Console.WriteLine("执行失败！正在调用api...");
                             }
-                            RestClient client = new("http://101.42.94.97/guser");
-                            RestRequest request = new("del?key=" + Global.api_key + "&uid=" + victim + "&gid=" + group, Method.Post);
+                            RestClient client = new($"{Global.api}/guser");
+                            RestRequest request = new($"del?key={Global.api_key}&uid={victim}&gid={group}", Method.Post);
                             request.Timeout = 10000;
                             RestResponse response = await client.ExecuteAsync(request);
                             Console.WriteLine(response.Content);
@@ -138,24 +138,30 @@ namespace Net_2kBot.Modules
             }
         }
         // 加黑功能
-        public async void Block(string executor, string victim, string group)
+        public static async void Block(string executor, string victim, string group)
         {
-            if (Global.ops != null && Global.ops.Contains(executor))
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
             {
-                if (Global.ops.Contains(victim) == false)
+                Connection = msc
+            };
+            msc.Open();
+            if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") || Global.g_ops != null && Global.g_ops.Contains($"{group}_{victim}"))
                 {
-                    if (Global.blocklist != null && Global.blocklist.Contains(victim) == false)
+                    if (Global.blocklist?.Contains(victim) == false)
                     {
-                        using StreamWriter file = new("blocklist.txt", append: true);
-                        await file.WriteLineAsync("\r\n" + victim);
-                        file.Close();
+                        cmd.CommandText = $"INSERT INTO blocklist (qid,gid) VALUES ({victim},{group});";
+                        cmd.ExecuteNonQuery();
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(group, "已将 " + victim + " 加入黑名单");
+                            await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 加入本群黑名单");
                         }
                         catch
                         {
-                            Console.WriteLine("已将 " + victim + " 加入黑名单");
+                            Console.WriteLine($"已将 {victim} 加入 {group} 黑名单");
                         }
                         try
                         {
@@ -173,8 +179,8 @@ namespace Net_2kBot.Modules
                                 {
                                     Console.WriteLine("在尝试将黑名单对象踢出时执行失败！正在调用api...");
                                 }
-                                RestClient client = new("http://101.42.94.97/guser");
-                                RestRequest request = new("del?key=" + Global.api_key + "&uid=" + victim + "&gid=" + group, Method.Post);
+                                RestClient client = new($"{Global.api}/guser");
+                                RestRequest request = new($"del?key={Global.api_key}&uid={victim}&gid={group}", Method.Post);
                                 request.Timeout = 10000;
                                 RestResponse response = await client.ExecuteAsync(request);
                                 Console.WriteLine(response.Content);
@@ -189,11 +195,11 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(group, victim + " 已经在黑名单内");
+                            await MessageManager.SendGroupMessageAsync(group, $"{victim} 已经在本群黑名单内");
                         }
                         catch
                         {
-                            Console.WriteLine(victim + " 已经在黑名单内");
+                            Console.WriteLine($"{victim} 已经在 {group} 黑名单内");
                         }
                     }
                 }
@@ -201,83 +207,54 @@ namespace Net_2kBot.Modules
                 {
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, victim + " 是机器人管理员，不能加黑");
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 是机器人管理员，不能加黑");
                     }
                     catch
                     {
-                        Console.WriteLine(victim + " 是机器人管理员，不能加黑");
+                        Console.WriteLine($"{victim} 是机器人管理员，不能加黑");
                     }
                 }
             }
             else
             {
                 await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
-            }
-        }
-        //给OP功能
-        public async void Op(string executor, string victim, string group)
-        {
-            if (Global.ops != null && Global.ops.Contains(executor))
-            {
-                if (Global.ops.Contains(victim) == false)
-                {
-                    using StreamWriter file = new("ops.txt", append: true);
-                    await file.WriteLineAsync("\r\n" + victim);
-                    file.Close();
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(group, "已将 " + victim + " 设置为机器人管理员");
-                    }
-                    catch
-                    {
-                        Console.WriteLine("已将 " + victim + " 设置为机器人管理员");
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(group, victim + " 已经是机器人管理员");
-                    }
-                    catch
-                    {
-                        Console.WriteLine(victim + " 已经是机器人管理员");
-                    }
-                }
-            }
-            else
-            {
-                try
-                {
-                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
-                }
-                catch
-                {
-                    Console.WriteLine("群消息发送失败");
-                }
             }
         }
         // 解黑功能
-        public async void Unblock(string executor, string victim, string group)
+        public static async void Unblock(string executor, string victim, string group)
         {
-            if (Global.ops != null && Global.ops.Contains(executor))
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
             {
-                if (Global.blocklist != null && Global.blocklist.Contains(victim))
+                Connection = msc
+            };
+            msc.Open();
+            if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.blocklist != null && Global.blocklist.Contains($"{group}_{victim}"))
                 {
-                    var blocklist_old = Global.blocklist;
-                    var blocklist_new = Global.blocklist.Where(line => !line.Contains(victim));
-                    File.WriteAllLines("blocklist.txt", blocklist_new);
-                    await MessageManager.SendGroupMessageAsync(group, "已将 " + victim + " 移出黑名单");
+                    cmd.CommandText = $"DELETE FROM blocklist WHERE qid = {victim} AND gid = {group});";
+                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 移出本群黑名单");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"已将 {victim} 移出 {group} 黑名单");
+                    }
+
                 }
                 else
                 {
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, victim + " 不在黑名单内");
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 不在本群黑名单内");
                     }
                     catch
                     {
-                        Console.WriteLine(victim + " 不在黑名单内");
+                        Console.WriteLine($"{victim} 不在 {group} 黑名单内");
                     }
                 }
             }
@@ -286,34 +263,166 @@ namespace Net_2kBot.Modules
                 await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
             }
         }
-        //取消OP功能
-        public async void Deop(string executor, string victim, string group)
+        // 全局加黑功能
+        public static async void G_Block(string executor, string victim, string group)
         {
-            if (Global.ops != null && Global.ops.Contains(executor))
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
             {
-                if (Global.ops.Contains(victim) == true)
+                Connection = msc
+            };
+            msc.Open();
+            if (Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.g_ops != null && Global.g_ops.Contains(victim) == false)
                 {
-                    var ops_old = Global.ops;
-                    var ops_new = Global.ops.Where(line => !line.Contains(victim));
-                    File.WriteAllLines("ops.txt", ops_new);
-                    try
+                    if (Global.g_blocklist == null || Global.g_blocklist != null && Global.g_blocklist.Contains(victim) == false)
                     {
-                        await MessageManager.SendGroupMessageAsync(group, "已取消 " + victim + " 的机器人管理员权限");
+                        cmd.CommandText = $"INSERT INTO g_blocklist (qid) VALUES ({victim});";
+                        cmd.ExecuteNonQuery();
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 加入全局黑名单");
+                        }
+                        catch
+                        {
+                            Console.WriteLine($"已将 {victim} 加入全局黑名单");
+                        }
+                        try
+                        {
+                            await GroupManager.KickAsync(victim, group);
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(group, "在尝试将黑名单对象踢出时执行失败！正在调用api...");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("在尝试将黑名单对象踢出时执行失败！正在调用api...");
+                                }
+                                RestClient client = new($"{Global.api}/guser");
+                                RestRequest request = new($"del?key={Global.api_key}&uid={victim}&gid={group}", Method.Post);
+                                request.Timeout = 10000;
+                                RestResponse response = await client.ExecuteAsync(request);
+                                Console.WriteLine(response.Content);
+                            }
+                            catch
+                            {
+                                Console.WriteLine("你甚至连api都调用不了");
+                            }
+                        }
                     }
-                    catch
+                    else
                     {
-                        Console.WriteLine("已取消 " + victim + " 的机器人管理员权限");
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, $"{victim} 已经在全局黑名单内");
+                        }
+                        catch
+                        {
+                            Console.WriteLine($"{victim} 已经在全局黑名单内");
+                        }
                     }
                 }
                 else
                 {
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, victim + " 不是机器人管理员");
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 是全局机器人管理员，不能全局加黑");
                     }
                     catch
                     {
-                        Console.WriteLine(victim + " 不是机器人管理员");
+                        Console.WriteLine($"{victim} 是全局机器人管理员，不能全局加黑");
+                    }
+                }
+            }
+            else
+            {
+                await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
+            }
+        }
+        // 全局解黑功能
+        public static async void G_Unblock(string executor, string victim, string group)
+        {
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
+            {
+                Connection = msc
+            };
+            msc.Open();
+            if (Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.g_blocklist != null && Global.g_blocklist.Contains(victim))
+                {
+                    cmd.CommandText = $"DELETE FROM g_blocklist WHERE qid = {victim});";
+                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 移出全局黑名单");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"已将 {victim} 移出全局黑名单");
+                    }
+
+                }
+                else
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 不在全局黑名单内");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"{victim} 不在全局黑名单内");
+                    }
+                }
+            }
+            else
+            {
+                await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
+            }
+        }
+        // 给OP功能
+        public static async void Op(string executor, string victim, string group)
+        {
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
+            {
+                Connection = msc
+            };
+            msc.Open();
+            if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.ops == null || Global.ops != null && Global.ops.Contains($"{group}_{victim}") == false)
+                {
+                    cmd.CommandText = $"INSERT INTO ops (qid,gid) VALUES ({victim},{group});";
+                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 设置为本群机器人管理员");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"已将 {victim} 设置为 {group} 机器人管理员");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 已经是本群机器人管理员");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"{victim} 已经是 {group} 机器人管理员");
                     }
                 }
             }
@@ -329,36 +438,283 @@ namespace Net_2kBot.Modules
                 }
             }
         }
-        //屏蔽消息功能
-        public async void Ignore(string executor, string victim, string group)
+        // 取消OP功能
+        public static async void Deop(string executor, string victim, string group)
         {
-            if (Global.ops != null && Global.ops.Contains(executor))
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
             {
-                if (Global.ignores != null && Global.ignores.Contains(victim) == false)
+                Connection = msc
+            };
+            msc.Open();
+            if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}"))
                 {
-                    using StreamWriter file = new("ignores.txt", append: true);
-                    await file.WriteLineAsync("\r\n" + victim);
-                    file.Close();
+                    cmd.CommandText = $"DELETE FROM ops WHERE qid = {victim} AND gid = {group});";
+                    cmd.ExecuteNonQuery();
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, "已将 " + victim + " 的消息屏蔽");
+                        await MessageManager.SendGroupMessageAsync(group, $"已取消 {victim} 在本群的机器人管理员权限");
                     }
                     catch
                     {
-                        Console.WriteLine("已将 " + victim + " 的消息屏蔽");
+                        Console.WriteLine($"已取消 {victim} 在 {group} 的机器人管理员权限");
                     }
                 }
                 else
                 {
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, victim + " 的消息已经被机器人屏蔽");
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 不是本群机器人管理员");
                     }
                     catch
                     {
-                        Console.WriteLine(victim + " 的消息已经被机器人屏蔽");
+                        Console.WriteLine($"{victim} 不是 {group} 机器人管理员");
                     }
                 }
+            }
+            else
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
+        }
+        // 给全局OP功能
+        public static async void G_Op(string executor, string victim, string group)
+        {
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
+            {
+                Connection = msc
+            };
+            msc.Open();
+            if (Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.g_ops != null && Global.g_ops.Contains(victim) == false)
+                {
+                    cmd.CommandText = $"INSERT INTO g_ops (qid) VALUES ({victim});";
+                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 设置为全局机器人管理员");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"已将 {victim} 设置为全局机器人管理员");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 已经是全局机器人管理员");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"{victim} 已经是全局机器人管理员");
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
+        }
+        // 取消OP功能
+        public static async void G_Deop(string executor, string victim, string group)
+        {
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
+            {
+                Connection = msc
+            };
+            msc.Open();
+            if (Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.g_ops != null && Global.g_ops.Contains(victim))
+                {
+                    cmd.CommandText = $"DELETE FROM g_ops WHERE qid = {victim});";
+                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"已取消 {victim} 的全局机器人管理员权限");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"已取消 {victim} 的全局机器人管理员权限");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 不是全局机器人管理员");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"{victim} 不是全局机器人管理员");
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
+        }
+        // 屏蔽消息功能
+        public static async void Ignore(string executor, string victim, string group)
+        {
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
+            {
+                Connection = msc
+            };
+            msc.Open();
+            if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.ignores?.Contains($"{group}_{victim}") == false)
+                {
+                    cmd.CommandText = $"INSERT INTO ignores (qid,gid) VALUES ({victim},{group});";
+                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"已在本群屏蔽 {victim} 的消息");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"已在 {group} 屏蔽 {victim} 的消息");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 的消息已经在本群被机器人屏蔽");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"{victim} 的消息已经在 {group} 被机器人屏蔽");
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
+        }
+        // 全局屏蔽消息功能
+        public static async void G_Ignore(string executor, string victim, string group)
+        {
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
+            {
+                Connection = msc
+            };
+            msc.Open();
+            if (Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.g_ignores?.Contains($"{group}_{victim}") == false)
+                {
+                    cmd.CommandText = $"INSERT INTO g_ignores (qid) VALUES ({victim});";
+                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"已屏蔽 {victim} 在所有群的消息");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"已屏蔽 {victim} 在所有群的消息");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 的消息已经在所有群被机器人屏蔽了");
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"{victim} 的消息已经所有群被机器人屏蔽了");
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
+        }
+        // 带 清 洗
+        public static async void Purge(string executor, string group)
+        {
+            if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
+            {
+                if (Global.g_blocklist != null)
+                {
+                    foreach (string item in Global.g_blocklist)
+                    {
+                        try
+                        {
+                            await GroupManager.KickAsync(item, group);
+                        }
+                        catch { }
+                    }
+                }
+                if (Global.blocklist != null)
+                {
+                    foreach (string item in Global.blocklist)
+                    {
+                        string[] blocklist = item.Split("_");
+                        if (blocklist[0] == group)
+                        {
+                            try
+                            {
+                                await GroupManager.KickAsync(blocklist[1], group);
+                            }
+                            catch { }
+                        }
+                    }
+                }
+                await MessageManager.SendGroupMessageAsync(group, "带清洗发动成功！");
             }
             else
             {

@@ -45,19 +45,19 @@ namespace Net_2kBot.Modules
                 if (receiver.MessageChain.GetPlainMessage() == "精神疾病" || receiver.MessageChain.GetPlainMessage() == "心理疾病")
                 {
                     await receiver.SendMessageAsync(
-                        "精神心理疾病科普大全：\r\n" +
-                        "1.神经症类\r\n" +
-                        "焦虑症|强迫症\r\n" +
-                        "神经衰弱|恐惧症\r\n" +
-                        "2.情感障碍\r\n" +
-                        "抑郁症|双相情感障碍\r\n" +
-                        "3.精神病性障碍\r\n" +
-                        "精神分裂症|妄想症\r\n" +
-                        "分裂情感性障碍\r\n" +
-                        "4.进食障碍\r\n" +
-                        "厌食症|贪食症\r\n" +
-                        "5.神经发育障碍\r\n" +
-                        "孤独症|多动症");
+                        @"精神心理疾病科普大全：
+1.神经症类
+焦虑症|强迫症
+神经衰弱|恐惧症
+2.情感障碍
+抑郁症|双相情感障碍
+3.精神病性障碍
+精神分裂症|妄想症
+分裂情感性障碍
+4.进食障碍
+厌食症|贪食症
+5.神经发育障碍
+孤独症|多动症");
                 }
                 foreach (string q in disorders)
                 {
@@ -91,7 +91,7 @@ namespace Net_2kBot.Modules
                 };
                 var links = new List<string>
                 {
-                    "(1)https://16personalities.com/ch/\r\n" +"(2)https://www.jungus.cn/zh-hans/test/\r\n" +"(3)https://www.zxgj.cn/g/mbti28",
+                    "(1)https://16personalities.com/ch/\r\n(2)https://www.jungus.cn/zh-hans/test/\r\n(3)https://www.zxgj.cn/g/mbti28",
                     "https://www.zxgj.cn/g/askj/",
                     "http://www.apesk.com/bigfive/",
                     "http://www.cnenn.cn/html/jiuxingrengeceshi/test.asp",
@@ -107,16 +107,16 @@ namespace Net_2kBot.Modules
                 if (receiver.MessageChain.GetPlainMessage() == "量表" || receiver.MessageChain.GetPlainMessage() == "测试")
                 {
                     await receiver.SendMessageAsync(
-                        "量表测试大全\r\n" +
-                        "人格/性格测试：\r\n" +
-                        "MBTI|艾森克\r\n" +
-                        "大五|九型\r\n" +
-                        "精神心理量表：\r\n" +
-                        "SCL90（综合）|SDS（抑郁）\r\n" +
-                        "SAS（焦虑）|MDQ（双相）\r\n" +
-                        "HCL32（轻躁狂）|偏执量表\r\n" +
-                        "强迫量表|精神质量表\r\n" +
-                        "（精神心理量表结果仅供参考，如出现相关症状，还请尽快前往当地医院就诊）");
+                        @"量表测试大全
+人格/性格测试：
+MBTI|艾森克
+大五|九型
+精神心理量表：
+SCL90（综合）|SDS（抑郁）
+SAS（焦虑）|MDQ（双相）
+HCL32（轻躁狂）|偏执量表
+强迫量表|精神质量表
+（精神心理量表结果仅供参考，如出现相关症状，还请尽快前往当地医院就诊）");
                 }
                 foreach (string q in scales)
                 {

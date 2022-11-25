@@ -1,10 +1,10 @@
-﻿using RestSharp;
+﻿using Mirai.Net.Data.Messages;
+using Mirai.Net.Data.Messages.Receivers;
+using Mirai.Net.Sessions.Http.Managers;
+using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Mirai.Net.Sessions.Http.Managers;
-using Mirai.Net.Data.Messages;
-using Mirai.Net.Data.Messages.Receivers;
-using System.Linq;
+using RestSharp;
 
 namespace Net_2kBot.Modules
 {
@@ -13,22 +13,27 @@ namespace Net_2kBot.Modules
         // 从Hanbot同步黑名单
         public static async void Sync(MessageReceiverBase @base, string group, string executor)
         {
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
+            {
+                Connection = msc
+            };
+            msc.Open();
             if (@base is GroupMessageReceiver receiver)
             {
                 if (Global.ops != null && Global.ops.Contains(executor))
                 {
-                    RestClient client = new("http://101.42.94.97/blacklist");
+                    RestClient client = new($"{Global.api}/blacklist");
                     RestRequest request = new("look", Method.Get);
                     request.Timeout = 10000;
                     RestResponse response = await client.ExecuteAsync(request);
                     JObject jo = (JObject)JsonConvert.DeserializeObject(response.Content!)!;  //正常获取jobject
-                    File.WriteAllText("blocklist.txt", String.Empty);
-                    using StreamWriter file = new("blocklist.txt", append: true);
                     foreach (string? s in jo["data"]!)
                     {
-                        await file.WriteLineAsync(s);
+                        cmd.CommandText = $"INSERT INTO g_blocklist (qid) VALUES ({s});";
+                        cmd.ExecuteNonQuery();
                     }
-                    file.Close();
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(receiver.GroupId, "从Hanbot同步黑名单成功！");
@@ -49,7 +54,7 @@ namespace Net_2kBot.Modules
                         Console.WriteLine("群消息发送失败");
                     }
                 }
-            }     
+            }
         }
         // 将黑名单反向同步到Hanbot
         public static async void Rsync(MessageReceiverBase @base, string group, string executor)
@@ -58,20 +63,20 @@ namespace Net_2kBot.Modules
             {
                 if (Global.ops != null && Global.ops.Contains(executor))
                 {
-                    RestClient client = new("http://101.42.94.97/blacklist");
+                    RestClient client = new($"{Global.api}/blacklist");
                     RestRequest request = new("look", Method.Get);
                     request.Timeout = 10000;
                     RestResponse response = await client.ExecuteAsync(request);
                     JObject jo = (JObject)JsonConvert.DeserializeObject(response.Content!)!;  //正常获取jobject
-                    List<string> blocklist2 = new List<string> {""};
-                    if (Global.blocklist != null)
+                    List<string> blocklist2 = new List<string> { "" };
+                    if (Global.g_blocklist != null)
                     {
-                        for (int i = 0; i < Global.blocklist.Length; i++)
+                        for (int i = 0; i < Global.g_blocklist.Count; i++)
                         {
-                            if (!jo["data"]!.Contains(Global.blocklist[i]))
+                            if (!jo["data"]!.Contains(Global.g_blocklist[i]))
                             {
                                 RestClient client1 = new("http://101.42.94.97/blacklist");
-                                RestRequest request1 = new("up?uid=" + Global.blocklist[i] + "&key=" + Global.api_key, Method.Post);
+                                RestRequest request1 = new("up?uid=" + Global.g_blocklist[i] + "&key=" + Global.api_key, Method.Post);
                                 request.Timeout = 10000;
                                 await client1.ExecuteAsync(request1);
                             }
@@ -84,14 +89,14 @@ namespace Net_2kBot.Modules
                             }
                         }
                         blocklist2.Remove("");
-                        var diff = new HashSet<string>(Global.blocklist);
+                        var diff = new HashSet<string>(Global.g_blocklist);
                         diff.SymmetricExceptWith(blocklist2);
                         string diff1 = String.Join(", ", diff);
                         string[] diff2 = diff1.Split(",");
                         foreach (string s in diff2)
                         {
-                            RestClient client2 = new("http://101.42.94.97/blacklist");
-                            RestRequest request2 = new("del?uid=" + s + "&key=" + Global.api_key, Method.Delete);
+                            RestClient client2 = new($"{Global.api}/blacklist");
+                            RestRequest request2 = new($"del?uid={s}&key={Global.api_key}", Method.Delete);
                             request.Timeout = 10000;
                             await client2.ExecuteAsync(request2);
                         }
@@ -121,6 +126,13 @@ namespace Net_2kBot.Modules
         // 合并黑名单+双向同步
         public static async void Merge(MessageReceiverBase @base, string group, string executor)
         {
+            // 连接数据库
+            MySqlConnection msc = new(Global.connectstring);
+            MySqlCommand cmd = new()
+            {
+                Connection = msc
+            };
+            msc.Open();
             if (@base is GroupMessageReceiver receiver)
             {
                 if (Global.ops != null && Global.ops.Contains(executor))
@@ -130,9 +142,8 @@ namespace Net_2kBot.Modules
                     request.Timeout = 10000;
                     RestResponse response = await client.ExecuteAsync(request);
                     JObject jo = (JObject)JsonConvert.DeserializeObject(response.Content!)!;  //正常获取jobject
-                    using StreamWriter file = new("blocklist.txt", append: true);
-                    List<string> blocklist2 = new List<string> {""};
-                    if (Global.blocklist != null)
+                    List<string> blocklist2 = new List<string> { "" };
+                    if (Global.g_blocklist != null)
                     {
                         foreach (string? s in jo["data"]!)
                         {
@@ -142,7 +153,7 @@ namespace Net_2kBot.Modules
                             }
                         }
                         blocklist2.Remove("");
-                        var diff = new HashSet<string>(Global.blocklist);
+                        var diff = new HashSet<string>(Global.g_blocklist);
                         diff.SymmetricExceptWith(blocklist2);
                         string diff1 = String.Join(", ", diff);
                         string[] diff2 = diff1.Split(",");
@@ -150,17 +161,17 @@ namespace Net_2kBot.Modules
                         {
                             if (!jo["data"]!.Contains(s))
                             {
-                                RestClient client1 = new("http://101.42.94.97/blacklist");
-                                RestRequest request1 = new("up?uid=" + s + "&key=" + Global.api_key, Method.Post);
+                                RestClient client1 = new($"{Global.api}/blacklist");
+                                RestRequest request1 = new($"up?uid={s}&key={Global.api_key}", Method.Post);
                                 request.Timeout = 10000;
                                 await client1.ExecuteAsync(request1);
                             }
-                            else if (!Global.blocklist.Contains(s))
+                            else if (!Global.g_blocklist.Contains(s))
                             {
-                                await file.WriteLineAsync(s);
+                                cmd.CommandText = $"INSERT INTO g_blocklist (qid,gid) VALUES ({s});";
+                                cmd.ExecuteNonQuery();
                             }
                         }
-                        file.Close();
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(receiver.GroupId, "合并黑名单成功！");
@@ -169,7 +180,7 @@ namespace Net_2kBot.Modules
                         {
                             Console.WriteLine("群消息发送失败");
                         }
-                    }    
+                    }
                 }
                 else
                 {

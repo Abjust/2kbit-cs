@@ -8,14 +8,16 @@ namespace Net_2kBot.Modules
     {
         public static async void Execute(MessageReceiverBase @base)
         {
+            MessageChain? messageChain = new MessageChainBuilder()
+               .At(Global.qq)
+               .Plain(" 你就是歌姬吧")
+               .Build();
             if (@base is GroupMessageReceiver receiver)
             {
-                if (receiver.MessageChain.Count > 2)
+                if (receiver.MessageChain == messageChain)
                 {
-                    if (receiver.MessageChain[1].ToString() == "AtMessage { Type = At, Target = 2810482259 }" && receiver.MessageChain[2].ToString() == "PlainMessage { Type = Plain, Text =  你就是歌姬吧 }")
+                    string[] words =
                     {
-                        string[] words =
-                        {
                          "cnmd",
                          "你更是歌姬吧嗷",
                          "你个狗比玩意",
@@ -43,21 +45,20 @@ namespace Net_2kBot.Modules
                          "如果你觉得我哪里不对，请一定要告诉我，反正我也不会改，你别憋出病来",
                          "你（  ）什么时候（  ）啊"
                         };
-                        Random r = new();
-                        int index = r.Next(words.Length);
-                        MessageChain? messageChain = new MessageChainBuilder()
-                        .At(receiver.Sender.Id)
-                        .Plain(" ")
-                        .Plain(words[index])
-                        .Build();
-                        try
-                        {
-                            await receiver.SendMessageAsync(messageChain);
-                        }
-                        catch
-                        {
-                            Console.WriteLine("祖安失败（恼）");
-                        }
+                    Random r = new();
+                    int index = r.Next(words.Length);
+                    MessageChain? messageChain1 = new MessageChainBuilder()
+                    .At(receiver.Sender.Id)
+                    .Plain(" ")
+                    .Plain(words[index])
+                    .Build();
+                    try
+                    {
+                        await receiver.SendMessageAsync(messageChain1);
+                    }
+                    catch
+                    {
+                        Console.WriteLine("祖安失败（恼）");
                     }
                 }
             }

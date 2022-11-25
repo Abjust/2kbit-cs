@@ -37,7 +37,7 @@ namespace Net_2kBot.Modules
                 Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                 try
                 {
-                    await MessageManager.SendGroupMessageAsync(group, "CD未到，请别急！CD还剩： " + (Global.call_cd - (Global.time_now - Global.last_call)).ToString() + " 秒");
+                    await MessageManager.SendGroupMessageAsync(group, $"CD未到，请别急！CD还剩： {Global.call_cd - (Global.time_now - Global.last_call)} 秒");
                 }
                 catch
                 {
