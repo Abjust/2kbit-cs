@@ -1,7 +1,7 @@
 name: 有虫子在机器人身上爬（悲）
 description: 选这个，帮助2kbot解决他身上的问题！
 title: '[Bug?!]: '
-labels: ["Bug?"]
+labels: ["bug?"]
 assignees: ["Abjust"]
 
 body:
