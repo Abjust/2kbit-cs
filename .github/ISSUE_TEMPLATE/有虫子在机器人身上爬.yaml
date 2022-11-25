@@ -1,11 +1,9 @@
----
 name: 有虫子在机器人身上爬（悲）
 about: 选这个，帮助2kbot变得更好！
 title: "[BUG?!]"
-labels: ''
-assignees: Abjust
+labels: ["Bug?"]
+assignees: ["Abjust"]
 
----
 *首先，感谢你为2kbot提出意见*
 - type: textarea
     id: part1
