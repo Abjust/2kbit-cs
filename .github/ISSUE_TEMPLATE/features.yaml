@@ -21,10 +21,14 @@ body:
     id: name
     attributes:
       label: 新功能名称
+    validations:
+      required: true
   - type: textarea
     id: description
     attributes:
       label: 新功能描述
+    validations:
+      required: true
   - type: textarea
     id: why
     attributes:
