@@ -5,7 +5,7 @@ labels: ["需求"]
 assignees: ["Abjust"]
 
 body:
-- type: markdown
+  - type: markdown
     attributes:
       value: |
         ### （模板来源：[HanBot](https://github.com/daizihan233/HanBot)）
