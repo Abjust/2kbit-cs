@@ -22,7 +22,7 @@ namespace Net_2kBot.Modules
             msc.Open();
             if (@base is GroupMessageReceiver receiver)
             {
-                if (Global.ops != null && Global.ops.Contains(executor))
+                if (Global.g_ops != null && Global.g_ops.Contains(executor))
                 {
                     RestClient client = new($"{Global.api}/blacklist");
                     RestRequest request = new("look", Method.Get);
@@ -47,7 +47,7 @@ namespace Net_2kBot.Modules
                 {
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                        await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
                     }
                     catch
                     {
@@ -61,7 +61,7 @@ namespace Net_2kBot.Modules
         {
             if (@base is GroupMessageReceiver receiver)
             {
-                if (Global.ops != null && Global.ops.Contains(executor))
+                if (Global.g_ops != null && Global.g_ops.Contains(executor))
                 {
                     RestClient client = new($"{Global.api}/blacklist");
                     RestRequest request = new("look", Method.Get);
@@ -75,7 +75,7 @@ namespace Net_2kBot.Modules
                         {
                             if (!jo["data"]!.Contains(Global.g_blocklist[i]))
                             {
-                                RestClient client1 = new("http://101.42.94.97/blacklist");
+                                RestClient client1 = new($"{Global.api}/blacklist");
                                 RestRequest request1 = new("up?uid=" + Global.g_blocklist[i] + "&key=" + Global.api_key, Method.Post);
                                 request.Timeout = 10000;
                                 await client1.ExecuteAsync(request1);
@@ -114,7 +114,7 @@ namespace Net_2kBot.Modules
                 {
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                        await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
                     }
                     catch
                     {
@@ -135,14 +135,14 @@ namespace Net_2kBot.Modules
             msc.Open();
             if (@base is GroupMessageReceiver receiver)
             {
-                if (Global.ops != null && Global.ops.Contains(executor))
+                if (Global.g_ops != null && Global.g_ops.Contains(executor))
                 {
-                    RestClient client = new("http://101.42.94.97/blacklist");
+                    RestClient client = new($"{Global.api}/blacklist");
                     RestRequest request = new("look", Method.Get);
                     request.Timeout = 10000;
                     RestResponse response = await client.ExecuteAsync(request);
                     JObject jo = (JObject)JsonConvert.DeserializeObject(response.Content!)!;  //正常获取jobject
-                    List<string> blocklist2 = new List<string> { "" };
+                    List<string> blocklist2 = new();
                     if (Global.g_blocklist != null)
                     {
                         foreach (string? s in jo["data"]!)
@@ -153,11 +153,8 @@ namespace Net_2kBot.Modules
                             }
                         }
                         blocklist2.Remove("");
-                        var diff = new HashSet<string>(Global.g_blocklist);
-                        diff.SymmetricExceptWith(blocklist2);
-                        string diff1 = String.Join(", ", diff);
-                        string[] diff2 = diff1.Split(",");
-                        foreach (string s in diff2)
+                        IEnumerable<string> union = blocklist2.Union(Global.g_blocklist);
+                        foreach (string s in union)
                         {
                             if (!jo["data"]!.Contains(s))
                             {
@@ -168,7 +165,7 @@ namespace Net_2kBot.Modules
                             }
                             else if (!Global.g_blocklist.Contains(s))
                             {
-                                cmd.CommandText = $"INSERT INTO g_blocklist (qid,gid) VALUES ({s});";
+                                cmd.CommandText = $"INSERT INTO g_blocklist (qid) VALUES ({s});";
                                 cmd.ExecuteNonQuery();
                             }
                         }
@@ -186,7 +183,7 @@ namespace Net_2kBot.Modules
                 {
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                        await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
                     }
                     catch
                     {
