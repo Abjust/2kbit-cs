@@ -847,11 +847,6 @@ namespace Net_2kBot
                 {
                     Admin.Purge(x.Sender.Id,x.GroupId);
                 }
-                // 合并黑名单并双向同步
-                if (x.MessageChain.GetPlainMessage() == ("/merge"))
-                {
-                    Syncs.Merge(x, x.GroupId, x.Sender.Id);
-                }
                 // 重新加载
                 if (x.MessageChain.GetPlainMessage() == ("/update"))
                 {
@@ -865,17 +860,17 @@ namespace Net_2kBot
                 // 同步黑名单
                 if (x.MessageChain.GetPlainMessage() == ("/sync"))
                 {
-                    Syncs.Sync(x, x.GroupId, x.Sender.Id);
+                    await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
                 }
                 // 反向同步黑名单
                 if (x.MessageChain.GetPlainMessage() == ("/rsync"))
                 {
-                    Syncs.Rsync(x, x.GroupId, x.Sender.Id);
+                    await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
                 }
                 // 合并黑名单并双向同步
                 if (x.MessageChain.GetPlainMessage() == ("/merge"))
                 {
-                    Syncs.Merge(x, x.GroupId, x.Sender.Id);
+                    await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
                 }
                 // 版本
                 if (x.MessageChain.GetPlainMessage() == "版本")
@@ -883,7 +878,7 @@ namespace Net_2kBot
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "机器人版本：b2.0.0\r\n上次更新日期：2022/11/25\r\n更新内容：改用MySQL数据库存储和处理数据，更加高效；对代码片段执行了优化以提升效率并增加可构建性");
+                        "机器人版本：b2.0.0-r1\r\n上次更新日期：2022/11/26\r\n更新内容：因HanBot API存在问题，暂时停用了同步功能");
                     }
                     catch
                     {
