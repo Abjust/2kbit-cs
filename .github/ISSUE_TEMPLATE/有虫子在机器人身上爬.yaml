@@ -4,44 +4,59 @@ title: "[BUG?!]"
 labels: ["Bug?"]
 assignees: ["Abjust"]
 
-*首先，感谢你为2kbot提出意见*
-- type: textarea
-    id: part1
+body:
+    - type: markdown
     attributes:
-      label: 简明描述
-      description: 简单描述下bug是怎样的
-    validations:
-      required: true
+      value: |
+        ## 首先，感谢你为2kbot提出意见！
+        ## 以下是一些注意事项，请务必阅读让我能够更容易处理
 
-- type: textarea
-    id: part2
-    attributes:
-      label: 如何重现
-      description: 这个bug是怎样重现的？
-      value: 我不到啊
+        ### ❗ | 确定没有相同问题的ISSUE已被提出。
+        ### ❔ | 截图完整聊天记录，尽量完整，不断章取义
+        ### ⚠ | 如果涉及个人信息，请自行打码
 
-- type: textarea
-    id: what-happened
-    attributes:
-      label: 期望现象
-      description: 你本来这么做是期望什么？
-    validations:
-      required: true
-
-- type: textarea
-    id: what-happened
-    attributes:
-      label: 补充说明
-      description: 还有什么想说的吗？
-
-- type: checkboxes
-    id: terms
-    attributes:
-      label: 请对下列选项进行确认。
-      options:
-        - label: "我已经仔细阅读上述教程和 [\"《提问的智慧》\"](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)。"
+        ## 如果您不知道如何有效、精准地表述，我建议您先阅读《提问的智慧》
+        链接: [《提问的智慧》](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)
+        ### （模板参照：HanBot）
+        ---
+        
+    - type: textarea
+        id: part1
+        attributes:
+          label: 简明描述
+          description: 简单描述下bug是怎样的
+        validations:
           required: true
-        - label: "我确定不是因为我技术菜乱搞才导致的。"
+
+    - type: textarea
+        id: part2
+        attributes:
+          label: 如何重现
+          description: 这个bug是怎样重现的？
+          value: 我不到啊
+
+    - type: textarea
+        id: what-happened
+        attributes:
+          label: 期望现象
+          description: 你本来这么做是期望什么？
+        validations:
           required: true
-        - label: "我确定这是一个有意义的Issue，且目前没有解决方案。"
-          required: true
+
+    - type: textarea
+        id: what-happened
+        attributes:
+          label: 补充说明
+          description: 还有什么想说的吗？
+
+    - type: checkboxes
+        id: terms
+        attributes:
+          label: 请对下列选项进行确认。
+          options:
+            - label: "我已经仔细阅读上述教程和 [\"《提问的智慧》\"](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)。"
+              required: true
+            - label: "我确定不是因为我技术菜乱搞才导致的。"
+              required: true
+            - label: "我确定这是一个有意义的Issue，且目前没有解决方案。"
+              required: true
