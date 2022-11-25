@@ -20,11 +20,15 @@ body:
   - type: input
     id: name
     attributes:
-      label: 新功能名称
+      label: 要优化的功能名称
+      description: |
+          如果希望（或者知道怎样让）机器人运行更高效，请写“机器人”
   - type: textarea
     id: description
     attributes:
-      label: 新功能描述
+      label: 应该如何优化？
+    validations:
+      required: true
   - type: textarea
     id: why
     attributes:
