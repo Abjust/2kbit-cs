@@ -1,0 +1,26 @@
+name: 新功能建议
+description: 选这个，帮助2kbot变得更好！
+title: '[需求]: '
+labels: ["需求"]
+assignees: ["Abjust"]
+
+body:
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 请确定您做到了以下内容
+      options:
+        - label: "我确定这是一个有意义的Issue，且目前没有此功能。"
+          required: true
+  - type: input
+    id: name
+    attributes:
+      label: 新功能名称
+  - type: textarea
+    id: description
+    attributes:
+      label: 新功能描述
+  - type: textarea
+    id: why
+    attributes:
+      label: 为什么想要这个功能？
