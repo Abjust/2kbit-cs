@@ -17,12 +17,13 @@ namespace Net_2kBot.Modules
                     try
                     {
                         await receiver.SendMessageAsync(@"2kbot菜单
-                        1.群管系统
-                        2.复读机
-                        3.精神心理疾病科普
-                        4.量表测试
-                        5.叫人功能
-                        详情请用/help指令");
+1.群管系统
+2.复读机
+3.叫人功能
+4.精神心理疾病科普
+5.量表测试
+6.面包厂功能
+详情请用/help指令");
                     }
                     catch
                     {
@@ -37,6 +38,7 @@ namespace Net_2kBot.Modules
                     "3",
                     "4",
                     "5",
+                    "6"
                 };
                 var contents = new List<string>
                 {
@@ -58,7 +60,13 @@ namespace Net_2kBot.Modules
                     "该指令用于复述文本\r\n用法：/echo <文本>",
                     "该指令用于叫人\r\n用法：/call <QQ号或at> [次数]",
                     "发送“精神疾病”或者“心理疾病”并按照后续出现的选项发送相应文字即可获得科普文本",
-                    "发送“量表”或者“测试”并按照后续出现的选项发送相应文字即可获得链接"
+                    "发送“量表”或者“测试”并按照后续出现的选项发送相应文字即可获得链接",
+                    @"面包厂功能
+给2kbot面包： /givebread <数量>
+向2kbot要面包：/getbread <数量>
+查询面包库存：/querybread
+改变多样化生产状态：/bread_diversity <on/off>
+升级面包厂：/upgrade_factory"
                 };
                 if (receiver.MessageChain.GetPlainMessage().StartsWith("/help") == true)
                 {
