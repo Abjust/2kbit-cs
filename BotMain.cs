@@ -880,7 +880,7 @@ namespace Net_2kBot
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "机器人版本：b2.0.0-r4\r\n上次更新日期：2022/11/26\r\n更新内容：修复了叫人系统的bug");
+                        "机器人版本：b2.0.1\r\n上次更新日期：2022/11/26\r\n更新内容：优化了动态管理机制");
                     }
                     catch
                     {
