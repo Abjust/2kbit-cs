@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     }
                 }
                 msc.Close();
-                Thread.Sleep(500);
+                Thread.Sleep(5000);
             });
             // 戳一戳效果
             bot.EventReceived
@@ -283,10 +283,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     Bread.UpgradeFactory(x.GroupId);
                 }
                 // 计算经验
-                if ((Global.ignores == null || Global.ignores.Contains($"{x.GroupId}_{x.Sender.Id}") == false) && (Global.g_ignores == null || Global.g_ignores.Contains(x.Sender.Id) == false))
-                {
-                    Bread.GetExp(x.GroupId);
-                }
+                Bread.GetExp(x);
                 // 复读机
                 Repeat.Execute(x);
                 // surprise
@@ -951,7 +948,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "机器人版本：b2.1.0\r\n上次更新日期：2022/11/26\r\n更新内容：新增了面包厂机制");
+                        "机器人版本：b2.1.1\r\n上次更新日期：2022/11/27\r\n更新内容：尝试优化了数据库连接机制");
                     }
                     catch
                     {
