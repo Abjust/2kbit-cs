@@ -68,7 +68,7 @@ namespace Net_2kBot.Modules
                     request.Timeout = 10000;
                     RestResponse response = await client.ExecuteAsync(request);
                     JObject jo = (JObject)JsonConvert.DeserializeObject(response.Content!)!;  //正常获取jobject
-                    List<string> blocklist2 = new List<string> { "" };
+                    List<string> blocklist2 = new();
                     if (Global.g_blocklist != null)
                     {
                         for (int i = 0; i < Global.g_blocklist.Count; i++)

@@ -11,7 +11,7 @@ namespace Net_2kBot.Modules
         {
             if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") || Global.g_ops != null && Global.g_ops.Contains(victim))
+                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") == false || Global.g_ops != null && Global.g_ops.Contains(victim) == false)
                 {
                     try
                     {
@@ -60,7 +60,7 @@ namespace Net_2kBot.Modules
                 try
                 {
                     await GroupManager.UnMuteAsync(victim, group);
-                    await MessageManager.SendGroupMessageAsync(group, "已尝试将 {victim} 解除禁言");
+                    await MessageManager.SendGroupMessageAsync(group, $"已尝试将 {victim} 解除禁言");
                 }
                 catch
                 {
@@ -96,7 +96,7 @@ namespace Net_2kBot.Modules
         {
             if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") || Global.g_ops != null && Global.g_ops.Contains(victim))
+                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") == false || Global.g_ops != null && Global.g_ops.Contains(victim) == false)
                 {
                     try
                     {
@@ -149,7 +149,7 @@ namespace Net_2kBot.Modules
             msc.Open();
             if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") || Global.g_ops != null && Global.g_ops.Contains($"{group}_{victim}"))
+                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") == false || Global.g_ops != null && Global.g_ops.Contains(victim) == false)
                 {
                     if (Global.blocklist?.Contains(victim) == false)
                     {
