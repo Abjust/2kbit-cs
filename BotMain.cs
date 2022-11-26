@@ -292,8 +292,10 @@ namespace Net_2kBot
                     string result1 = x.MessageChain.ToJsonString();
                     JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
                     string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (Global.ignores?.Contains($"{x.GroupId}_{x.Sender.Id}") == false && Global.g_ignores?.Contains(x.Sender.Id) == false)
+                    if ((Global.ignores == null || Global.ignores.Contains($"{x.GroupId}_{x.Sender.Id}") == false) && (Global.g_ignores == null || Global.g_ignores.Contains(x.Sender.Id) == false))
                     {
+                        Console.WriteLine(text.Length);
+                        Console.WriteLine(ja.Count);
                         switch (text.Length)
                         {
                             case 3:
@@ -878,7 +880,7 @@ namespace Net_2kBot
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "机器人版本：b2.0.0-r3\r\n上次更新日期：2022/11/26\r\n更新内容：修复了群管系统的些许bug");
+                        "机器人版本：b2.0.0-r4\r\n上次更新日期：2022/11/26\r\n更新内容：修复了叫人系统的bug");
                     }
                     catch
                     {
