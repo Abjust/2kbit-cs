@@ -54,7 +54,6 @@ namespace Net_2kBot.Modules
                             reader.Read();
                             if (reader.GetInt32("breads") + random < maxstorage)
                             {
-                                Console.WriteLine(groupid);
                                 cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") + random} WHERE gid = {groupid};";
                                 cmd1.ExecuteNonQuery();
                             }
@@ -64,6 +63,8 @@ namespace Net_2kBot.Modules
                                 cmd1.ExecuteNonQuery();
                             }
                             reader.Close();
+                            msc.Close();
+                            msc1.Close();
                         }
                     }
                 }

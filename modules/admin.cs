@@ -155,6 +155,7 @@ namespace Net_2kBot.Modules
                     {
                         cmd.CommandText = $"INSERT INTO blocklist (qid,gid) VALUES ({victim},{group});";
                         cmd.ExecuteNonQuery();
+                        msc.Close();
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 加入本群黑名单");
@@ -202,6 +203,7 @@ namespace Net_2kBot.Modules
                             Console.WriteLine($"{victim} 已经在 {group} 黑名单内");
                         }
                     }
+                    msc.Close();
                 }
                 else
                 {
@@ -236,6 +238,7 @@ namespace Net_2kBot.Modules
                 {
                     cmd.CommandText = $"DELETE FROM blocklist WHERE qid = {victim} AND gid = {group});";
                     cmd.ExecuteNonQuery();
+                    msc.Close();
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 移出本群黑名单");
@@ -281,6 +284,7 @@ namespace Net_2kBot.Modules
                     {
                         cmd.CommandText = $"INSERT INTO g_blocklist (qid) VALUES ({victim});";
                         cmd.ExecuteNonQuery();
+                        msc.Close();
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 加入全局黑名单");
@@ -362,6 +366,7 @@ namespace Net_2kBot.Modules
                 {
                     cmd.CommandText = $"DELETE FROM g_blocklist WHERE qid = {victim});";
                     cmd.ExecuteNonQuery();
+                    msc.Close();
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 移出全局黑名单");
@@ -405,6 +410,7 @@ namespace Net_2kBot.Modules
                 {
                     cmd.CommandText = $"INSERT INTO ops (qid,gid) VALUES ({victim},{group});";
                     cmd.ExecuteNonQuery();
+                    msc.Close();
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 设置为本群机器人管理员");
@@ -454,6 +460,7 @@ namespace Net_2kBot.Modules
                 {
                     cmd.CommandText = $"DELETE FROM ops WHERE qid = {victim} AND gid = {group});";
                     cmd.ExecuteNonQuery();
+                    msc.Close();
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(group, $"已取消 {victim} 在本群的机器人管理员权限");
@@ -503,6 +510,7 @@ namespace Net_2kBot.Modules
                 {
                     cmd.CommandText = $"INSERT INTO g_ops (qid) VALUES ({victim});";
                     cmd.ExecuteNonQuery();
+                    msc.Close();
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(group, $"已将 {victim} 设置为全局机器人管理员");
@@ -552,6 +560,7 @@ namespace Net_2kBot.Modules
                 {
                     cmd.CommandText = $"DELETE FROM g_ops WHERE qid = {victim});";
                     cmd.ExecuteNonQuery();
+                    msc.Close();
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(group, $"已取消 {victim} 的全局机器人管理员权限");
@@ -601,6 +610,7 @@ namespace Net_2kBot.Modules
                 {
                     cmd.CommandText = $"INSERT INTO ignores (qid,gid) VALUES ({victim},{group});";
                     cmd.ExecuteNonQuery();
+                    msc.Close();
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(group, $"已在本群屏蔽 {victim} 的消息");
@@ -650,6 +660,7 @@ namespace Net_2kBot.Modules
                 {
                     cmd.CommandText = $"INSERT INTO g_ignores (qid) VALUES ({victim});";
                     cmd.ExecuteNonQuery();
+                    msc.Close();
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(group, $"已屏蔽 {victim} 在所有群的消息");

@@ -120,11 +120,12 @@ namespace Net_2kBot.Modules
                         try
                         {
                             await receiver.SendMessageAsync(@"目前有对于以下功能的帮助文档：
-                            [1]群管功能
-                            [2]/echo
-                            [3]/call
-                            [4]精神心理疾病科普
-                            [5]量表测试");
+[1]群管功能
+[2]/echo
+[3]/call
+[4]精神心理疾病科普
+[5]量表测试
+[6]面包厂");
                         }
                         catch
                         {

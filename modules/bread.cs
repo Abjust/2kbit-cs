@@ -1,4 +1,5 @@
 ﻿using Mirai.Net.Data.Messages;
+using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
 using MySql.Data.MySqlClient;
@@ -280,74 +281,80 @@ namespace Net_2kBot.Modules
             }
         }
         // 获取经验
-        public static async void GetExp(string group)
+        public static async void GetExp(MessageReceiverBase @base)
         {
-            // 连接数据库
-            MySqlConnection msc = new(Global.connectstring);
-            MySqlConnection msc1 = new(Global.connectstring);
-            MySqlCommand cmd = new()
+            if (@base is GroupMessageReceiver receiver)
             {
-                Connection = msc
-            };
-            MySqlCommand cmd1 = new()
-            {
-                Connection = msc1
-            };
-            msc.Open();
-            msc1.Open();
-            // 判断数据是否存在
-            cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {group};";
-            int i = Convert.ToInt32(cmd.ExecuteScalar());
-            if (i == 1)
-            {
-                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
-                MySqlDataReader reader = cmd.ExecuteReader();
-                reader.Read();
-                int maxexp_formula = (int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1));
-                Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-                if (Global.time_now - reader.GetInt64("last_expfull") >= 86400)
+                if ((Global.ignores == null || Global.ignores.Contains($"{receiver.GroupId}_{receiver.Sender.Id}") == false) && (Global.g_ignores == null || Global.g_ignores.Contains(receiver.Sender.Id) == false))
                 {
-                    if (Global.time_now - reader.GetInt64("last_expgain") >= 86400)
+                    // 连接数据库
+                    MySqlConnection msc = new(Global.connectstring);
+                    MySqlConnection msc1 = new(Global.connectstring);
+                    MySqlCommand cmd = new()
                     {
-                        cmd1.CommandText = $"UPDATE bread SET exp_gained_today = 0, last_expgain = {Global.time_now} WHERE gid = {group};";
-                        cmd1.ExecuteNonQuery();
-                        if (reader.GetInt32("exp_gained_today") <= maxexp_formula)
-                        {
-                            cmd1.CommandText = $"UPDATE bread SET factory_exp = {reader.GetInt32("factory_exp") + 1}, exp_gained_today = {reader.GetInt32("exp_gained_today") + 1} WHERE gid = {group};";
-                            cmd1.ExecuteNonQuery();
-                        }
-                        else
-                        {
-                            cmd1.CommandText = $"UPDATE bread SET last_expfull = {Global.time_now}, exp_gained_today = 0 WHERE gid = {group};";
-                            cmd1.ExecuteNonQuery();
-                            try
-                            {
-                                await MessageManager.SendGroupMessageAsync(group, "本群已达到今日获取经验上限！");
-                            }
-                            catch
-                            {
-                                Console.WriteLine("群消息发送失败");
-                            }
-                        }
-                    }
-                    else
+                        Connection = msc
+                    };
+                    MySqlCommand cmd1 = new()
                     {
-                        if (reader.GetInt32("exp_gained_today") < maxexp_formula)
+                        Connection = msc1
+                    };
+                    msc.Open();
+                    msc1.Open();
+                    // 判断数据是否存在
+                    cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {receiver.GroupId};";
+                    int i = Convert.ToInt32(cmd.ExecuteScalar());
+                    if (i == 1)
+                    {
+                        cmd.CommandText = $"SELECT * FROM bread WHERE gid = {receiver.GroupId};";
+                        MySqlDataReader reader = cmd.ExecuteReader();
+                        reader.Read();
+                        int maxexp_formula = (int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1));
+                        Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                        if (Global.time_now - reader.GetInt64("last_expfull") >= 86400)
                         {
-                            cmd1.CommandText = $"UPDATE bread SET factory_exp = {reader.GetInt32("factory_exp") + 1}, exp_gained_today = {reader.GetInt32("exp_gained_today") + 1} WHERE gid = {group};";
-                            cmd1.ExecuteNonQuery();
-                        }
-                        else
-                        {
-                            cmd1.CommandText = $"UPDATE bread SET last_expfull = {Global.time_now}, exp_gained_today = 0 WHERE gid = {group};";
-                            cmd1.ExecuteNonQuery();
-                            try 
+                            if (Global.time_now - reader.GetInt64("last_expgain") >= 86400)
                             {
-                                await MessageManager.SendGroupMessageAsync(group, "本群已达到今日获取经验上限！");
+                                cmd1.CommandText = $"UPDATE bread SET exp_gained_today = 0, last_expgain = {Global.time_now} WHERE gid = {receiver.GroupId};";
+                                cmd1.ExecuteNonQuery();
+                                if (reader.GetInt32("exp_gained_today") <= maxexp_formula)
+                                {
+                                    cmd1.CommandText = $"UPDATE bread SET factory_exp = {reader.GetInt32("factory_exp") + 1}, exp_gained_today = {reader.GetInt32("exp_gained_today") + 1} WHERE gid = {receiver.GroupId};";
+                                    cmd1.ExecuteNonQuery();
+                                }
+                                else
+                                {
+                                    cmd1.CommandText = $"UPDATE bread SET last_expfull = {Global.time_now}, exp_gained_today = 0 WHERE gid = {receiver.GroupId};";
+                                    cmd1.ExecuteNonQuery();
+                                    try
+                                    {
+                                        await MessageManager.SendGroupMessageAsync(receiver.GroupId, "本群已达到今日获取经验上限！");
+                                    }
+                                    catch
+                                    {
+                                        Console.WriteLine("群消息发送失败");
+                                    }
+                                }
                             }
-                            catch
+                            else
                             {
-                                Console.WriteLine("群消息发送失败");
+                                if (reader.GetInt32("exp_gained_today") < maxexp_formula)
+                                {
+                                    cmd1.CommandText = $"UPDATE bread SET factory_exp = {reader.GetInt32("factory_exp") + 1}, exp_gained_today = {reader.GetInt32("exp_gained_today") + 1} WHERE gid = {receiver.GroupId};";
+                                    cmd1.ExecuteNonQuery();
+                                }
+                                else
+                                {
+                                    cmd1.CommandText = $"UPDATE bread SET last_expfull = {Global.time_now}, exp_gained_today = 0 WHERE gid = {receiver.GroupId};";
+                                    cmd1.ExecuteNonQuery();
+                                    try
+                                    {
+                                        await MessageManager.SendGroupMessageAsync(receiver.GroupId, "本群已达到今日获取经验上限！");
+                                    }
+                                    catch
+                                    {
+                                        Console.WriteLine("群消息发送失败");
+                                    }
+                                }
                             }
                         }
                     }
@@ -395,6 +402,9 @@ namespace Net_2kBot.Modules
                     {
                         Console.WriteLine("群消息发送失败");
                     }
+                    reader.Close();
+                    msc.Close();
+                    msc1.Close();
                 }
                 else
                 {
@@ -406,6 +416,9 @@ namespace Net_2kBot.Modules
                     {
                         Console.WriteLine("群消息发送失败");
                     }
+                    reader.Close();
+                    msc.Close();
+                    msc1.Close();
                 }
                 reader.Close();
             }

@@ -13,7 +13,7 @@ namespace Net_2kBot.Modules
             MySqlCommand cmd;
             msc.Open();
             // 更新op列表
-            cmd = new MySqlCommand($"SELECT * FROM ops WHERE qid IS NOT NULL AND gid IS NOT NULL;",msc);
+            cmd = new MySqlCommand($"SELECT * FROM ops WHERE qid IS NOT NULL AND gid IS NOT NULL;", msc);
             MySqlDataReader reader = cmd.ExecuteReader();
             List<string> ops = new();
             while (reader.Read())

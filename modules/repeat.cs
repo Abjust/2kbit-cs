@@ -131,6 +131,9 @@ namespace Net_2kBot.Modules
                                         cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = {reader.GetInt32("repeat_count") + 1} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                         cmd1.ExecuteNonQuery();
                                         await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                        reader.Close();
+                                        msc.Close();
+                                        msc1.Close();
                                     }
                                     else
                                     {
@@ -141,6 +144,9 @@ namespace Net_2kBot.Modules
                                            .Plain($" 你话太多了（恼）（你的消息将在 {Global.repeat_cd} 秒内不被复读）")
                                            .Build();
                                             await receiver.SendMessageAsync(messageChain);
+                                            reader.Close();
+                                            msc.Close();
+                                            msc1.Close();
                                         }
                                         catch
                                         {
@@ -148,6 +154,9 @@ namespace Net_2kBot.Modules
                                         }
                                         cmd1.CommandText = $"UPDATE repeatctrl SET last_repeatctrl = {Global.time_now}, repeat_count = 0 WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                         cmd1.ExecuteNonQuery();
+                                        reader.Close();
+                                        msc.Close();
+                                        msc1.Close();
                                     }
                                 }
                                 else
@@ -157,6 +166,9 @@ namespace Net_2kBot.Modules
                                     cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = {reader.GetString("repeat_count").ToInt32() + 1} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                     cmd1.ExecuteNonQuery();
                                     await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                    reader.Close();
+                                    msc.Close();
+                                    msc1.Close();
                                 }
                             }
                             reader.Close();
