@@ -38,19 +38,25 @@ namespace Net_2kBot
             };
             msc.Open();
             // 若数据表不存在则创建
-            cmd.CommandText = $"CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`blocklist` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));";
-            cmd.ExecuteNonQuery();
-            cmd.CommandText = $"CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`ops` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));";
-            cmd.ExecuteNonQuery();
-            cmd.CommandText = $"CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`ignores` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));";
-            cmd.ExecuteNonQuery();
-            cmd.CommandText = $"CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`g_blocklist` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',PRIMARY KEY (`id`));";
-            cmd.ExecuteNonQuery();
-            cmd.CommandText = $"CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`g_ops` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',PRIMARY KEY (`id`));";
-            cmd.ExecuteNonQuery();
-            cmd.CommandText = $"CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`g_ignores` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',PRIMARY KEY (`id`));";
-            cmd.ExecuteNonQuery();
-            cmd.CommandText = $"CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`repeatctrl` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',`last_repeat` BIGINT NULL COMMENT '上次复读时间',`last_repeatctrl` BIGINT NULL COMMENT '上次复读控制时间',`repeat_count` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '复读计数',PRIMARY KEY (`id`));";
+            cmd.CommandText = @$"
+CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`blocklist` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`ops` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`ignores` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`g_blocklist` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`g_ops` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`g_ignores` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`repeatctrl` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',`last_repeat` BIGINT NULL COMMENT '上次复读时间',`last_repeatctrl` BIGINT NULL COMMENT '上次复读控制时间',`repeat_count` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '复读计数',PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `gid` varchar(10) NOT NULL COMMENT 'Q群号',
+  `factory_level` int NOT NULL DEFAULT '1' COMMENT '面包厂等级',
+  `bread_diversity` tinyint NOT NULL DEFAULT '0' COMMENT '多样化生产状态',
+  `factory_exp` int NOT NULL DEFAULT '0' COMMENT '面包厂经验',
+  `breads` int NOT NULL DEFAULT '0' COMMENT '面包库存',
+  `exp_gained_today` int NOT NULL DEFAULT '0' COMMENT '近24小时获取经验数',
+  `last_expfull` bigint NOT NULL DEFAULT '946656000' COMMENT '上次达到经验上限时间',
+  `last_expgain` bigint NOT NULL DEFAULT '946656000' COMMENT '近24小时首次获取经验时间',
+  PRIMARY KEY (`id`))";
             cmd.ExecuteNonQuery();
             msc.Close();
             // 在这里添加你的代码，比如订阅消息/事件之类的
@@ -58,9 +64,29 @@ namespace Net_2kBot
             // 持续更新数据
             bot.MessageReceived
             .OfType<GroupMessageReceiver>()
-            .Subscribe(_ =>
+            .Subscribe(async _ =>
             {
                 Update.Execute();
+                // 为新群建造面包厂
+                // 判断数据是否存在
+                msc.Open();
+                cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {_.GroupId};";
+                int i = Convert.ToInt32(cmd.ExecuteScalar());
+                // 如不存在便创建
+                if (i == 0)
+                {
+                    cmd.CommandText = $"INSERT INTO bread (gid) VALUES ({_.GroupId});";
+                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(_.GroupId, "成功为本群建造面包厂！");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("群消息发送失败");
+                    }
+                }
+                msc.Close();
                 Thread.Sleep(500);
             });
             // 戳一戳效果
@@ -216,6 +242,51 @@ namespace Net_2kBot
             .OfType<GroupMessageReceiver>()
             .Subscribe(async x =>
             {
+                // 面包厂相关
+                string[] text1 = x.MessageChain.GetPlainMessage().Split(" ");
+                if (text1.Length == 2)
+                {
+                    int number;
+                    switch (text1[0])
+                    {
+                        case "/givebread":
+                            if (int.TryParse(text1[1], out number))
+                            {
+                                Bread.Give(x.GroupId, number);
+                            }
+                            break;
+                        case "/getbread":
+                            if (int.TryParse(text1[1], out number))
+                            {
+                                Bread.Get(x.GroupId, number);
+                            }
+                            break;
+                        case "/bread_diversity":
+                            switch (text1[1])
+                            {
+                                case "on":
+                                    Bread.Diversity(x.GroupId, 1);
+                                    break;
+                                case "off":
+                                    Bread.Diversity(x.GroupId, 0);
+                                    break;
+                            }
+                            break;
+                    }
+                }
+                else if (text1[0] == "/querybread")
+                {
+                    Bread.Query(x.GroupId);
+                }
+                else if (text1[0] == "/upgrade_factory")
+                {
+                    Bread.UpgradeFactory(x.GroupId);
+                }
+                // 计算经验
+                if ((Global.ignores == null || Global.ignores.Contains($"{x.GroupId}_{x.Sender.Id}") == false) && (Global.g_ignores == null || Global.g_ignores.Contains(x.Sender.Id) == false))
+                {
+                    Bread.GetExp(x.GroupId);
+                }
                 // 复读机
                 Repeat.Execute(x);
                 // surprise
@@ -847,7 +918,7 @@ namespace Net_2kBot
                 // 发动带清洗
                 if (x.MessageChain.GetPlainMessage() == ("/purge"))
                 {
-                    Admin.Purge(x.Sender.Id,x.GroupId);
+                    Admin.Purge(x.Sender.Id, x.GroupId);
                 }
                 // 重新加载
                 if (x.MessageChain.GetPlainMessage() == ("/update"))
@@ -880,7 +951,7 @@ namespace Net_2kBot
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "机器人版本：b2.0.1-r1\r\n上次更新日期：2022/11/26\r\n更新内容：恢复了原有的at消息判断机制，以保证祖安功能能够使用");
+                        "机器人版本：b2.1.0\r\n上次更新日期：2022/11/26\r\n更新内容：新增了面包厂机制");
                     }
                     catch
                     {
@@ -888,6 +959,8 @@ namespace Net_2kBot
                     }
                 }
             });
+            // 运行面包厂生产任务
+            await Task.WhenAll(Main(), BreadFactory.BreadProduce());
             // 然后在这之后卡住主线程（也可以使用别的方式，文档假设阅读者是个C#初学者）
             Console.ReadLine();
         }
