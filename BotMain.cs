@@ -72,11 +72,11 @@ namespace Net_2kBot
                 {
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(receiver.Subject.Id, "狗日的，你tm还有脸戳我？");
+                        await MessageManager.SendGroupMessageAsync(receiver.Subject.Id, "握草泥马呀—\r\n我操尼玛啊啊啊啊—\r\n我—操—你—妈—\r\n听到没，我—操—你—妈—");
                     }
                     catch
                     {
-                        Console.WriteLine("狗日的，你tm还有脸戳我？");
+                        Console.WriteLine("握草泥马呀—\r\n我操尼玛啊啊啊啊—\r\n我—操—你—妈—\r\n听到没，我—操—你—妈—");
                     }
                 }
                 else if (receiver.Target == Global.qq && receiver.Subject.Kind == "Friend")
@@ -878,7 +878,7 @@ namespace Net_2kBot
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "机器人版本：b2.0.0-r1\r\n上次更新日期：2022/11/26\r\n更新内容：因HanBot API存在问题，暂时停用了同步功能");
+                        "机器人版本：b2.0.0-r3\r\n上次更新日期：2022/11/26\r\n更新内容：修复了群管系统的些许bug");
                     }
                     catch
                     {
