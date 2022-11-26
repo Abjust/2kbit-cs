@@ -127,10 +127,10 @@ namespace Net_2kBot.Modules
                                     if (reader.GetInt32("repeat_count") <= Global.repeat_threshold)
                                     {
                                         cmd1.CommandText = $"UPDATE repeatctrl SET last_repeat = {Global.time_now} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
-                                        await cmd1.ExecuteNonQueryAsync().ConfigureAwait(false);
-                                        await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                        cmd1.ExecuteNonQuery();
                                         cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = {reader.GetInt32("repeat_count") + 1} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
-                                        await cmd1.ExecuteNonQueryAsync().ConfigureAwait(false);
+                                        cmd1.ExecuteNonQuery();
+                                        await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
                                     }
                                     else
                                     {
@@ -147,16 +147,16 @@ namespace Net_2kBot.Modules
                                             Console.WriteLine("群消息发送失败");
                                         }
                                         cmd1.CommandText = $"UPDATE repeatctrl SET last_repeatctrl = {Global.time_now}, repeat_count = 0 WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
-                                        await cmd1.ExecuteNonQueryAsync().ConfigureAwait(false);
+                                        cmd1.ExecuteNonQuery();
                                     }
                                 }
                                 else
                                 {
                                     cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = 0, last_repeat = {Global.time_now} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
-                                    await cmd1.ExecuteNonQueryAsync().ConfigureAwait(false);
-                                    await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                    cmd1.ExecuteNonQuery();
                                     cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = {reader.GetString("repeat_count").ToInt32() + 1} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
-                                    await cmd1.ExecuteNonQueryAsync().ConfigureAwait(false);
+                                    cmd1.ExecuteNonQuery();
+                                    await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
                                 }
                             }
                             reader.Close();
