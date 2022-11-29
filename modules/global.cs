@@ -14,6 +14,7 @@ namespace Net_2kBot.Modules
         public const int repeat_cd = 300;
         public const int repeat_threshold = 5;
         public const int repeat_interval = 10;
+        public const int bread_cd = 300;
         public static readonly string path = Directory.GetCurrentDirectory();
         public static readonly string owner_qq = "";
         public static readonly string api = "";
@@ -25,5 +26,5 @@ namespace Net_2kBot.Modules
         public const string database_passwd = "";
         public const string database_name = "";
         public static readonly string connectstring = $"server={database_host};userid={database_user};password={database_passwd};database={database_name}";
-    };
+    }
 }
