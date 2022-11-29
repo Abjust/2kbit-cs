@@ -14,7 +14,6 @@ namespace Net_2kBot.Modules
         public const int repeat_cd = 300;
         public const int repeat_threshold = 5;
         public const int repeat_interval = 10;
-        public const int bread_cd = 300;
         public static readonly string path = Directory.GetCurrentDirectory();
         public static readonly string owner_qq = "";
         public static readonly string api = "";
