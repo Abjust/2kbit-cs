@@ -14,5 +14,5 @@
 ## 如何构建
 1.打开Visual Studios\
 2.点击“克隆存储库”\
-3.存储库位置填https://github.com/Abjust/2kbot.git\
-4.点击克隆\
+3.存储库位置填(https://github.com/Abjust/2kbot.git)\
+4.点击克隆
