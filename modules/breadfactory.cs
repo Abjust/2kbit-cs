@@ -5,7 +5,6 @@ namespace Net_2kBot.Modules
 {
     public class BreadFactory
     {
-        public static long last_produce = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
         public static List<string>? group_ids;
         public static int speed;
         public static async Task BreadProduce()
@@ -38,14 +37,14 @@ namespace Net_2kBot.Modules
                             cmd.CommandText = $"SELECT * FROM bread WHERE gid = {groupid};";
                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                             await reader.ReadAsync();
-                            int formula = (int)(Math.Ceiling(Math.Pow(4, reader.GetInt32("factory_level")) * Math.Pow(0.25, reader.GetInt32("bread_diversity"))) + 1);
+                            int formula = (int)Math.Ceiling(Math.Pow(4, reader.GetInt32("factory_level")) * Math.Pow(0.25, reader.GetInt32("bread_diversity")));
                             speed = 300 - (20 * (reader.GetInt32("factory_level") -1));
-                            int maxstorage = (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1));
+                            int maxstorage = (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")));
                             Random r = new();
                             int random = r.Next(1, formula);
-                            await reader.CloseAsync();
-                            if (Global.time_now - last_produce >= speed)
+                            if (Global.time_now - reader.GetInt64("last_produce") >= speed)
                             {
+                                await reader.CloseAsync();
                                 cmd.CommandText = $"SELECT * FROM bread WHERE gid = {groupid};";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
@@ -66,14 +65,12 @@ namespace Net_2kBot.Modules
                                         cmd1.CommandText = $"UPDATE bread SET breads = {maxstorage} WHERE gid = {groupid};";
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
+                                    cmd1.CommandText = $"UPDATE bread SET last_produce = {new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()} WHERE gid = {groupid};";
+                                    await cmd1.ExecuteNonQueryAsync();
                                 }
                                 await reader.CloseAsync();
                             }
                         }
-                    }
-                    if (Global.time_now - last_produce >= speed)
-                    {
-                        last_produce = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                     }
                     Thread.Sleep(500);
                 }
