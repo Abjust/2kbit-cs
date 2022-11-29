@@ -950,7 +950,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        $"机器人版本：b2.1.7\r\n上次更新日期：2022/11/29\r\n更新内容：给BreadProduce()方法加了while (true)，使其保持执行\r\n---------\r\n{splashes[random]}");
+                        $"机器人版本：b2.2.0\r\n上次更新日期：2022/11/29\r\n更新内容：修复了查询面包库存功能的bug；为面包厂系统增加了些许机制；现在查询面包库存的同时，也能得知库存上限了\r\n---------\r\n{splashes[random]}");
                     }
                     catch
                     {
