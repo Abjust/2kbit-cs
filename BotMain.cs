@@ -28,17 +28,17 @@ namespace Net_2kBot
             };
             // 注意: `LaunchAsync`是一个异步方法，请确保`Main`方法的返回值为`Task`
             await bot.LaunchAsync();
-
             // 初始化
             // 连接数据库
-            MySqlConnection msc = new(Global.connectstring);
-            MySqlCommand cmd = new()
+            using (var msc = new MySqlConnection(Global.connectstring))
             {
-                Connection = msc
-            };
-            msc.Open();
-            // 若数据表不存在则创建
-            cmd.CommandText = @$"
+                await msc.OpenAsync();
+                MySqlCommand cmd = new()
+                {
+                    Connection = msc
+                };
+                // 若数据表不存在则创建
+                cmd.CommandText = @$"
 CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`blocklist` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));
 CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`ops` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));
 CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`ignores` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));
@@ -57,38 +57,10 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
   `last_expfull` bigint NOT NULL DEFAULT '946656000' COMMENT '上次达到经验上限时间',
   `last_expgain` bigint NOT NULL DEFAULT '946656000' COMMENT '近24小时首次获取经验时间',
   PRIMARY KEY (`id`))";
-            cmd.ExecuteNonQuery();
-            msc.Close();
+                await cmd.ExecuteNonQueryAsync();
+            }
             // 在这里添加你的代码，比如订阅消息/事件之类的
             Update.Execute();
-            // 持续更新数据
-            bot.MessageReceived
-            .OfType<GroupMessageReceiver>()
-            .Subscribe(async _ =>
-            {
-                Update.Execute();
-                // 为新群建造面包厂
-                // 判断数据是否存在
-                msc.Open();
-                cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {_.GroupId};";
-                int i = Convert.ToInt32(cmd.ExecuteScalar());
-                // 如不存在便创建
-                if (i == 0)
-                {
-                    cmd.CommandText = $"INSERT INTO bread (gid) VALUES ({_.GroupId});";
-                    cmd.ExecuteNonQuery();
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(_.GroupId, "成功为本群建造面包厂！");
-                    }
-                    catch
-                    {
-                        Console.WriteLine("群消息发送失败");
-                    }
-                }
-                msc.Close();
-                Thread.Sleep(5000);
-            });
             // 戳一戳效果
             bot.EventReceived
             .OfType<NudgeEvent>()
@@ -133,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
             .OfType<NewMemberRequestedEvent>()
             .Subscribe(async e =>
             {
-                if (Global.blocklist != null && Global.blocklist.Contains(e.FromId))
+                if ((Global.blocklist != null && Global.blocklist.Contains($"{e.GroupId}_{e.FromId}")) || (Global.blocklist != null && Global.blocklist.Contains(e.FromId)))
                 {
                     await e.RejectAsync();
                 }
@@ -274,13 +246,20 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                             break;
                     }
                 }
-                else if (text1[0] == "/querybread")
+                else
                 {
-                    Bread.Query(x.GroupId);
-                }
-                else if (text1[0] == "/upgrade_factory")
-                {
-                    Bread.UpgradeFactory(x.GroupId);
+                    switch (text1[0])
+                    {
+                        case "/querybread":
+                            Bread.Query(x.GroupId);
+                            break;
+                        case "/upgrade_factory":
+                            Bread.UpgradeFactory(x.GroupId);
+                            break;
+                        case "/build_factory":
+                            Bread.BuildFactory(x.GroupId);
+                            break;
+                    }
                 }
                 // 计算经验
                 Bread.GetExp(x);
@@ -945,10 +924,33 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                 // 版本
                 if (x.MessageChain.GetPlainMessage() == "版本")
                 {
+                    List<string> splashes = new()
+                    {
+                        "也试试HanBot罢！Also try HanBot!",
+                        "誓死捍卫微软苏维埃！",
+                        "打倒MF独裁分子！",
+                        "要把反革命分子的恶臭思想，扫进历史的垃圾堆！",
+                        "PHP是世界上最好的编程语言（雾）",
+                        "社会主义好，社会主义好~",
+                        "Minecraft很好玩，但也可以试试Terraria！",
+                        "So Nvidia, f**k you!",
+                        "战无不胜的马克思列宁主义万岁！",
+                        "Bug是杀不完的，你杀死了一个Bug，就会有千千万万个Bug站起来！",
+                        "跟张浩扬博士一起来学Jvav罢！",
+                        "哼哼哼，啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊",
+                        "你知道吗？其实你什么都不知道！",
+                        "Tips:这是一条烫...烫..烫知识（）",
+                        "你知道成功的秘诀吗？我告诉你成功的秘诀就是：我操你妈的大臭逼",
+                        "有时候ctmd不一定是骂人 可能是传统美德",
+                        "python不一定是编程语言 也可能是屁眼通红",
+                        "这条标语虽然没有用，但是是有用的，因为他被加上了标语"
+                    };
+                    Random r = new();
+                    int random = r.Next(splashes.Count);
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "机器人版本：b2.1.1\r\n上次更新日期：2022/11/27\r\n更新内容：尝试优化了数据库连接机制");
+                        $"机器人版本：b2.1.7\r\n上次更新日期：2022/11/29\r\n更新内容：给BreadProduce()方法加了while (true)，使其保持执行\r\n---------\r\n{splashes[random]}");
                     }
                     catch
                     {
@@ -957,8 +959,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                 }
             });
             // 运行面包厂生产任务
-            await Task.WhenAll(Main(), BreadFactory.BreadProduce());
-            // 然后在这之后卡住主线程（也可以使用别的方式，文档假设阅读者是个C#初学者）
+            await Task.WhenAny(BreadFactory.BreadProduce());
             Console.ReadLine();
         }
     }
