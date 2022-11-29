@@ -19,7 +19,7 @@ namespace Net_2kBot.Modules
             {
                 Connection = msc
             };
-            msc.Open();
+            await msc.OpenAsync();
             if (@base is GroupMessageReceiver receiver)
             {
                 if (Global.g_ops != null && Global.g_ops.Contains(executor))
@@ -32,7 +32,7 @@ namespace Net_2kBot.Modules
                     foreach (string? s in jo["data"]!)
                     {
                         cmd.CommandText = $"INSERT INTO g_blocklist (qid) VALUES ({s});";
-                        cmd.ExecuteNonQuery();
+                        await cmd.ExecuteNonQueryAsync();
                     }
                     try
                     {
@@ -54,6 +54,7 @@ namespace Net_2kBot.Modules
                         Console.WriteLine("群消息发送失败");
                     }
                 }
+                await msc.CloseAsync();
             }
         }
         // 将黑名单反向同步到Hanbot
@@ -132,7 +133,7 @@ namespace Net_2kBot.Modules
             {
                 Connection = msc
             };
-            msc.Open();
+            await msc.OpenAsync();
             if (@base is GroupMessageReceiver receiver)
             {
                 if (Global.g_ops != null && Global.g_ops.Contains(executor))
@@ -166,7 +167,7 @@ namespace Net_2kBot.Modules
                             else if (!Global.g_blocklist.Contains(s))
                             {
                                 cmd.CommandText = $"INSERT INTO g_blocklist (qid) VALUES ({s});";
-                                cmd.ExecuteNonQuery();
+                                await cmd.ExecuteNonQueryAsync();
                             }
                         }
                         try
@@ -190,6 +191,7 @@ namespace Net_2kBot.Modules
                         Console.WriteLine("群消息发送失败");
                     }
                 }
+                await msc.CloseAsync();
             }
         }
     }

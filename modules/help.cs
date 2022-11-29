@@ -62,6 +62,7 @@ namespace Net_2kBot.Modules
                     "发送“精神疾病”或者“心理疾病”并按照后续出现的选项发送相应文字即可获得科普文本",
                     "发送“量表”或者“测试”并按照后续出现的选项发送相应文字即可获得链接",
                     @"面包厂功能
+建造面包厂（初始化）：/build_factory
 给2kbot面包： /givebread <数量>
 向2kbot要面包：/getbread <数量>
 查询面包库存：/querybread

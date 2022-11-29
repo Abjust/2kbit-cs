@@ -10,7 +10,7 @@ namespace Net_2kBot.Modules
         {
             if (@base is GroupMessageReceiver receiver)
             {
-                if (receiver.MessageChain[1].ToString() == "AtMessage { Type = At, Target = 2810482259 }" && receiver.MessageChain[2].ToString() == "PlainMessage { Type = Plain, Text =  你就是歌姬吧 }")
+                if (receiver.MessageChain[1].ToString() == $"AtMessage {{ Type = At, Target = {Global.qq} }}" && receiver.MessageChain[2].ToString() == "PlainMessage { Type = Plain, Text =  你就是歌姬吧 }")
                 {
                     string[] words =
                     {
