@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
   `exp_gained_today` int NOT NULL DEFAULT '0' COMMENT '近24小时获取经验数',
   `last_expfull` bigint NOT NULL DEFAULT '946656000' COMMENT '上次达到经验上限时间',
   `last_expgain` bigint NOT NULL DEFAULT '946656000' COMMENT '近24小时首次获取经验时间',
+  `last_produce` bigint NOT NULL DEFAULT '946656000' COMMENT '上次完成一轮生产周期时间',
   PRIMARY KEY (`id`))";
                 await cmd.ExecuteNonQueryAsync();
             }
@@ -224,13 +225,13 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                         case "/givebread":
                             if (int.TryParse(text1[1], out number))
                             {
-                                Bread.Give(x.GroupId, number);
+                                Bread.Give(x.GroupId, x.Sender.Id, number);
                             }
                             break;
                         case "/getbread":
                             if (int.TryParse(text1[1], out number))
                             {
-                                Bread.Get(x.GroupId, number);
+                                Bread.Get(x.GroupId, x.Sender.Id, number);
                             }
                             break;
                         case "/bread_diversity":
@@ -251,13 +252,16 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     switch (text1[0])
                     {
                         case "/querybread":
-                            Bread.Query(x.GroupId);
+                            Bread.Query(x.GroupId,x.Sender.Id);
                             break;
                         case "/upgrade_factory":
                             Bread.UpgradeFactory(x.GroupId);
                             break;
                         case "/build_factory":
                             Bread.BuildFactory(x.GroupId);
+                            break;
+                        case "/upgrade_storage":
+                            Bread.UpgradeStorage(x.GroupId);
                             break;
                     }
                 }
@@ -950,7 +954,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        $"机器人版本：b2.2.0\r\n上次更新日期：2022/11/29\r\n更新内容：修复了查询面包库存功能的bug；为面包厂系统增加了些许机制；现在查询面包库存的同时，也能得知库存上限了\r\n---------\r\n{splashes[random]}");
+                        $"机器人版本：b2.3.0\r\n上次更新日期：2022/11/29\r\n更新内容：修改了面包厂系统的等级机制\r\n---------\r\n{splashes[random]}");
                     }
                     catch
                     {
