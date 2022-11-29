@@ -16,15 +16,15 @@
         public const int repeat_interval = 10;
         public const int breadfactory_maxlevel = 5;
         public static readonly string path = Directory.GetCurrentDirectory();
-        public static readonly string owner_qq = "2548452533";
-        public static readonly string api = "http://152.136.205.97/bot_api";
-        public static readonly string api_key = "k3kGvRtDPI";
-        public static readonly string qq = "2810482259";
-        public static readonly string verify_key = "989898123oO";
-        public const string database_host = "localhost";
-        public const string database_user = "root";
-        public const string database_passwd = "Abjust.253389";
-        public const string database_name = "2kbot";
+        public static readonly string owner_qq = "";
+        public static readonly string api = "";
+        public static readonly string api_key = "";
+        public static readonly string qq = "";
+        public static readonly string verify_key = "";
+        public const string database_host = "";
+        public const string database_user = "";
+        public const string database_passwd = "";
+        public const string database_name = "";
         public static readonly string connectstring = $"server={database_host};userid={database_user};password={database_passwd};database={database_name}";
     }
 }
