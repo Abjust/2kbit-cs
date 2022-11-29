@@ -66,24 +66,38 @@ namespace Net_2kBot.Modules
                 {
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
-                    if (number + reader.GetInt32("breads") <= 32 * Math.Pow(4, reader.GetInt32("factory_level") - 1))
+                    if (reader.GetInt32("bread_diversity") == 0)
                     {
-                        using (var msc1 = new MySqlConnection(Global.connectstring))
+                        if (number + reader.GetInt32("breads") <= 32 * Math.Pow(4, reader.GetInt32("factory_level") - 1))
                         {
-                            await msc1.OpenAsync();
-                            MySqlCommand cmd1 = new()
+                            using (var msc1 = new MySqlConnection(Global.connectstring))
                             {
-                                Connection = msc1
-                            };
-                            cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") + number} WHERE gid = {group};";
-                            await cmd1.ExecuteNonQueryAsync();
-                            await reader.CloseAsync();
-                            cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
-                            reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
-                            await reader.ReadAsync();
+                                await msc1.OpenAsync();
+                                MySqlCommand cmd1 = new()
+                                {
+                                    Connection = msc1
+                                };
+                                cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") + number} WHERE gid = {group};";
+                                await cmd1.ExecuteNonQueryAsync();
+                                await reader.CloseAsync();
+                                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                                reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                                await reader.ReadAsync();
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(group, $"现在库存有 {reader.GetInt32("breads")} 块面包辣！");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
+                            }
+                        }
+                        else
+                        {
                             try
                             {
-                                await MessageManager.SendGroupMessageAsync(group, $"现在库存有 {reader.GetInt32("breads")} 块面包辣！");
+                                await MessageManager.SendGroupMessageAsync(group, "抱歉，库存已经满了。。。");
                             }
                             catch
                             {
@@ -95,14 +109,13 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(group, "抱歉，库存已经满了。。。");
+                            await MessageManager.SendGroupMessageAsync(group, "在开启多样化生产模式的情况下，你不能给2kbot面包！");
                         }
                         catch
                         {
                             Console.WriteLine("群消息发送失败");
                         }
                     }
-                    await reader.CloseAsync();
                 }
                 catch
                 {
@@ -230,17 +243,17 @@ namespace Net_2kBot.Modules
                 };
                 try
                 {
+                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, $"现在库存有 {reader.GetInt32("breads")} 块面包");
+                        await MessageManager.SendGroupMessageAsync(group, $"现在库存有 {reader.GetInt32("breads")} 块面包，本群面包厂目前最多可储存 {(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1))} 块面包");
                     }
                     catch
                     {
                         Console.WriteLine("群消息发送失败");
                     }
-                    await reader.CloseAsync();
                 }
                 catch
                 {
