@@ -1,5 +1,4 @@
 ﻿using MySql.Data.MySqlClient;
-using System.Data;
 
 namespace Net_2kBot.Modules
 {
