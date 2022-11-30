@@ -1,4 +1,14 @@
-﻿using Manganese.Text;
+﻿// 2kbot b2.3.0
+
+// 致所有构建及修改2kbot代码片段的用户：作者（Abjust）并不承担构建2kbot代码片段（包括修改过的版本）所产生的一切风险，但是用户有权在2kbot的GitHub项目页提出issue，并有权在代码片段修复这些问题后获取这些更新，但是，作者不会对修改过的代码版本做质量保证，也没有义务修正在修改过的代码片段中存在的任何缺陷。
+
+// 2kbot是自由软件，且严格执行AGPLv3开源许可证。
+
+// 本程序的发布是希望它能起到作用，但没有任何保证，甚至没有隐含的保证。
+
+// 您应该已经收到了一份GNU Affero通用公共许可证的副本。 如果没有，请参见<https://www.gnu.org/licenses/>。
+
+using Manganese.Text;
 using Mirai.Net.Data.Events.Concretes.Group;
 using Mirai.Net.Data.Events.Concretes.Message;
 using Mirai.Net.Data.Events.Concretes.Request;
