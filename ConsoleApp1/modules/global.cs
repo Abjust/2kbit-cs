@@ -1,4 +1,6 @@
-﻿namespace Net_2kBot.Modules
+// 提交Git并将代码片段推送到GitHub仓库之前，请将该文件的隐私部分（如数据库信息、机器人QQ号）删除，以免带来不必要的麻烦
+
+namespace Net_2kBot.Modules
 {
     public class Global
     {
