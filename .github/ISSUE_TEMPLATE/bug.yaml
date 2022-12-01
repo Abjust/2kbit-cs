@@ -44,7 +44,7 @@ body:
     attributes:
       label: 使用的2kbot版本
       description: |
-        如果你使用的是原版2kbot，请写“2kbot”以及现在在用的版本号（比如“b2.3.0”），如果你使用的是修改过的2kbot版本，请写出这个修改版的名称以及版本号（比如“Mica App 5.1.2”）。
+        如果你使用的是原版2kbot（包括你自己克隆且除了修改程序名称以外，未经任何修改的版本），请写“2kbot”以及现在在用的版本号（比如“2kbot b2.3.0”），如果你使用的是修改过的2kbot版本，请写出这个修改版的名称以及版本号（比如“Mica App 5.1.2”）。
     validations:
       required: true
 
