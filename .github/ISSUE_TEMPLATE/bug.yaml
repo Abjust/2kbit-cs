@@ -38,9 +38,9 @@ body:
         ## 相关信息
         好的，那我们现在开始罢！
   
-  # Input | Reproduce
+  # Input | Edition
   - type: textarea
-    id: reproduce-steps
+    id: using-edition
     attributes:
       label: 使用的2kbot版本
       description: |
