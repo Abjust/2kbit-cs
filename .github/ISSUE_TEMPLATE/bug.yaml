@@ -39,12 +39,12 @@ body:
         好的，那我们现在开始罢！
   
   # Input | Edition
-  - type: textarea
+  - type: input
     id: using-edition
     attributes:
       label: 使用的2kbot版本
       description: |
-        如果你使用的是原版2kbot，请写“2kbot”，如果你使用的是修改过的2kbot版本，请写出这个版本的名称。
+        如果你使用的是原版2kbot，请写“2kbot”，如果你使用的是修改过的2kbot版本，请写出这个修改版的名称（比如“Mica App”）。
     validations:
       required: true
 
