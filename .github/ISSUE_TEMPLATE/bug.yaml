@@ -24,6 +24,8 @@ body:
     attributes:
       label: 请确保您已阅读以上注意事项，并勾选下方的确认框。
       options:
+        - label: "如果你正在使用修改过的2kbot版本：我确定这个bug是由于2kbot本身的代码缺陷导致的，而非修改版本中修改过的部分所存在的缺陷。"
+          required: false
         - label: "我已经仔细阅读上述教程和 [\"《提问的智慧》\"](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)。"
           required: true
         - label: "我十分肯定，绝对不是因为我菜才这样。"
@@ -35,6 +37,16 @@ body:
       value: |
         ## 相关信息
         好的，那我们现在开始罢！
+  
+  # Input | Reproduce
+  - type: textarea
+    id: reproduce-steps
+    attributes:
+      label: 使用的2kbot版本
+      description: |
+        如果你使用的是原版2kbot，请写“2kbot”，如果你使用的是修改过的2kbot版本，请写出这个版本的名称。
+    validations:
+      required: true
 
 
   # Input | Reproduce
