@@ -1,4 +1,4 @@
-﻿// 2kbot b2.3.0
+﻿// 2kbot b2.3.1
 // Copyright(C) 2022 Abjust 版权所有。
 
 // 本程序是自由软件：你可以根据自由软件基金会发布的GNU Affero通用公共许可证的条款，即许可证的第3版或（您选择的）任何后来的版本重新发布它和/或修改它。。
@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
   `id` int NOT NULL AUTO_INCREMENT,
   `gid` varchar(10) NOT NULL COMMENT 'Q群号',
   `factory_level` int NOT NULL DEFAULT '1' COMMENT '面包厂等级',
+  `storage_upgraded` int NOT NULL DEFAULT '0' COMMENT '库存升级次数',
   `bread_diversity` tinyint NOT NULL DEFAULT '0' COMMENT '多样化生产状态',
   `factory_exp` int NOT NULL DEFAULT '0' COMMENT '面包厂经验',
   `breads` int NOT NULL DEFAULT '0' COMMENT '面包库存',
@@ -965,7 +966,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        $"机器人版本：b2.3.0\r\n上次更新日期：2022/11/29\r\n更新内容：修改了面包厂系统的等级机制\r\n---------\r\n{splashes[random]}");
+                        $"机器人版本：b2.3.1\r\n上次更新日期：2022/11/29\r\n更新内容：修改了面包厂系统的小bug\r\n---------\r\n{splashes[random]}");
                     }
                     catch
                     {
