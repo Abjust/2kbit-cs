@@ -1,4 +1,4 @@
-﻿// 2kbot b2.3.1
+﻿// 2kbot，一款用C#编写的基于mirai和mirai.net的自由机器人软件
 // Copyright(C) 2022 Abjust 版权所有。
 
 // 本程序是自由软件：你可以根据自由软件基金会发布的GNU Affero通用公共许可证的条款，即许可证的第3版或（您选择的）任何后来的版本重新发布它和/或修改它。。
@@ -34,6 +34,7 @@ namespace Net_2kBot.Modules
 4.精神心理疾病科普
 5.量表测试
 6.面包厂功能
+7.获取源码
 详情请用/help指令");
                     }
                     catch
@@ -49,7 +50,8 @@ namespace Net_2kBot.Modules
                     "3",
                     "4",
                     "5",
-                    "6"
+                    "6",
+                    "7"
                 };
                 var contents = new List<string>
                 {
@@ -78,7 +80,8 @@ namespace Net_2kBot.Modules
 向2kbot要面包：/getbread <数量>
 查询面包库存：/querybread
 改变多样化生产状态：/bread_diversity <on/off>
-升级面包厂：/upgrade_factory"
+升级面包厂：/upgrade_factory",
+                    "https://github.com/Abjust/2kbot"
                 };
                 if (receiver.MessageChain.GetPlainMessage().StartsWith("/help") == true)
                 {
@@ -137,7 +140,8 @@ namespace Net_2kBot.Modules
 [3]/call
 [4]精神心理疾病科普
 [5]量表测试
-[6]面包厂");
+[6]面包厂
+[7]获取源码");
                         }
                         catch
                         {

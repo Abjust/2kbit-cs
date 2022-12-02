@@ -1,4 +1,4 @@
-﻿// 2kbot b2.3.1
+﻿// 2kbot，一款用C#编写的基于mirai和mirai.net的自由机器人软件
 // Copyright(C) 2022 Abjust 版权所有。
 
 // 本程序是自由软件：你可以根据自由软件基金会发布的GNU Affero通用公共许可证的条款，即许可证的第3版或（您选择的）任何后来的版本重新发布它和/或修改它。。
@@ -48,7 +48,7 @@ namespace Net_2kBot.Modules
                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                             await reader.ReadAsync();
                             int formula = (int)Math.Ceiling(Math.Pow(4, reader.GetInt32("factory_level")) * Math.Pow(0.25, reader.GetInt32("bread_diversity")));
-                            speed = 300 - (20 * (reader.GetInt32("factory_level") -1));
+                            speed = 300 - (20 * (reader.GetInt32("factory_level") - 1));
                             int maxstorage = (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")));
                             Random r = new();
                             int random = r.Next(1, formula);
@@ -78,8 +78,8 @@ namespace Net_2kBot.Modules
                                     cmd1.CommandText = $"UPDATE bread SET last_produce = {new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()} WHERE gid = {groupid};";
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
-                                await reader.CloseAsync();
                             }
+                            await reader.CloseAsync();
                         }
                     }
                     Thread.Sleep(500);

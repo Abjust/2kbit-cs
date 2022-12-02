@@ -1,4 +1,4 @@
-﻿// 2kbot b2.3.1
+﻿// 2kbot，一款用C#编写的基于mirai和mirai.net的自由机器人软件
 // Copyright(C) 2022 Abjust 版权所有。
 
 // 本程序是自由软件：你可以根据自由软件基金会发布的GNU Affero通用公共许可证的条款，即许可证的第3版或（您选择的）任何后来的版本重新发布它和/或修改它。。
@@ -959,14 +959,27 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                         "你知道成功的秘诀吗？我告诉你成功的秘诀就是：我操你妈的大臭逼",
                         "有时候ctmd不一定是骂人 可能是传统美德",
                         "python不一定是编程语言 也可能是屁眼通红",
-                        "这条标语虽然没有用，但是是有用的，因为他被加上了标语"
+                        "这条标语虽然没有用，但是是有用的，因为他被加上了标语",
+                        "使用C#编写！"
                     };
                     Random r = new();
                     int random = r.Next(splashes.Count);
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        $"机器人版本：b2.3.1\r\n上次更新日期：2022/11/29\r\n更新内容：修改了面包厂系统的小bug\r\n---------\r\n{splashes[random]}");
+                        $"机器人版本：b2.3.2\r\n上次更新日期：2022/12/2\r\n更新内容：修复了面包厂系统无法产出面包的bug\r\n---------\r\n{splashes[random]}");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("群消息发送失败");
+                    }
+                }
+                // 获取源码
+                if (x.MessageChain.GetPlainMessage() == "源码" || (x.MessageChain.GetPlainMessage() == "获取源码") || (x.MessageChain.GetPlainMessage() == "怎样做这样的机器人"))
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(x.GroupId, "请前往https://github.com/Abjust/2kbot获取2kbot的源码！");
                     }
                     catch
                     {
