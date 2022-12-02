@@ -9,8 +9,6 @@
 
 // 致所有构建及修改2kbot代码片段的用户：作者（Abjust）并不承担构建2kbot代码片段（包括修改过的版本）所产生的一切风险，但是用户有权在2kbot的GitHub项目页提出issue，并有权在代码片段修复这些问题后获取这些更新，但是，作者不会对修改过的代码版本做质量保证，也没有义务修正在修改过的代码片段中存在的任何缺陷。
 
-// 提交Git并将代码片段推送到GitHub仓库之前，请将该文件的隐私部分（如数据库信息、机器人QQ号）删除，以免带来不必要的麻烦
-
 namespace Net_2kBot.Modules
 {
     public class Global
@@ -29,15 +27,15 @@ namespace Net_2kBot.Modules
         public const int repeat_interval = 10;
         public const int breadfactory_maxlevel = 5;
         public static readonly string path = Directory.GetCurrentDirectory();
-        public static readonly string owner_qq = "";
-        public static readonly string api = "";
-        public static readonly string api_key = "";
-        public static readonly string qq = "";
-        public static readonly string verify_key = "";
-        public const string database_host = "";
-        public const string database_user = "";
-        public const string database_passwd = "";
-        public const string database_name = "";
-        public static readonly string connectstring = $"server={database_host};userid={database_user};password={database_passwd};database={database_name}";
+        public static string owner_qq = "";
+        public static string api = "";
+        public static string api_key = "";
+        public static string bot_qq = "";
+        public static string verify_key = "";
+        public static string database_host = "";
+        public static string database_user = "";
+        public static string database_passwd = "";
+        public static string database_name = "";
+        public static string connectstring = "";
     }
 }

@@ -31,14 +31,70 @@ namespace Net_2kBot
     {
         public static async Task Main()
         {
+            // 初始化全局变量
+            if (!System.IO.File.Exists("global.txt"))
+            {
+                string[] lines =
+                {
+                    "owner_qq=", "api=", "api_key=","bot_qq=","verify_key=","database_host=","database_user=","database_passwd=","database_name="
+                };
+                System.IO.File.Create("global.txt").Close();
+                await System.IO.File.WriteAllLinesAsync("global.txt", lines);
+                Console.WriteLine("全局变量文件已创建！现在，你需要前往项目文件夹或者程序文件夹找到global.txt并按照要求编辑");
+                Environment.Exit(0);
+            }
+            else
+            {
+                foreach (string line in System.IO.File.ReadLines("global.txt"))
+                {
+                    string[] split = line.Split("=");
+                    if (split.Length == 2)
+                    {
+                        switch (split[0])
+                        {
+                            case "owner_qq":
+                                Global.owner_qq = split[1];
+                                break;
+                            case "api":
+                                Global.api = split[1];
+                                break;
+                            case "api_key":
+                                Global.api_key = split[1];
+                                break;
+                            case "bot_qq":
+                                Global.bot_qq = split[1];
+                                break;
+                            case "verify_key":
+                                Global.verify_key = split[1];
+                                break;
+                            case "database_host":
+                                Global.database_host = split[1];
+                                break;
+                            case "database_user":
+                                Global.database_user = split[1];
+                                break;
+                            case "database_passwd":
+                                Global.database_passwd = split[1];
+                                break;
+                            case "database_name":
+                                Global.database_name = split[1];
+                                break;
+                        }
+                    }
+                }
+                Global.connectstring = $"server={Global.database_host};userid={Global.database_user};password={Global.database_passwd};database={Global.database_name}";
+            }
+            // 启动机器人程序
             MiraiBot bot = new()
             {
                 Address = "localhost:8080",
-                QQ = Global.qq,
+                QQ = Global.bot_qq,
                 VerifyKey = Global.verify_key
             };
             // 注意: `LaunchAsync`是一个异步方法，请确保`Main`方法的返回值为`Task`
             await bot.LaunchAsync();
+            // 启动成功提示
+            Console.WriteLine("2kbot已启动！");
             // 初始化
             // 连接数据库
             using (var msc = new MySqlConnection(Global.connectstring))
@@ -79,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
             .OfType<NudgeEvent>()
             .Subscribe(async receiver =>
             {
-                if (receiver.Target == Global.qq && receiver.Subject.Kind == "Group")
+                if (receiver.Target == Global.bot_qq && receiver.Subject.Kind == "Group")
                 {
                     try
                     {
@@ -90,7 +146,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                         Console.WriteLine("握草泥马呀—\r\n我操尼玛啊啊啊啊—\r\n我—操—你—妈—\r\n听到没，我—操—你—妈—");
                     }
                 }
-                else if (receiver.Target == Global.qq && receiver.Subject.Kind == "Friend")
+                else if (receiver.Target == Global.bot_qq && receiver.Subject.Kind == "Friend")
                 {
                     await MessageManager.SendFriendMessageAsync(receiver.Subject.Id, "cnmlgbd，还跑到私信里来了？");
                 }
@@ -264,7 +320,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     switch (text1[0])
                     {
                         case "/querybread":
-                            Bread.Query(x.GroupId,x.Sender.Id);
+                            Bread.Query(x.GroupId, x.Sender.Id);
                             break;
                         case "/upgrade_factory":
                             Bread.UpgradeFactory(x.GroupId);
@@ -281,6 +337,12 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                 Bread.GetExp(x);
                 // 复读机
                 Repeat.Execute(x);
+                // 公告
+                if (x.MessageChain.GetPlainMessage().StartsWith("/announce"))
+                {
+                    IEnumerable<Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
+                    Announce.Execute(x, x.Sender.Id, groups);
+                }
                 // surprise
                 if (x.MessageChain.GetPlainMessage() == "/surprise")
                 {
@@ -967,7 +1029,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        $"机器人版本：b2.3.3\r\n上次更新日期：2022/12/2\r\n更新内容：修复了面包厂系统不计算库存升级部分的bug\r\n---------\r\n{splashes[random]}");
+                        $"机器人版本：b2.4.0\r\n上次更新日期：2022/12/2\r\n更新内容：机器人主人可以群发公告了；修改了一些全局变量的定义方式\r\n---------\r\n{splashes[random]}");
                     }
                     catch
                     {
