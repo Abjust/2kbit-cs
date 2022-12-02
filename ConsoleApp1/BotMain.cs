@@ -967,7 +967,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        $"机器人版本：b2.3.2\r\n上次更新日期：2022/12/2\r\n更新内容：修复了面包厂系统无法产出面包的bug\r\n---------\r\n{splashes[random]}");
+                        $"机器人版本：b2.3.3\r\n上次更新日期：2022/12/2\r\n更新内容：修复了面包厂系统不计算库存升级部分的bug\r\n---------\r\n{splashes[random]}");
                     }
                     catch
                     {
@@ -988,7 +988,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                 }
             });
             // 运行面包厂生产任务
-            await Task.WhenAny(BreadFactory.BreadProduce());
+            await BreadFactory.BreadProduce();
             Console.ReadLine();
         }
     }

@@ -80,7 +80,8 @@ namespace Net_2kBot.Modules
 向2kbot要面包：/getbread <数量>
 查询面包库存：/querybread
 改变多样化生产状态：/bread_diversity <on/off>
-升级面包厂：/upgrade_factory",
+升级面包厂：/upgrade_factory
+升级库存（满级后）：/upgrade_storage",
                     "https://github.com/Abjust/2kbot"
                 };
                 if (receiver.MessageChain.GetPlainMessage().StartsWith("/help") == true)

@@ -77,7 +77,7 @@ namespace Net_2kBot.Modules
                     await reader.ReadAsync();
                     if (reader.GetInt32("bread_diversity") == 0)
                     {
-                        if (number + reader.GetInt32("breads") <= 32 * Math.Pow(4, reader.GetInt32("factory_level") - 1))
+                        if (number + reader.GetInt32("breads") <= (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded"))))
                         {
                             using (var msc1 = new MySqlConnection(Global.connectstring))
                             {
