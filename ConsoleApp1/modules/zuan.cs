@@ -50,8 +50,9 @@ namespace Net_2kBot.Modules
                          "如果国家把长相分等级的话，你的长相，都可以吃低保了",
                          "你没权利看不惯我的生活方式，但你有权抠瞎自己的双眼",
                          "如果你觉得我哪里不对，请一定要告诉我，反正我也不会改，你别憋出病来",
-                         "你（  ）什么时候（  ）啊"
-                        };
+                         "你（  ）什么时候（  ）啊",
+                         "四吗玩意，说我是歌姬吧，你怎么不撒泡尿照照镜子看看你自己，狗比玩意"
+                    };
                     Random r = new();
                     int index = r.Next(words.Length);
                     MessageChain? messageChain1 = new MessageChainBuilder()

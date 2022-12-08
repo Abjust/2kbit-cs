@@ -260,7 +260,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     Console.WriteLine("群消息发送失败");
                 }
             });
-            //侦测入群
+            // 侦测入群
             bot.EventReceived
             .OfType<MemberJoinedEvent>()
             .Subscribe(async receiver =>
@@ -419,8 +419,6 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     string[] text = ja[1]["text"]!.ToString().Split(" ");
                     if ((Global.ignores == null || Global.ignores.Contains($"{x.GroupId}_{x.Sender.Id}") == false) && (Global.g_ignores == null || Global.g_ignores.Contains(x.Sender.Id) == false))
                     {
-                        Console.WriteLine(text.Length);
-                        Console.WriteLine(ja.Count);
                         switch (text.Length)
                         {
                             case 3:
@@ -457,7 +455,6 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                             case 2:
                                 try
                                 {
-                                    Console.WriteLine(ja.Count);
                                     if (ja.Count == 4)
                                     {
                                         string target = ja[2]["target"]!.ToString();
@@ -465,8 +462,6 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                                         int time = t.ToInt32();
                                         try
                                         {
-                                            Console.WriteLine(time);
-                                            Console.WriteLine(target);
                                             if (time >= 1)
                                             {
                                                 Call.Execute(target, x.GroupId, time);
@@ -1029,7 +1024,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        $"机器人版本：b2.4.1\r\n上次更新日期：2022/12/3\r\n更新内容：修复了复读功能SQL初始化语句的问题\r\n---------\r\n{splashes[random]}");
+                        $"机器人版本：b_22w23a\r\n上次更新日期：2022/12/3\r\n更新内容：啥也没更新（确信）\r\n---------\r\n{splashes[random]}");
                     }
                     catch
                     {

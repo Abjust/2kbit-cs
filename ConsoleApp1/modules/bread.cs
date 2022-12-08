@@ -164,13 +164,13 @@ namespace Net_2kBot.Modules
                         if (reader.GetInt32("bread_diversity") == 1)
                         {
                             List<string> bread_types = new()
-                        {
-                        "🍞",
-                        "🥖",
-                        "🥐",
-                        "🥯",
-                        "🍩"
-                        };
+                            {
+                            "🍞",
+                            "🥖",
+                            "🥐",
+                            "🥯",
+                            "🍩"
+                            };
                             if (number >= bread_types.Count)
                             {
                                 int ExpectedSum = number;
@@ -190,6 +190,18 @@ namespace Net_2kBot.Modules
                                     sum += fields[i];
                                 }
                                 fields[fields.Length - 1] = ExpectedSum - sum;
+                                string text = "";
+                                for (int i = 0; i < bread_types.Count; i++)
+                                {
+                                    if(i == 0)
+                                    {
+                                        text = $"\n{bread_types[i]}*{fields[i]}";
+                                    }
+                                    else
+                                    {
+                                        text += $"\n{bread_types[i]}*{fields[i]}";
+                                    }
+                                }
                                 MessageChain? messageChain = new MessageChainBuilder()
                                .At(executor)
                                .Plain($"\r\n{bread_types[0]}*{fields[0]}\r\n{bread_types[1]}*{fields[1]}\r\n{bread_types[2]}*{fields[2]}\r\n{bread_types[3]}*{fields[3]}\r\n{bread_types[4]}*{fields[4]}")
