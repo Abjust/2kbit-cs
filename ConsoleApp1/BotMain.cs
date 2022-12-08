@@ -1024,7 +1024,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        $"机器人版本：b_22w23a\r\n上次更新日期：2022/12/3\r\n更新内容：啥也没更新（确信）\r\n---------\r\n{splashes[random]}");
+                        $"机器人版本：b_22w23b\r\n上次更新日期：2022/12/8\r\n更新内容：修复了群管功能中些许SQL语句的问题\r\n---------\r\n{splashes[random]}");
                     }
                     catch
                     {

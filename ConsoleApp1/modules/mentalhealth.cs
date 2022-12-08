@@ -55,7 +55,9 @@ namespace Net_2kBot.Modules
                 };
                 if (receiver.MessageChain.GetPlainMessage() == "精神疾病" || receiver.MessageChain.GetPlainMessage() == "心理疾病")
                 {
-                    await receiver.SendMessageAsync(
+                    try
+                    {
+                        await receiver.SendMessageAsync(
                         @"精神心理疾病科普大全：
 1.神经症类
 焦虑症|强迫症
@@ -69,6 +71,11 @@ namespace Net_2kBot.Modules
 厌食症|贪食症
 5.神经发育障碍
 孤独症|多动症");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("群消息发送失败");
+                    }
                 }
                 foreach (string q in disorders)
                 {

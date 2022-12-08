@@ -175,9 +175,7 @@ namespace Net_2kBot.Modules
                                             {
                                                 Connection = msc1
                                             };
-                                            cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = 0, last_repeat = {Global.time_now} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
-                                            await cmd1.ExecuteNonQueryAsync();
-                                            cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = {reader.GetString("repeat_count").ToInt32() + 1} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
+                                            cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = 1, last_repeat = {Global.time_now} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                             await cmd1.ExecuteNonQueryAsync();
                                             await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
                                             await reader.CloseAsync();

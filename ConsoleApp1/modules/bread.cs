@@ -204,7 +204,7 @@ namespace Net_2kBot.Modules
                                 }
                                 MessageChain? messageChain = new MessageChainBuilder()
                                .At(executor)
-                               .Plain($"\r\n{bread_types[0]}*{fields[0]}\r\n{bread_types[1]}*{fields[1]}\r\n{bread_types[2]}*{fields[2]}\r\n{bread_types[3]}*{fields[3]}\r\n{bread_types[4]}*{fields[4]}")
+                               .Plain(text)
                                .Build();
                                 using (var msc1 = new MySqlConnection(Global.connectstring))
                                 {
@@ -605,6 +605,7 @@ namespace Net_2kBot.Modules
                 }
             }
         }
+        // 升级库存
         public static async void UpgradeStorage(string group)
         {
             using (var msc = new MySqlConnection(Global.connectstring))
@@ -665,7 +666,7 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(group, "本群面包厂尚未满级！（tips：面包厂满级为 5 级）");
+                            await MessageManager.SendGroupMessageAsync(group, $"本群面包厂尚未满级！（tips：面包厂满级为 {Global.breadfactory_maxlevel} 级）");
                         }
                         catch
                         {

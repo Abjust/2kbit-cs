@@ -247,7 +247,7 @@ namespace Net_2kBot.Modules
             {
                 if (Global.blocklist != null && Global.blocklist.Contains($"{group}_{victim}"))
                 {
-                    cmd.CommandText = $"DELETE FROM blocklist WHERE qid = {victim} AND gid = {group});";
+                    cmd.CommandText = $"DELETE FROM blocklist WHERE qid = {victim} AND gid = {group};";
                     await cmd.ExecuteNonQueryAsync();
                     await msc.CloseAsync();
                     try
@@ -375,7 +375,7 @@ namespace Net_2kBot.Modules
             {
                 if (Global.g_blocklist != null && Global.g_blocklist.Contains(victim))
                 {
-                    cmd.CommandText = $"DELETE FROM g_blocklist WHERE qid = {victim});";
+                    cmd.CommandText = $"DELETE FROM g_blocklist WHERE qid = {victim};";
                     await cmd.ExecuteNonQueryAsync();
                     await msc.CloseAsync();
                     try
@@ -469,7 +469,7 @@ namespace Net_2kBot.Modules
             {
                 if (Global.ops != null && Global.ops.Contains($"{group}_{victim}"))
                 {
-                    cmd.CommandText = $"DELETE FROM ops WHERE qid = {victim} AND gid = {group});";
+                    cmd.CommandText = $"DELETE FROM ops WHERE qid = {victim} AND gid = {group};";
                     await cmd.ExecuteNonQueryAsync();
                     await msc.CloseAsync();
                     try
@@ -555,7 +555,7 @@ namespace Net_2kBot.Modules
                 }
             }
         }
-        // 取消OP功能
+        // 取消全局OP功能
         public static async void G_Deop(string executor, string victim, string group)
         {
             // 连接数据库
@@ -569,7 +569,7 @@ namespace Net_2kBot.Modules
             {
                 if (Global.g_ops != null && Global.g_ops.Contains(victim))
                 {
-                    cmd.CommandText = $"DELETE FROM g_ops WHERE qid = {victim});";
+                    cmd.CommandText = $"DELETE FROM g_ops WHERE qid = {victim};";
                     await cmd.ExecuteNonQueryAsync();
                     await msc.CloseAsync();
                     try

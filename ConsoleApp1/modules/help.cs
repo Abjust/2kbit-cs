@@ -22,7 +22,7 @@ namespace Net_2kBot.Modules
         {
             if (@base is GroupMessageReceiver receiver)
             {
-                //菜单
+                // 菜单
                 if (receiver.MessageChain.GetPlainMessage() == "菜单" || receiver.MessageChain.GetPlainMessage() == "/menu")
                 {
                     try
@@ -42,7 +42,7 @@ namespace Net_2kBot.Modules
                         Console.WriteLine("菜单消息发送失败");
                     }
                 }
-                //帮助
+                // 帮助
                 var indexs = new List<string>
                 {
                     "1",
@@ -87,7 +87,7 @@ namespace Net_2kBot.Modules
                 if (receiver.MessageChain.GetPlainMessage().StartsWith("/help") == true)
                 {
                     string[] result = receiver.MessageChain.GetPlainMessage().Split(" ");
-                    if (result.Length > 1)
+                    if (result.Length == 2)
                     {
                         foreach (string q in indexs)
                         {

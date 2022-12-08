@@ -21,7 +21,11 @@ namespace Net_2kBot.Modules
         {
             if (@base is GroupMessageReceiver receiver)
             {
-                if (receiver.MessageChain[1].ToString() == $"AtMessage {{ Type = At, Target = {Global.bot_qq} }}" && receiver.MessageChain[2].ToString() == "PlainMessage { Type = Plain, Text =  你就是歌姬吧 }")
+                MessageChain messageChain = new MessageChainBuilder()
+                    .At(Global.bot_qq)
+                    .Plain(" 你就是歌姬吧")
+                    .Build();
+                if (receiver.MessageChain[1] == messageChain[0] && receiver.MessageChain[2] == messageChain[1])
                 {
                     string[] words =
                     {
