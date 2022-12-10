@@ -388,7 +388,7 @@ namespace Net_2kBot.Modules
                                     }
                                     else
                                     {
-                                        int_ans = (long) Math.Pow(ans, int.Parse(operands[i]));
+                                        int_ans = (long) Math.Pow(int_ans, int.Parse(operands[i]));
                                     }
                                 }
                                 else
@@ -399,7 +399,7 @@ namespace Net_2kBot.Modules
                                     }
                                     else
                                     {
-                                        decimal_ans = (decimal) Math.Pow(ans, double.Parse(operands[i]));
+                                        decimal_ans = (decimal) Math.Pow((double) decimal_ans, double.Parse(operands[i]));
                                     }
                                 }
                             }
