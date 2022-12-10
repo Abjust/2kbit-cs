@@ -1,4 +1,4 @@
-﻿// 2kbot，一款用C#编写的基于mirai和mirai.net的自由机器人软件
+// 2kbot，一款用C#编写的基于mirai和mirai.net的自由机器人软件
 // Copyright(C) 2022 Abjust 版权所有。
 
 // 本程序是自由软件：你可以根据自由软件基金会发布的GNU Affero通用公共许可证的条款，即许可证的第3版或（您选择的）任何后来的版本重新发布它和/或修改它。。
@@ -402,27 +402,27 @@ namespace Net_2kBot.Modules
                                         decimal_ans = (decimal) Math.Pow(ans, double.Parse(operands[i]));
                                     }
                                 }
-                                if (is_int)
+                            }
+                            if (is_int)
+                            {
+                                try
                                 {
-                                    try
-                                    {
-                                        await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{int_ans}");
-                                    }
-                                    catch
-                                    {
-                                        Console.WriteLine("群消息发送失败");
-                                    }
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{int_ans}");
                                 }
-                                else
+                                catch
                                 {
-                                    try
-                                    {
-                                        await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
-                                    }
-                                    catch
-                                    {
-                                        Console.WriteLine("群消息发送失败");
-                                    }
+                                    Console.WriteLine("群消息发送失败");
+                                }
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
                                 }
                             }
                         }
