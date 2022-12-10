@@ -339,6 +339,11 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     Bread.GetExp(x);
                     // 复读机
                     Repeat.Execute(x);
+                    // 数学计算
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/calc"))
+                    {
+                        Mathematics.Execute(x);
+                    }
                     // 发送公告
                     if (x.MessageChain.GetPlainMessage().StartsWith("/announce"))
                     {
@@ -546,7 +551,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     Zuan.Execute(x);
                     // 群管功能
                     // 禁言
-                    if (x.MessageChain.GetPlainMessage().StartsWith("/mute"))
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/mute") && !x.MessageChain.GetPlainMessage().StartsWith("/muteme"))
                     {
                         string result1 = x.MessageChain.ToJsonString();
                         JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
@@ -964,6 +969,27 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                             catch { }
                         }
                     }
+                    // 禁言自己
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/muteme"))
+                    {
+                        string[] text = x.MessageChain.GetPlainMessage().Split(" ");
+                        if (text.Length == 2)
+                        {
+                            Admin.MuteMe(x.Sender.Id, x.GroupId, text[1].ToInt32());
+                        }
+                        else if (text.Length == 1)
+                        {
+                            Admin.MuteMe(x.Sender.Id, x.GroupId, 10);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch { }
+                        }
+                    }
                     // 发动带清洗
                     if (x.MessageChain.GetPlainMessage() == ("/purge"))
                     {
@@ -1014,7 +1040,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_22w23f\r\n上次更新日期：2022/12/10\r\n更新内容：将列表更新方式改为按需更新\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_22w24a\r\n上次更新日期：2022/12/10\r\n更新内容：添加了数学计算器和禁言自己功能\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {

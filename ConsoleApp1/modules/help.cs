@@ -35,6 +35,7 @@ namespace Net_2kBot.Modules
 5.量表测试
 6.面包厂功能
 7.获取源码
+8.数学计算器
 详情请用/help指令");
                     }
                     catch
@@ -51,7 +52,8 @@ namespace Net_2kBot.Modules
                     "4",
                     "5",
                     "6",
-                    "7"
+                    "7",
+                    "8"
                 };
                 var contents = new List<string>
                 {
@@ -82,7 +84,8 @@ namespace Net_2kBot.Modules
 改变多样化生产状态：/bread_diversity <on/off>
 升级面包厂：/upgrade_factory
 升级库存（满级后）：/upgrade_storage",
-                    "https://github.com/Abjust/2kbot"
+                    "https://github.com/Abjust/2kbot",
+                    "使用/calc可以显示计算器说明"
                 };
                 if (receiver.MessageChain.GetPlainMessage().StartsWith("/help") == true)
                 {
@@ -142,7 +145,8 @@ namespace Net_2kBot.Modules
 [4]精神心理疾病科普
 [5]量表测试
 [6]面包厂
-[7]获取源码");
+[7]获取源码
+[8]数学计算器");
                         }
                         catch
                         {

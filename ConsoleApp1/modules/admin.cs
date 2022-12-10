@@ -955,5 +955,25 @@ namespace Net_2kBot.Modules
                 }
             }
         }
+        // 禁言自己
+        public static async void MuteMe(string executor, string group, int minutes)
+        {
+            try
+            {
+                await GroupManager.MuteAsync(executor, group, minutes * 60);
+                await MessageManager.SendGroupMessageAsync(group, $"已尝试将你禁言 {minutes} 分钟");
+            }
+            catch
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "执行失败");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
+        }
     }
 }
