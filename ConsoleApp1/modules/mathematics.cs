@@ -47,7 +47,6 @@ namespace Net_2kBot.Modules
                 {
                     string formula = receiver.MessageChain.GetPlainMessage().Split(" ")[1];
                     bool is_int = false;
-                    double ans = 0;
                     decimal decimal_ans = 0;
                     long int_ans = 0;
                     double operand;
