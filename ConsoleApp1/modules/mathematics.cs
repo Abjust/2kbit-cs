@@ -72,7 +72,7 @@ namespace Net_2kBot.Modules
                             }
                             for (int i = 0; i < operands.Length; i++)
                             {
-                                if (is_int == true)
+                                if (is_int)
                                 {
                                     if (i == 0)
                                     {
@@ -95,13 +95,27 @@ namespace Net_2kBot.Modules
                                     }
                                 }
                             }
-                            try
+                            if (is_int)
                             {
-                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{ans}");
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{int_ans}");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
                             }
-                            catch
+                            else
                             {
-                                Console.WriteLine("群消息发送失败");
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
                             }
                         }
                         catch
@@ -135,7 +149,7 @@ namespace Net_2kBot.Modules
                             }
                             for (int i = 0; i < operands.Length; i++)
                             {
-                                if (is_int == true)
+                                if (is_int)
                                 {
                                     if (i == 0)
                                     {
@@ -158,13 +172,27 @@ namespace Net_2kBot.Modules
                                     }
                                 }
                             }
-                            try
+                            if (is_int)
                             {
-                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{ans}");
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{int_ans}");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
                             }
-                            catch
+                            else
                             {
-                                Console.WriteLine("群消息发送失败");
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
                             }
                         }
                         catch
@@ -198,7 +226,7 @@ namespace Net_2kBot.Modules
                             }
                             for (int i = 0; i < operands.Length; i++)
                             {
-                                if (is_int == true)
+                                if (is_int)
                                 {
                                     if (i == 0)
                                     {
@@ -221,13 +249,27 @@ namespace Net_2kBot.Modules
                                     }
                                 }
                             }
-                            try
+                            if (is_int)
                             {
-                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{ans}");
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{int_ans}");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
                             }
-                            catch
+                            else
                             {
-                                Console.WriteLine("群消息发送失败");
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
                             }
                         }
                         catch
@@ -261,7 +303,7 @@ namespace Net_2kBot.Modules
                             }
                             for (int i = 0; i < operands.Length; i++)
                             {
-                                if (is_int == true)
+                                if (is_int)
                                 {
                                     if (i == 0)
                                     {
@@ -284,13 +326,27 @@ namespace Net_2kBot.Modules
                                     }
                                 }
                             }
-                            try
+                            if (is_int)
                             {
-                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{ans}");
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{int_ans}");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
                             }
-                            catch
+                            else
                             {
-                                Console.WriteLine("群消息发送失败");
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
                             }
                         }
                         catch
@@ -324,7 +380,7 @@ namespace Net_2kBot.Modules
                             }
                             for (int i = 0; i < operands.Length; i++)
                             {
-                                if (is_int == true)
+                                if (is_int)
                                 {
                                     if (i == 0)
                                     {
@@ -346,13 +402,27 @@ namespace Net_2kBot.Modules
                                         decimal_ans = (decimal) Math.Pow(ans, double.Parse(operands[i]));
                                     }
                                 }
-                                try
+                                if (is_int)
                                 {
-                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{ans}");
+                                    try
+                                    {
+                                        await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{int_ans}");
+                                    }
+                                    catch
+                                    {
+                                        Console.WriteLine("群消息发送失败");
+                                    }
                                 }
-                                catch
+                                else
                                 {
-                                    Console.WriteLine("群消息发送失败");
+                                    try
+                                    {
+                                        await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
+                                    }
+                                    catch
+                                    {
+                                        Console.WriteLine("群消息发送失败");
+                                    }
                                 }
                             }
                         }
@@ -377,7 +447,7 @@ namespace Net_2kBot.Modules
                             decimal_ans = (decimal)Math.Sin(operand * Math.PI / 180);
                             try
                             {
-                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{ans}");
+                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
                             }
                             catch
                             {
@@ -404,7 +474,7 @@ namespace Net_2kBot.Modules
                             decimal_ans = (decimal)Math.Cos(operand * Math.PI / 180);
                             try
                             {
-                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{ans}");
+                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
                             }
                             catch
                             {
@@ -431,7 +501,7 @@ namespace Net_2kBot.Modules
                             decimal_ans = (decimal)Math.Tan(operand * Math.PI / 180);
                             try
                             {
-                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{ans}");
+                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
                             }
                             catch
                             {
@@ -458,7 +528,7 @@ namespace Net_2kBot.Modules
                             decimal_ans = 1 / (decimal)Math.Tan(operand * Math.PI / 180);
                             try
                             {
-                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{ans}");
+                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{decimal_ans}");
                             }
                             catch
                             {
