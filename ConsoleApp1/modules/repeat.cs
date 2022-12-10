@@ -9,7 +9,6 @@
 
 // 致所有构建及修改2kbot代码片段的用户：作者（Abjust）并不承担构建2kbot代码片段（包括修改过的版本）所产生的一切风险，但是用户有权在2kbot的GitHub项目页提出issue，并有权在代码片段修复这些问题后获取这些更新，但是，作者不会对修改过的代码版本做质量保证，也没有义务修正在修改过的代码片段中存在的任何缺陷。
 
-using Manganese.Text;
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Utils.Scaffolds;
@@ -98,7 +97,7 @@ namespace Net_2kBot.Modules
                     }
                 }
                 // 主动复读
-                else if ((Global.ignores == null || Global.ignores.Contains($"{receiver.GroupId}_{receiver.Sender.Id}") == false) && (Global.g_ignores == null || Global.g_ignores.Contains(receiver.Sender.Id) == false))
+                else
                 {
                     foreach (string item in repeatwords)
                     {
@@ -179,7 +178,7 @@ namespace Net_2kBot.Modules
                                             await cmd1.ExecuteNonQueryAsync();
                                             await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
                                             await reader.CloseAsync();
-                                        }     
+                                        }
                                     }
                                 }
                             }

@@ -193,7 +193,7 @@ namespace Net_2kBot.Modules
                                 string text = "";
                                 for (int i = 0; i < bread_types.Count; i++)
                                 {
-                                    if(i == 0)
+                                    if (i == 0)
                                     {
                                         text = $"\n{bread_types[i]}*{fields[i]}";
                                     }
@@ -329,7 +329,7 @@ namespace Net_2kBot.Modules
                         Console.WriteLine("群消息发送失败");
                     }
                 }
-            }  
+            }
         }
         // 多样化生产
         public static async void Diversity(string group, int status)
@@ -425,86 +425,46 @@ namespace Net_2kBot.Modules
         {
             if (@base is GroupMessageReceiver receiver)
             {
-                if ((Global.ignores == null || Global.ignores.Contains($"{receiver.GroupId}_{receiver.Sender.Id}") == false) && (Global.g_ignores == null || Global.g_ignores.Contains(receiver.Sender.Id) == false))
+                // 连接数据库
+                using (var msc = new MySqlConnection(Global.connectstring))
                 {
-                    // 连接数据库
-                    using (var msc = new MySqlConnection(Global.connectstring))
+                    await msc.OpenAsync();
+                    MySqlCommand cmd = new()
                     {
-                        await msc.OpenAsync();
-                        MySqlCommand cmd = new()
+                        Connection = msc
+                    };
+                    // 判断数据是否存在
+                    cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {receiver.GroupId};";
+                    int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                    if (i == 1)
+                    {
+                        cmd.CommandText = $"SELECT * FROM bread WHERE gid = {receiver.GroupId};";
+                        MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                        await reader.ReadAsync();
+                        int maxexp_formula = (int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1));
+                        Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                        if (Global.time_now - reader.GetInt64("last_expfull") >= 86400)
                         {
-                            Connection = msc
-                        };
-                        // 判断数据是否存在
-                        cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {receiver.GroupId};";
-                        int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-                        if (i == 1)
-                        {
-                            cmd.CommandText = $"SELECT * FROM bread WHERE gid = {receiver.GroupId};";
-                            MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
-                            await reader.ReadAsync();
-                            int maxexp_formula = (int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1));
-                            Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-                            if (Global.time_now - reader.GetInt64("last_expfull") >= 86400)
+                            if (Global.time_now - reader.GetInt64("last_expgain") >= 86400)
                             {
-                                if (Global.time_now - reader.GetInt64("last_expgain") >= 86400)
+                                using (var msc1 = new MySqlConnection(Global.connectstring))
                                 {
-                                    using (var msc1 = new MySqlConnection(Global.connectstring))
+                                    await msc1.OpenAsync();
+                                    MySqlCommand cmd1 = new()
                                     {
-                                        await msc1.OpenAsync();
-                                        MySqlCommand cmd1 = new()
-                                        {
-                                            Connection = msc1
-                                        };
-                                        cmd1.CommandText = $"UPDATE bread SET exp_gained_today = 0, last_expgain = {Global.time_now} WHERE gid = {receiver.GroupId};";
+                                        Connection = msc1
+                                    };
+                                    cmd1.CommandText = $"UPDATE bread SET exp_gained_today = 0, last_expgain = {Global.time_now} WHERE gid = {receiver.GroupId};";
+                                    await cmd1.ExecuteNonQueryAsync();
+                                    if (reader.GetInt32("exp_gained_today") <= maxexp_formula)
+                                    {
+                                        cmd1.CommandText = $"UPDATE bread SET factory_exp = {reader.GetInt32("factory_exp") + 1}, exp_gained_today = {reader.GetInt32("exp_gained_today") + 1} WHERE gid = {receiver.GroupId};";
                                         await cmd1.ExecuteNonQueryAsync();
-                                        if (reader.GetInt32("exp_gained_today") <= maxexp_formula)
-                                        {
-                                            cmd1.CommandText = $"UPDATE bread SET factory_exp = {reader.GetInt32("factory_exp") + 1}, exp_gained_today = {reader.GetInt32("exp_gained_today") + 1} WHERE gid = {receiver.GroupId};";
-                                            await cmd1.ExecuteNonQueryAsync();
-                                        }
-                                        else
-                                        {
-                                            cmd1.CommandText = $"UPDATE bread SET last_expfull = {Global.time_now}, exp_gained_today = 0 WHERE gid = {receiver.GroupId};";
-                                            await cmd1.ExecuteNonQueryAsync();
-                                            try
-                                            {
-                                                await MessageManager.SendGroupMessageAsync(receiver.GroupId, "本群已达到今日获取经验上限！");
-                                            }
-                                            catch
-                                            {
-                                                Console.WriteLine("群消息发送失败");
-                                            }
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if (reader.GetInt32("exp_gained_today") < maxexp_formula)
-                                    {
-                                        using (var msc1 = new MySqlConnection(Global.connectstring))
-                                        {
-                                            await msc1.OpenAsync();
-                                            MySqlCommand cmd1 = new()
-                                            {
-                                                Connection = msc1
-                                            };
-                                            cmd1.CommandText = $"UPDATE bread SET factory_exp = {reader.GetInt32("factory_exp") + 1}, exp_gained_today = {reader.GetInt32("exp_gained_today") + 1} WHERE gid = {receiver.GroupId};";
-                                            await cmd1.ExecuteNonQueryAsync();
-                                        }
                                     }
                                     else
                                     {
-                                        using (var msc1 = new MySqlConnection(Global.connectstring))
-                                        {
-                                            await msc1.OpenAsync();
-                                            MySqlCommand cmd1 = new()
-                                            {
-                                                Connection = msc1
-                                            };
-                                            cmd1.CommandText = $"UPDATE bread SET last_expfull = {Global.time_now}, exp_gained_today = 0 WHERE gid = {receiver.GroupId};";
-                                            await cmd1.ExecuteNonQueryAsync();
-                                        }   
+                                        cmd1.CommandText = $"UPDATE bread SET last_expfull = {Global.time_now}, exp_gained_today = 0 WHERE gid = {receiver.GroupId};";
+                                        await cmd1.ExecuteNonQueryAsync();
                                         try
                                         {
                                             await MessageManager.SendGroupMessageAsync(receiver.GroupId, "本群已达到今日获取经验上限！");
@@ -513,6 +473,43 @@ namespace Net_2kBot.Modules
                                         {
                                             Console.WriteLine("群消息发送失败");
                                         }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (reader.GetInt32("exp_gained_today") < maxexp_formula)
+                                {
+                                    using (var msc1 = new MySqlConnection(Global.connectstring))
+                                    {
+                                        await msc1.OpenAsync();
+                                        MySqlCommand cmd1 = new()
+                                        {
+                                            Connection = msc1
+                                        };
+                                        cmd1.CommandText = $"UPDATE bread SET factory_exp = {reader.GetInt32("factory_exp") + 1}, exp_gained_today = {reader.GetInt32("exp_gained_today") + 1} WHERE gid = {receiver.GroupId};";
+                                        await cmd1.ExecuteNonQueryAsync();
+                                    }
+                                }
+                                else
+                                {
+                                    using (var msc1 = new MySqlConnection(Global.connectstring))
+                                    {
+                                        await msc1.OpenAsync();
+                                        MySqlCommand cmd1 = new()
+                                        {
+                                            Connection = msc1
+                                        };
+                                        cmd1.CommandText = $"UPDATE bread SET last_expfull = {Global.time_now}, exp_gained_today = 0 WHERE gid = {receiver.GroupId};";
+                                        await cmd1.ExecuteNonQueryAsync();
+                                    }
+                                    try
+                                    {
+                                        await MessageManager.SendGroupMessageAsync(receiver.GroupId, "本群已达到今日获取经验上限！");
+                                    }
+                                    catch
+                                    {
+                                        Console.WriteLine("群消息发送失败");
                                     }
                                 }
                             }

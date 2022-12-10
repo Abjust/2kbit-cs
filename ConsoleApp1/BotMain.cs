@@ -129,7 +129,6 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                 await cmd.ExecuteNonQueryAsync();
             }
             // 在这里添加你的代码，比如订阅消息/事件之类的
-            Update.Execute();
             // 戳一戳效果
             bot.EventReceived
             .OfType<NudgeEvent>()
@@ -283,142 +282,142 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
             .OfType<GroupMessageReceiver>()
             .Subscribe(async x =>
             {
-                // 面包厂相关
-                string[] text1 = x.MessageChain.GetPlainMessage().Split(" ");
-                if (text1.Length == 2)
+                if ((Global.ignores == null || !Global.ignores.Contains($"{x.GroupId}_{x.Sender.Id}")) && (Global.g_ignores == null || !Global.g_ignores.Contains(x.Sender.Id)))
                 {
-                    int number;
-                    switch (text1[0])
+                    // 面包厂相关
+                    string[] text1 = x.MessageChain.GetPlainMessage().Split(" ");
+                    if (text1.Length == 2)
                     {
-                        case "/givebread":
-                            if (int.TryParse(text1[1], out number))
-                            {
-                                Bread.Give(x.GroupId, x.Sender.Id, number);
-                            }
-                            break;
-                        case "/getbread":
-                            if (int.TryParse(text1[1], out number))
-                            {
-                                Bread.Get(x.GroupId, x.Sender.Id, number);
-                            }
-                            break;
-                        case "/bread_diversity":
-                            switch (text1[1])
-                            {
-                                case "on":
-                                    Bread.Diversity(x.GroupId, 1);
-                                    break;
-                                case "off":
-                                    Bread.Diversity(x.GroupId, 0);
-                                    break;
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    switch (text1[0])
-                    {
-                        case "/querybread":
-                            Bread.Query(x.GroupId, x.Sender.Id);
-                            break;
-                        case "/upgrade_factory":
-                            Bread.UpgradeFactory(x.GroupId);
-                            break;
-                        case "/build_factory":
-                            Bread.BuildFactory(x.GroupId);
-                            break;
-                        case "/upgrade_storage":
-                            Bread.UpgradeStorage(x.GroupId);
-                            break;
-                    }
-                }
-                // 计算经验
-                Bread.GetExp(x);
-                // 复读机
-                Repeat.Execute(x);
-                // 公告
-                if (x.MessageChain.GetPlainMessage().StartsWith("/announce"))
-                {
-                    IEnumerable<Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
-                    Announce.Execute(x, x.Sender.Id, groups);
-                }
-                // surprise
-                if (x.MessageChain.GetPlainMessage() == "/surprise")
-                {
-                    MessageChain? chain = new MessageChainBuilder()
-                         .VoiceFromPath(Global.path + "/ysxb.slk")
-                         .Build();
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(x.GroupId, chain);
-                    }
-                    catch
-                    {
-                        Console.WriteLine("群消息发送失败");
-                    }
-                }
-                // 随机图片
-                if (x.MessageChain.GetPlainMessage() == "/photo")
-                {
-                    Random r = new();
-                    string url;
-                    int chance = 3;
-                    int choice = r.Next(chance);
-                    if (choice == chance - 1)
-                    {
-                        url = "https://www.dmoe.cc/random.php";
+                        int number;
+                        switch (text1[0])
+                        {
+                            case "/givebread":
+                                if (int.TryParse(text1[1], out number))
+                                {
+                                    Bread.Give(x.GroupId, x.Sender.Id, number);
+                                }
+                                break;
+                            case "/getbread":
+                                if (int.TryParse(text1[1], out number))
+                                {
+                                    Bread.Get(x.GroupId, x.Sender.Id, number);
+                                }
+                                break;
+                            case "/bread_diversity":
+                                switch (text1[1])
+                                {
+                                    case "on":
+                                        Bread.Diversity(x.GroupId, 1);
+                                        break;
+                                    case "off":
+                                        Bread.Diversity(x.GroupId, 0);
+                                        break;
+                                }
+                                break;
+                        }
                     }
                     else
                     {
-                        url = "https://source.unsplash.com/random";
+                        switch (text1[0])
+                        {
+                            case "/querybread":
+                                Bread.Query(x.GroupId, x.Sender.Id);
+                                break;
+                            case "/upgrade_factory":
+                                Bread.UpgradeFactory(x.GroupId);
+                                break;
+                            case "/build_factory":
+                                Bread.BuildFactory(x.GroupId);
+                                break;
+                            case "/upgrade_storage":
+                                Bread.UpgradeStorage(x.GroupId);
+                                break;
+                        }
                     }
-                    MessageChain? chain = new MessageChainBuilder()
-                         .ImageFromUrl(url)
-                         .Build();
-                    try
+                    // 计算经验
+                    Bread.GetExp(x);
+                    // 复读机
+                    Repeat.Execute(x);
+                    // 发送公告
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/announce"))
                     {
-                        await MessageManager.SendGroupMessageAsync(x.GroupId, "图片在来的路上...");
+                        IEnumerable<Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
+                        Announce.Execute(x, x.Sender.Id, groups);
                     }
-                    catch
+                    // surprise
+                    if (x.MessageChain.GetPlainMessage() == "/surprise")
                     {
-                        Console.WriteLine("群消息发送失败");
-                    }
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(x.GroupId, chain);
-                    }
-                    catch
-                    {
+                        MessageChain? chain = new MessageChainBuilder()
+                             .VoiceFromPath(Global.path + "/ysxb.slk")
+                             .Build();
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "图片好像不见了！再等等吧？");
+                            await MessageManager.SendGroupMessageAsync(x.GroupId, chain);
                         }
                         catch
                         {
                             Console.WriteLine("群消息发送失败");
                         }
                     }
-                }
-                // 菜单与帮助
-                Help.Execute(x);
-                // 遗言
-                if (x.MessageChain.GetPlainMessage() == "遗言" || x.MessageChain.GetPlainMessage() == "留言")
-                {
-                    await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        @"对我而言，我曾一直觉得Setup群是个适合我的地方，我的直觉也的确没有错，Setup群确实是个好地方，我在里面学到了不少东西，并且跟群友相谈甚欢。但是，因为群里包括群主在内的不少人和我一样，都饱受抑郁症或者精神心理疾病的困扰，以至于我在面对他们慢慢开始伤害自己的时候，或者说甚至打算终结自己的时候，却显得格外无能。我的一句“赶紧去看医生吧”，此刻显得苍白无力，我理解他们第一次求助，羞于启齿不敢告诉家里人。我不是不能理解群友们的心情，或者自身的悲惨经历。但是对我而言，我真的一时间难以接受这么多负面倾诉。我不是心理咨询师，我对心理学的掌握也有限，其实说是在，我自己也是个病人，我是个双相情感障碍患者，我也是第一次面对这种情况。每次遇到这种情况，我总是想着怎么逃避现实，仿佛精神分裂般，总是觉得事情没有发生，一切都是梦境罢了。我也希望是这样，但是发生的事情终归是发生了，我不可能凭主观意识去改变。
+                    // 随机图片
+                    if (x.MessageChain.GetPlainMessage() == "/photo")
+                    {
+                        Random r = new();
+                        string url;
+                        int chance = 3;
+                        int choice = r.Next(chance);
+                        if (choice == chance - 1)
+                        {
+                            url = "https://www.dmoe.cc/random.php";
+                        }
+                        else
+                        {
+                            url = "https://source.unsplash.com/random";
+                        }
+                        MessageChain? chain = new MessageChainBuilder()
+                             .ImageFromUrl(url)
+                             .Build();
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(x.GroupId, "图片在来的路上...");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("群消息发送失败");
+                        }
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(x.GroupId, chain);
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "图片好像不见了！再等等吧？");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
+                        }
+                    }
+                    // 菜单与帮助
+                    Help.Execute(x);
+                    // 遗言
+                    if (x.MessageChain.GetPlainMessage() == "遗言" || x.MessageChain.GetPlainMessage() == "留言")
+                    {
+                        await MessageManager.SendGroupMessageAsync(x.GroupId,
+                            @"对我而言，我曾一直觉得Setup群是个适合我的地方，我的直觉也的确没有错，Setup群确实是个好地方，我在里面学到了不少东西，并且跟群友相谈甚欢。但是，因为群里包括群主在内的不少人和我一样，都饱受抑郁症或者精神心理疾病的困扰，以至于我在面对他们慢慢开始伤害自己的时候，或者说甚至打算终结自己的时候，却显得格外无能。我的一句“赶紧去看医生吧”，此刻显得苍白无力，我理解他们第一次求助，羞于启齿不敢告诉家里人。我不是不能理解群友们的心情，或者自身的悲惨经历。但是对我而言，我真的一时间难以接受这么多负面倾诉。我不是心理咨询师，我对心理学的掌握也有限，其实说是在，我自己也是个病人，我是个双相情感障碍患者，我也是第一次面对这种情况。每次遇到这种情况，我总是想着怎么逃避现实，仿佛精神分裂般，总是觉得事情没有发生，一切都是梦境罢了。我也希望是这样，但是发生的事情终归是发生了，我不可能凭主观意识去改变。
 有时候我深感愧疚，不为什么，就为病情。不说世界上的人，就群友来说，群里比我惨的大有人在，有些没事，有些是抑郁症，像我这样得双相情感障碍的基本没有。我会自行反思，自己是不是太矫情、懦弱了，是不是抗压能力太差了呢？我怀疑过自己是假抑郁，认为自己不过是在博同情、骗流量。没错，就连我自己都不相信我自己了，那还有谁会相信这么拙劣的谎言？我感觉自己什么都是装出来的，我没有一样是真的，我只是在不懂装懂，我只是在夸大自己的苦楚和不幸，丝毫没有考虑别人的感受。我就是个精致的利己主义者，自私自利，只考虑自己的感受，特别不要脸。
 我知道如果我离开，那就更加坚定我就是只顾自己的人，但是有时候我真的接受不了现实，我真的很想逃离现实，跟社会隔离开来，我不知道为什么我一直想这样，我也控制不了我自己，唉，现实就是那么残酷又无情，或许别人的痛苦是真正的不幸，我得病只是我活该，是我应有的惩罚，如果真是这么说，我也认罪认罚了。说实话，来了群之后，我的事情就特别的多，我不断地给群里的人制造麻烦，做过的错事实在是太多了，实在是不可饶恕。
 对不起，Setup群的各位群友们，我觉得我应该就我给你们制造的麻烦，以及我对你们的欺骗谢罪，我可能真的值得离开，如果我离开了，希望你们不要挂念我，我就是个罪人，没什么值得纪念的地方。");
-                }
-                // 叫人
-                if (x.MessageChain.GetPlainMessage().StartsWith("/call"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if ((Global.ignores == null || Global.ignores.Contains($"{x.GroupId}_{x.Sender.Id}") == false) && (Global.g_ignores == null || Global.g_ignores.Contains(x.Sender.Id) == false))
+                    }
+                    // 叫人
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/call"))
                     {
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
                         switch (text.Length)
                         {
                             case 3:
@@ -527,477 +526,467 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                                 break;
                         }
                     }
-                }
-                // 鸣谢
-                if (x.MessageChain.GetPlainMessage() == "鸣谢")
-                {
-                    try
+                    // 鸣谢
+                    if (x.MessageChain.GetPlainMessage() == "鸣谢")
                     {
-                        await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        "感谢Leobot和Hanbot给我的启发，感谢Leo给我提供C#的技术支持，也感谢Setup群各位群员对我的支持！");
-                    }
-                    catch
-                    {
-                        Console.WriteLine("群消息发送失败");
-                    }
-                }
-                // 精神心理疾病科普
-                MentalHealth.Execute(x);
-                // 处理“你就是歌姬吧”（祖安）
-                Zuan.Execute(x);
-                // 群管功能
-                // 禁言
-                if (x.MessageChain.GetPlainMessage().StartsWith("/mute"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length != 1)
-                    {
-                        switch (text.Length)
+                        try
                         {
-                            case 3:
-                                Admin.Mute(x.Sender.Id, text[1], x.GroupId, text[2].ToInt32());
-                                break;
-                            case 2:
-                                switch (ja.Count)
-                                {
-                                    case 4:
-                                        string t = ja[3]["text"]!.ToString().Replace(" ", "");
-                                        string target = ja[2]["target"]!.ToString();
-                                        if (t == "")
-                                        {
-                                            Admin.Mute(x.Sender.Id, target, x.GroupId, 10);
-                                        }
-                                        else
-                                        {
-                                            int time = t.ToInt32();
-                                            Admin.Mute(x.Sender.Id, target, x.GroupId, time);
-                                        }
-                                        break;
-                                    case 3:
-                                        string target1 = ja[2]["target"]!.ToString();
-                                        Admin.Mute(x.Sender.Id, target1, x.GroupId, 10);
-                                        break;
-                                    case 2:
-                                        Admin.Mute(x.Sender.Id, text[1], x.GroupId, 10);
-                                        break;
-                                }
-                                break;
-                            default:
-                                {
-                                    try
+                            await MessageManager.SendGroupMessageAsync(x.GroupId,
+                            "感谢Leobot和Hanbot给我的启发，感谢Leo给我提供C#的技术支持，也感谢Setup群各位群员对我的支持！");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("群消息发送失败");
+                        }
+                    }
+                    // 精神心理疾病科普
+                    MentalHealth.Execute(x);
+                    // 处理“你就是歌姬吧”（祖安）
+                    Zuan.Execute(x);
+                    // 群管功能
+                    // 禁言
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/mute"))
+                    {
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length != 1)
+                        {
+                            switch (text.Length)
+                            {
+                                case 3:
+                                    Admin.Mute(x.Sender.Id, text[1], x.GroupId, x.Sender.Permission.ToString(), text[2].ToInt32());
+                                    break;
+                                case 2:
+                                    switch (ja.Count)
                                     {
-                                        await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
-                                    }
-                                    catch
-                                    {
-                                        Console.WriteLine("群消息发送失败");
+                                        case 4:
+                                            string t = ja[3]["text"]!.ToString().Replace(" ", "");
+                                            string target = ja[2]["target"]!.ToString();
+                                            if (t == "")
+                                            {
+                                                Admin.Mute(x.Sender.Id, target, x.GroupId, x.Sender.Permission.ToString(), 10);
+                                            }
+                                            else
+                                            {
+                                                int time = t.ToInt32();
+                                                Admin.Mute(x.Sender.Id, target, x.GroupId, x.Sender.Permission.ToString(), time);
+                                            }
+                                            break;
+                                        case 3:
+                                            string target1 = ja[2]["target"]!.ToString();
+                                            Admin.Mute(x.Sender.Id, target1, x.GroupId, x.Sender.Permission.ToString(), 10);
+                                            break;
+                                        case 2:
+                                            Admin.Mute(x.Sender.Id, text[1], x.GroupId, x.Sender.Permission.ToString(), 10);
+                                            break;
                                     }
                                     break;
-                                }
+                                default:
+                                    {
+                                        try
+                                        {
+                                            await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                                        }
+                                        catch
+                                        {
+                                            Console.WriteLine("群消息发送失败");
+                                        }
+                                        break;
+                                    }
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
                         }
                     }
-                    else
+                    // 解禁
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/unmute"))
                     {
-                        try
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.Unmute(x.Sender.Id, target, x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                                case 2:
+                                    Admin.Unmute(x.Sender.Id, text[1], x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                            }
                         }
-                        catch
+                        else
                         {
-                            Console.WriteLine("群消息发送失败");
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
                         }
                     }
-                }
-                // 解禁
-                if (x.MessageChain.GetPlainMessage().StartsWith("/unmute"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
+                    // 踢人
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/kick"))
                     {
-                        switch (ja.Count)
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.Unmute(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.Unmute(x.Sender.Id, text[1], x.GroupId);
-                                break;
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.Kick(x.Sender.Id, target, x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                                case 2:
+                                    Admin.Kick(x.Sender.Id, text[1], x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
                         }
                     }
-                    else
+                    // 加黑
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/block"))
                     {
-                        try
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.Block(x.Sender.Id, target, x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                                case 2:
+                                    Admin.Block(x.Sender.Id, text[1], x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                            }
                         }
-                        catch
+                        else
                         {
-                            Console.WriteLine("群消息发送失败");
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch { }
                         }
                     }
-                }
-                // 踢人
-                if (x.MessageChain.GetPlainMessage().StartsWith("/kick"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
+                    // 解黑
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/unblock"))
                     {
-                        switch (ja.Count)
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.Kick(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.Kick(x.Sender.Id, text[1], x.GroupId);
-                                break;
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.Unblock(x.Sender.Id, target, x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                                case 2:
+                                    Admin.Unblock(x.Sender.Id, text[1], x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
                         }
                     }
-                    else
+                    // 全局加黑
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/gblock"))
                     {
-                        try
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.G_Block(x.Sender.Id, target, x.GroupId);
+                                    break;
+                                case 2:
+                                    Admin.G_Block(x.Sender.Id, text[1], x.GroupId);
+                                    break;
+                            }
                         }
-                        catch
+                        else
                         {
-                            Console.WriteLine("群消息发送失败");
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch { }
                         }
                     }
-                }
-                // 加黑
-                if (x.MessageChain.GetPlainMessage().StartsWith("/block"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
+                    // 全局解黑
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/gunblock"))
                     {
-                        switch (ja.Count)
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.Block(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.Block(x.Sender.Id, text[1], x.GroupId);
-                                break;
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.G_Unblock(x.Sender.Id, target, x.GroupId);
+                                    break;
+                                case 2:
+                                    Admin.G_Unblock(x.Sender.Id, text[1], x.GroupId);
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
                         }
                     }
-                    else
+                    // 给予机器人管理员
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/op"))
                     {
-                        try
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.Op(x.Sender.Id, target, x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                                case 2:
+                                    Admin.Op(x.Sender.Id, text[1], x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                            }
                         }
-                        catch { }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch { }
+                        }
                     }
-                }
-                // 解黑
-                if (x.MessageChain.GetPlainMessage().StartsWith("/unblock"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
+                    // 剥夺机器人管理员
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/deop"))
                     {
-                        switch (ja.Count)
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        IEnumerable<Member> members = new List<Member>();
+                        if (text.Length == 2)
                         {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.Unblock(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.Unblock(x.Sender.Id, text[1], x.GroupId);
-                                break;
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.Deop(x.Sender.Id, target, x.GroupId);
+                                    break;
+                                case 2:
+                                    Admin.Deop(x.Sender.Id, text[1], x.GroupId);
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
                         }
                     }
-                    else
+                    // 给予全局机器人管理员
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/gop"))
                     {
-                        try
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.G_Op(x.Sender.Id, target, x.GroupId);
+                                    break;
+                                case 2:
+                                    Admin.G_Op(x.Sender.Id, text[1], x.GroupId);
+                                    break;
+                            }
                         }
-                        catch
+                        else
                         {
-                            Console.WriteLine("群消息发送失败");
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch { }
                         }
                     }
-                }
-                // 全局加黑
-                if (x.MessageChain.GetPlainMessage().StartsWith("/gblock"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
+                    // 剥夺全局机器人管理员
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/gdeop"))
                     {
-                        switch (ja.Count)
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.G_Block(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.G_Block(x.Sender.Id, text[1], x.GroupId);
-                                break;
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.G_Deop(x.Sender.Id, target, x.GroupId);
+                                    break;
+                                case 2:
+                                    Admin.G_Deop(x.Sender.Id, text[1], x.GroupId);
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
                         }
                     }
-                    else
+                    // 屏蔽消息
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/ignore"))
                     {
-                        try
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.Ignore(x.Sender.Id, target, x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                                case 2:
+                                    Admin.Ignore(x.Sender.Id, text[1], x.GroupId, x.Sender.Permission.ToString());
+                                    break;
+                            }
                         }
-                        catch { }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch { }
+                        }
                     }
-                }
-                // 全局解黑
-                if (x.MessageChain.GetPlainMessage().StartsWith("/gunblock"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
+                    // 全局屏蔽消息
+                    if (x.MessageChain.GetPlainMessage().StartsWith("/gignore"))
                     {
-                        switch (ja.Count)
+                        string result1 = x.MessageChain.ToJsonString();
+                        JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
+                        string[] text = ja[1]["text"]!.ToString().Split(" ");
+                        if (text.Length == 2)
                         {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.G_Unblock(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.G_Unblock(x.Sender.Id, text[1], x.GroupId);
-                                break;
+                            switch (ja.Count)
+                            {
+                                case 3:
+                                    string target = ja[2]["target"]!.ToString();
+                                    Admin.G_Ignore(x.Sender.Id, target, x.GroupId);
+                                    break;
+                                case 2:
+                                    Admin.G_Ignore(x.Sender.Id, text[1], x.GroupId);
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, "参数错误");
+                            }
+                            catch { }
                         }
                     }
-                    else
+                    // 发动带清洗
+                    if (x.MessageChain.GetPlainMessage() == ("/purge"))
                     {
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
-                        }
-                        catch
-                        {
-                            Console.WriteLine("群消息发送失败");
-                        }
+                        Admin.Purge(x.Sender.Id, x.GroupId, x.Sender.Permission.ToString());
                     }
-                }
-                // 给予机器人管理员
-                if (x.MessageChain.GetPlainMessage().StartsWith("/op"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
+                    // 同步黑名单
+                    if (x.MessageChain.GetPlainMessage() == ("/sync"))
                     {
-                        switch (ja.Count)
-                        {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.Op(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.Op(x.Sender.Id, text[1], x.GroupId);
-                                break;
-                        }
+                        await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
                     }
-                    else
+                    // 反向同步黑名单
+                    if (x.MessageChain.GetPlainMessage() == ("/rsync"))
                     {
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
-                        }
-                        catch { }
+                        await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
                     }
-                }
-                // 剥夺机器人管理员
-                if (x.MessageChain.GetPlainMessage().StartsWith("/deop"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
+                    // 合并黑名单并双向同步
+                    if (x.MessageChain.GetPlainMessage() == ("/merge"))
                     {
-                        switch (ja.Count)
-                        {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.Deop(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.Deop(x.Sender.Id, text[1], x.GroupId);
-                                break;
-                        }
+                        await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
                     }
-                    else
+                    // 版本
+                    if (x.MessageChain.GetPlainMessage() == "版本")
                     {
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
-                        }
-                        catch
-                        {
-                            Console.WriteLine("群消息发送失败");
-                        }
-                    }
-                }
-                // 给予全局机器人管理员
-                if (x.MessageChain.GetPlainMessage().StartsWith("/gop"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
-                    {
-                        switch (ja.Count)
-                        {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.G_Op(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.G_Op(x.Sender.Id, text[1], x.GroupId);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
-                        }
-                        catch { }
-                    }
-                }
-                // 剥夺全局机器人管理员
-                if (x.MessageChain.GetPlainMessage().StartsWith("/gdeop"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;  //正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
-                    {
-                        switch (ja.Count)
-                        {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.G_Deop(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.G_Deop(x.Sender.Id, text[1], x.GroupId);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
-                        }
-                        catch
-                        {
-                            Console.WriteLine("群消息发送失败");
-                        }
-                    }
-                }
-                // 屏蔽消息
-                if (x.MessageChain.GetPlainMessage().StartsWith("/ignore"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
-                    {
-                        switch (ja.Count)
-                        {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.Ignore(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.Ignore(x.Sender.Id, text[1], x.GroupId);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
-                        }
-                        catch { }
-                    }
-                }
-                // 全局屏蔽消息
-                if (x.MessageChain.GetPlainMessage().StartsWith("/gignore"))
-                {
-                    string result1 = x.MessageChain.ToJsonString();
-                    JArray ja = (JArray)JsonConvert.DeserializeObject(result1)!;//正常获取jobject
-                    string[] text = ja[1]["text"]!.ToString().Split(" ");
-                    if (text.Length == 2)
-                    {
-                        switch (ja.Count)
-                        {
-                            case 3:
-                                string target = ja[2]["target"]!.ToString();
-                                Admin.G_Ignore(x.Sender.Id, target, x.GroupId);
-                                break;
-                            case 2:
-                                Admin.G_Ignore(x.Sender.Id, text[1], x.GroupId);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "缺少参数");
-                        }
-                        catch { }
-                    }
-                }
-                // 发动带清洗
-                if (x.MessageChain.GetPlainMessage() == ("/purge"))
-                {
-                    Admin.Purge(x.Sender.Id, x.GroupId);
-                }
-                // 重新加载
-                if (x.MessageChain.GetPlainMessage() == ("/update"))
-                {
-                    Update.Execute();
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(x.GroupId, "重新加载列表成功！");
-                    }
-                    catch { }
-                }
-                // 同步黑名单
-                if (x.MessageChain.GetPlainMessage() == ("/sync"))
-                {
-                    await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
-                }
-                // 反向同步黑名单
-                if (x.MessageChain.GetPlainMessage() == ("/rsync"))
-                {
-                    await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
-                }
-                // 合并黑名单并双向同步
-                if (x.MessageChain.GetPlainMessage() == ("/merge"))
-                {
-                    await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
-                }
-                // 版本
-                if (x.MessageChain.GetPlainMessage() == "版本")
-                {
-                    List<string> splashes = new()
+                        List<string> splashes = new()
                     {
                         "也试试HanBot罢！Also try HanBot!",
                         "誓死捍卫微软苏维埃！",
@@ -1019,33 +1008,36 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                         "这条标语虽然没有用，但是是有用的，因为他被加上了标语",
                         "使用C#编写！"
                     };
-                    Random r = new();
-                    int random = r.Next(splashes.Count);
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(x.GroupId,
-                        $"机器人版本：b_22w23b\r\n上次更新日期：2022/12/8\r\n更新内容：修复了群管功能中些许SQL语句的问题\r\n---------\r\n{splashes[random]}");
+                        Random r = new();
+                        int random = r.Next(splashes.Count);
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(x.GroupId,
+                            $"机器人版本：b_22w23c\r\n上次更新日期：2022/12/10\r\n更新内容：修复了群管功能遗留的致命问题\r\n---------\r\n{splashes[random]}");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("群消息发送失败");
+                        }
                     }
-                    catch
+                    // 获取源码
+                    if (x.MessageChain.GetPlainMessage() == "源码" || (x.MessageChain.GetPlainMessage() == "获取源码") || (x.MessageChain.GetPlainMessage() == "怎样做这样的机器人"))
                     {
-                        Console.WriteLine("群消息发送失败");
-                    }
-                }
-                // 获取源码
-                if (x.MessageChain.GetPlainMessage() == "源码" || (x.MessageChain.GetPlainMessage() == "获取源码") || (x.MessageChain.GetPlainMessage() == "怎样做这样的机器人"))
-                {
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(x.GroupId, "请前往https://github.com/Abjust/2kbot获取2kbot的源码！");
-                    }
-                    catch
-                    {
-                        Console.WriteLine("群消息发送失败");
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(x.GroupId, "请前往https://github.com/Abjust/2kbot获取2kbot的源码！");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("群消息发送失败");
+                        }
                     }
                 }
             });
             // 运行面包厂生产任务
             await BreadFactory.BreadProduce();
+            // 自动更新列表
+            await Update.Execute();
             Console.ReadLine();
         }
     }

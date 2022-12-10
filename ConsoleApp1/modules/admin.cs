@@ -9,6 +9,7 @@
 
 // 致所有构建及修改2kbot代码片段的用户：作者（Abjust）并不承担构建2kbot代码片段（包括修改过的版本）所产生的一切风险，但是用户有权在2kbot的GitHub项目页提出issue，并有权在代码片段修复这些问题后获取这些更新，但是，作者不会对修改过的代码版本做质量保证，也没有义务修正在修改过的代码片段中存在的任何缺陷。
 
+using Mirai.Net.Data.Shared;
 using Mirai.Net.Sessions.Http.Managers;
 using MySql.Data.MySqlClient;
 using RestSharp;
@@ -18,11 +19,11 @@ namespace Net_2kBot.Modules
     public class Admin
     {
         // 禁言功能
-        public static async void Mute(string executor, string victim, string group, int minutes)
+        public static async void Mute(string executor, string victim, string group, string permission, int minutes)
         {
             if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") == false || Global.g_ops != null && Global.g_ops.Contains(victim) == false)
+                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") == false && Global.g_ops != null && Global.g_ops.Contains(victim) == false)
                 {
                     try
                     {
@@ -58,13 +59,31 @@ namespace Net_2kBot.Modules
                     await MessageManager.SendGroupMessageAsync(group, "此人是机器人管理员，无法禁言");
                 }
             }
+            else if (permission != "Owner")
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
             else
             {
-                await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员，但你是本群群主（你应该使用/op指令将自己设置为本群机器人管理员）");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
             }
         }
         // 解禁功能
-        public static async void Unmute(string executor, string victim, string group)
+        public static async void Unmute(string executor, string victim, string group, string permission)
         {
             if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
@@ -97,17 +116,35 @@ namespace Net_2kBot.Modules
                     }
                 }
             }
+            else if (permission != "Owner")
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
             else
             {
-                await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员，但你是本群群主（你应该使用/op指令将自己设置为本群机器人管理员）");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
             }
         }
         // 踢人功能
-        public static async void Kick(string executor, string victim, string group)
+        public static async void Kick(string executor, string victim, string group, string permission)
         {
             if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") == false || Global.g_ops != null && Global.g_ops.Contains(victim) == false)
+                if (Global.ops != null && !Global.ops.Contains($"{group}_{victim}") && Global.g_ops != null && !Global.g_ops.Contains(victim))
                 {
                     try
                     {
@@ -143,13 +180,31 @@ namespace Net_2kBot.Modules
                     await MessageManager.SendGroupMessageAsync(group, "此人是机器人管理员，无法踢出");
                 }
             }
+            else if (permission != "Owner")
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
             else
             {
-                await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员，但你是本群群主（你应该使用/op指令将自己设置为本群机器人管理员）");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
             }
         }
         // 加黑功能
-        public static async void Block(string executor, string victim, string group)
+        public static async void Block(string executor, string victim, string group, string permission)
         {
             // 连接数据库
             MySqlConnection msc = new(Global.connectstring);
@@ -160,7 +215,7 @@ namespace Net_2kBot.Modules
             await msc.OpenAsync();
             if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") == false || Global.g_ops != null && Global.g_ops.Contains(victim) == false)
+                if (Global.ops != null && Global.ops.Contains($"{group}_{victim}") == false && Global.g_ops != null && Global.g_ops.Contains(victim) == false)
                 {
                     if (Global.blocklist?.Contains(victim) == false)
                     {
@@ -228,13 +283,31 @@ namespace Net_2kBot.Modules
                     }
                 }
             }
+            else if (permission != "Owner")
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
             else
             {
-                await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员，但你是本群群主（你应该使用/op指令将自己设置为本群机器人管理员）");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
             }
         }
         // 解黑功能
-        public static async void Unblock(string executor, string victim, string group)
+        public static async void Unblock(string executor, string victim, string group, string permission)
         {
             // 连接数据库
             MySqlConnection msc = new(Global.connectstring);
@@ -272,9 +345,27 @@ namespace Net_2kBot.Modules
                     }
                 }
             }
+            else if (permission != "Owner")
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
             else
             {
-                await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员，但你是本群群主（你应该使用/op指令将自己设置为本群机器人管理员）");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
             }
         }
         // 全局加黑功能
@@ -291,7 +382,7 @@ namespace Net_2kBot.Modules
             {
                 if (Global.g_ops != null && Global.g_ops.Contains(victim) == false)
                 {
-                    if (Global.g_blocklist == null || Global.g_blocklist != null && Global.g_blocklist.Contains(victim) == false)
+                    if (Global.g_blocklist == null || !Global.g_blocklist.Contains(victim))
                     {
                         cmd.CommandText = $"INSERT INTO g_blocklist (qid) VALUES ({victim});";
                         await cmd.ExecuteNonQueryAsync();
@@ -356,9 +447,27 @@ namespace Net_2kBot.Modules
                     }
                 }
             }
+            else if (executor != Global.owner_qq)
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
             else
             {
-                await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员，但你是机器人主人（你应该使用/gop指令将自己设置为全局机器人管理员）");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
             }
         }
         // 全局解黑功能
@@ -400,13 +509,31 @@ namespace Net_2kBot.Modules
                     }
                 }
             }
+            else if (executor != Global.owner_qq)
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
             else
             {
-                await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员，但你是机器人主人（你应该使用/gop指令将自己设置为全局机器人管理员）");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
             }
         }
         // 给OP功能
-        public static async void Op(string executor, string victim, string group)
+        public static async void Op(string executor, string victim, string group, string permission)
         {
             // 连接数据库
             MySqlConnection msc = new(Global.connectstring);
@@ -415,9 +542,9 @@ namespace Net_2kBot.Modules
                 Connection = msc
             };
             await msc.OpenAsync();
-            if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
+            if (permission == "Owner" || Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.ops == null || Global.ops != null && Global.ops.Contains($"{group}_{victim}") == false)
+                if (Global.ops == null || !Global.ops.Contains($"{group}_{victim}"))
                 {
                     cmd.CommandText = $"INSERT INTO ops (qid,gid) VALUES ({victim},{group});";
                     await cmd.ExecuteNonQueryAsync();
@@ -447,7 +574,7 @@ namespace Net_2kBot.Modules
             {
                 try
                 {
-                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员或者本群群主");
                 }
                 catch
                 {
@@ -465,20 +592,43 @@ namespace Net_2kBot.Modules
                 Connection = msc
             };
             await msc.OpenAsync();
+            IEnumerable<Member> members = AccountManager.GetGroupMembersAsync(group).Result;
+            string group_owner = "";
+            foreach (Member member in members)
+            {
+                if (member.Permission.ToString() == "Owner")
+                {
+                    group_owner = member.Id;
+                }
+            }
             if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
                 if (Global.ops != null && Global.ops.Contains($"{group}_{victim}"))
                 {
-                    cmd.CommandText = $"DELETE FROM ops WHERE qid = {victim} AND gid = {group};";
-                    await cmd.ExecuteNonQueryAsync();
-                    await msc.CloseAsync();
-                    try
+                    if (victim != group_owner)
                     {
-                        await MessageManager.SendGroupMessageAsync(group, $"已取消 {victim} 在本群的机器人管理员权限");
+                        cmd.CommandText = $"DELETE FROM ops WHERE qid = {victim} AND gid = {group};";
+                        await cmd.ExecuteNonQueryAsync();
+                        await msc.CloseAsync();
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, $"已取消 {victim} 在本群的机器人管理员权限");
+                        }
+                        catch
+                        {
+                            Console.WriteLine($"已取消 {victim} 在 {group} 的机器人管理员权限");
+                        }
                     }
-                    catch
+                    else
                     {
-                        Console.WriteLine($"已取消 {victim} 在 {group} 的机器人管理员权限");
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, $"{victim} 是本群群主，不能被取消本群机器人管理员");
+                        }
+                        catch
+                        {
+                            Console.WriteLine($"{victim} 是 {group} 群主，不能被取消 {group} 机器人管理员");
+                        }
                     }
                 }
                 else
@@ -515,9 +665,9 @@ namespace Net_2kBot.Modules
                 Connection = msc
             };
             await msc.OpenAsync();
-            if (Global.g_ops != null && Global.g_ops.Contains(executor))
+            if (executor == Global.owner_qq || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.g_ops != null && Global.g_ops.Contains(victim) == false)
+                if (Global.g_ops != null && !Global.g_ops.Contains(victim))
                 {
                     cmd.CommandText = $"INSERT INTO g_ops (qid) VALUES ({victim});";
                     await cmd.ExecuteNonQueryAsync();
@@ -547,7 +697,7 @@ namespace Net_2kBot.Modules
             {
                 try
                 {
-                    await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员");
+                    await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员或者机器人主人");
                 }
                 catch
                 {
@@ -569,16 +719,30 @@ namespace Net_2kBot.Modules
             {
                 if (Global.g_ops != null && Global.g_ops.Contains(victim))
                 {
-                    cmd.CommandText = $"DELETE FROM g_ops WHERE qid = {victim};";
-                    await cmd.ExecuteNonQueryAsync();
-                    await msc.CloseAsync();
-                    try
+                    if (victim != Global.owner_qq)
                     {
-                        await MessageManager.SendGroupMessageAsync(group, $"已取消 {victim} 的全局机器人管理员权限");
+                        cmd.CommandText = $"DELETE FROM g_ops WHERE qid = {victim};";
+                        await cmd.ExecuteNonQueryAsync();
+                        await msc.CloseAsync();
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, $"已取消 {victim} 的全局机器人管理员权限");
+                        }
+                        catch
+                        {
+                            Console.WriteLine($"已取消 {victim} 的全局机器人管理员权限");
+                        }
                     }
-                    catch
+                    else
                     {
-                        Console.WriteLine($"已取消 {victim} 的全局机器人管理员权限");
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, $"{victim} 是机器人主人，不能被取消全局机器人管理员");
+                        }
+                        catch
+                        {
+                            Console.WriteLine($"{victim} 是机器人主人，不能被取消全局机器人管理员");
+                        }
                     }
                 }
                 else
@@ -606,7 +770,7 @@ namespace Net_2kBot.Modules
             }
         }
         // 屏蔽消息功能
-        public static async void Ignore(string executor, string victim, string group)
+        public static async void Ignore(string executor, string victim, string group, string permission)
         {
             // 连接数据库
             MySqlConnection msc = new(Global.connectstring);
@@ -617,7 +781,7 @@ namespace Net_2kBot.Modules
             await msc.OpenAsync();
             if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.ignores?.Contains($"{group}_{victim}") == false)
+                if (Global.ignores == null || !Global.ignores.Contains($"{group}_{victim}"))
                 {
                     cmd.CommandText = $"INSERT INTO ignores (qid,gid) VALUES ({victim},{group});";
                     await cmd.ExecuteNonQueryAsync();
@@ -635,19 +799,30 @@ namespace Net_2kBot.Modules
                 {
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 的消息已经在本群被机器人屏蔽");
+                        await MessageManager.SendGroupMessageAsync(group, $"{victim} 的消息已经在本群被机器人屏蔽了");
                     }
                     catch
                     {
-                        Console.WriteLine($"{victim} 的消息已经在 {group} 被机器人屏蔽");
+                        Console.WriteLine($"{victim} 的消息已经在 {group} 被机器人屏蔽了");
                     }
+                }
+            }
+            else if (permission != "Owner")
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
                 }
             }
             else
             {
                 try
                 {
-                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员，但你是本群群主（你应该使用/op指令将自己设置为本群机器人管理员）");
                 }
                 catch
                 {
@@ -667,7 +842,7 @@ namespace Net_2kBot.Modules
             await msc.OpenAsync();
             if (Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.g_ignores?.Contains($"{group}_{victim}") == false)
+                if (Global.g_ignores == null || Global.g_ignores.Contains(victim))
                 {
                     cmd.CommandText = $"INSERT INTO g_ignores (qid) VALUES ({victim});";
                     await cmd.ExecuteNonQueryAsync();
@@ -693,7 +868,7 @@ namespace Net_2kBot.Modules
                     }
                 }
             }
-            else
+            else if (executor != Global.owner_qq)
             {
                 try
                 {
@@ -704,9 +879,20 @@ namespace Net_2kBot.Modules
                     Console.WriteLine("群消息发送失败");
                 }
             }
+            else
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是全局机器人管理员，但你是机器人主人（你应该使用/gop指令将自己设置为全局机器人管理员）");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
         }
         // 带 清 洗
-        public static async void Purge(string executor, string group)
+        public static async void Purge(string executor, string group, string permission)
         {
             if (Global.ops != null && Global.ops.Contains($"{group}_{executor}") || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
@@ -738,11 +924,22 @@ namespace Net_2kBot.Modules
                 }
                 await MessageManager.SendGroupMessageAsync(group, "带清洗发动成功！");
             }
-            else
+            else if (permission != "Owner")
             {
                 try
                 {
                     await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员");
+                }
+                catch
+                {
+                    Console.WriteLine("群消息发送失败");
+                }
+            }
+            else
+            {
+                try
+                {
+                    await MessageManager.SendGroupMessageAsync(group, "你不是机器人管理员，但你是本群群主（你应该使用/op指令将自己设置为本群机器人管理员）");
                 }
                 catch
                 {

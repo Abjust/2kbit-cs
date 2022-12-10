@@ -19,18 +19,15 @@ namespace Net_2kBot.Modules
                         try
                         {
                             string results = "";
-                            if ((Global.ignores == null || Global.ignores.Contains($"{receiver.GroupId}_{receiver.Sender.Id}") == false) && (Global.g_ignores == null || Global.g_ignores.Contains(receiver.Sender.Id) == false))
+                            for (int i = 1; i < result.Length; i++)
                             {
-                                for (int i = 1; i < result.Length; i++)
+                                if (i == 1)
                                 {
-                                    if (i == 1)
-                                    {
-                                        results = result[i];
-                                    }
-                                    else
-                                    {
-                                        results = results + " " + result[i];
-                                    }
+                                    results = result[i];
+                                }
+                                else
+                                {
+                                    results = results + " " + result[i];
                                 }
                             }
                             foreach (Mirai.Net.Data.Shared.Group group in groups)
@@ -49,7 +46,7 @@ namespace Net_2kBot.Modules
                         {
                             try
                             {
-                                await receiver.SendMessageAsync("油饼食不食？");
+                                await receiver.SendMessageAsync("参数错误");
                             }
                             catch
                             {
