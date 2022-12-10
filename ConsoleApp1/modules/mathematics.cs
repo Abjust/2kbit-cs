@@ -46,7 +46,7 @@ namespace Net_2kBot.Modules
                 else
                 {
                     string formula = receiver.MessageChain.GetPlainMessage().Split(" ")[1];
-                    bool is_int = false;
+                    bool is_int = true;
                     decimal decimal_ans = 0;
                     long int_ans = 0;
                     double operand;
@@ -59,11 +59,7 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number) % 1 == 0)
-                                {
-                                    is_int = true;
-                                }
-                                else
+                                if (double.Parse(number) % 1 != 0)
                                 {
                                     is_int = false;
                                     break;
@@ -136,11 +132,7 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number) % 1 == 0)
-                                {
-                                    is_int = true;
-                                }
-                                else
+                                if (double.Parse(number) % 1 != 0)
                                 {
                                     is_int = false;
                                     break;
@@ -213,11 +205,7 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number) % 1 == 0)
-                                {
-                                    is_int = true;
-                                }
-                                else
+                                if (double.Parse(number) % 1 != 0)
                                 {
                                     is_int = false;
                                     break;
@@ -290,11 +278,7 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number) % 1 == 0)
-                                {
-                                    is_int = true;
-                                }
-                                else
+                                if (double.Parse(number) % 1 != 0)
                                 {
                                     is_int = false;
                                     break;
@@ -367,11 +351,7 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number) % 1 == 0)
-                                {
-                                    is_int = true;
-                                }
-                                else
+                                if (double.Parse(number) % 1 != 0)
                                 {
                                     is_int = false;
                                     break;
@@ -387,7 +367,7 @@ namespace Net_2kBot.Modules
                                     }
                                     else
                                     {
-                                        int_ans = (long) Math.Pow(int_ans, int.Parse(operands[i]));
+                                        int_ans = (long)Math.Pow(int_ans, int.Parse(operands[i]));
                                     }
                                 }
                                 else
@@ -398,7 +378,7 @@ namespace Net_2kBot.Modules
                                     }
                                     else
                                     {
-                                        decimal_ans = (decimal) Math.Pow((double) decimal_ans, double.Parse(operands[i]));
+                                        decimal_ans = (decimal)Math.Pow((double)decimal_ans, double.Parse(operands[i]));
                                     }
                                 }
                             }
@@ -442,7 +422,7 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            operand = double.Parse(formula.Split("sin")[0]);
+                            operand = double.Parse(formula.Split("sin")[1]);
                             decimal_ans = (decimal)Math.Sin(operand * Math.PI / 180);
                             try
                             {
@@ -469,7 +449,7 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            operand = double.Parse(formula.Split("cos")[0]);
+                            operand = double.Parse(formula.Split("cos")[1]);
                             decimal_ans = (decimal)Math.Cos(operand * Math.PI / 180);
                             try
                             {
@@ -523,7 +503,7 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            operand = double.Parse(formula.Split("cot")[0]);
+                            operand = double.Parse(formula.Split("cot")[1]);
                             decimal_ans = 1 / (decimal)Math.Tan(operand * Math.PI / 180);
                             try
                             {
