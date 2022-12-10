@@ -97,7 +97,7 @@ namespace Net_2kBot.Modules
                     }
                 }
                 // 主动复读
-                else
+                else if ((Global.ignores == null || Global.ignores.Contains($"{receiver.GroupId}_{receiver.Sender.Id}") == false) && (Global.g_ignores == null || Global.g_ignores.Contains(receiver.Sender.Id) == false))
                 {
                     foreach (string item in repeatwords)
                     {
