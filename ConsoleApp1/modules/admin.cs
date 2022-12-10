@@ -230,6 +230,7 @@ namespace Net_2kBot.Modules
                         {
                             Console.WriteLine($"已将 {victim} 加入 {group} 黑名单");
                         }
+                        Update.Execute();
                         try
                         {
                             await GroupManager.KickAsync(victim, group);
@@ -331,7 +332,7 @@ namespace Net_2kBot.Modules
                     {
                         Console.WriteLine($"已将 {victim} 移出 {group} 黑名单");
                     }
-
+                    Update.Execute();
                 }
                 else
                 {
@@ -395,6 +396,7 @@ namespace Net_2kBot.Modules
                         {
                             Console.WriteLine($"已将 {victim} 加入全局黑名单");
                         }
+                        Update.Execute();
                         try
                         {
                             await GroupManager.KickAsync(victim, group);
@@ -495,7 +497,7 @@ namespace Net_2kBot.Modules
                     {
                         Console.WriteLine($"已将 {victim} 移出全局黑名单");
                     }
-
+                    Update.Execute();
                 }
                 else
                 {
@@ -557,6 +559,7 @@ namespace Net_2kBot.Modules
                     {
                         Console.WriteLine($"已将 {victim} 设置为 {group} 机器人管理员");
                     }
+                    Update.Execute();
                 }
                 else
                 {
@@ -618,6 +621,7 @@ namespace Net_2kBot.Modules
                         {
                             Console.WriteLine($"已取消 {victim} 在 {group} 的机器人管理员权限");
                         }
+                        Update.Execute();
                     }
                     else
                     {
@@ -680,6 +684,7 @@ namespace Net_2kBot.Modules
                     {
                         Console.WriteLine($"已将 {victim} 设置为全局机器人管理员");
                     }
+                    Update.Execute();
                 }
                 else
                 {
@@ -732,6 +737,7 @@ namespace Net_2kBot.Modules
                         {
                             Console.WriteLine($"已取消 {victim} 的全局机器人管理员权限");
                         }
+                        Update.Execute();
                     }
                     else
                     {
@@ -794,6 +800,7 @@ namespace Net_2kBot.Modules
                     {
                         Console.WriteLine($"已在 {group} 屏蔽 {victim} 的消息");
                     }
+                    Update.Execute();
                 }
                 else
                 {
@@ -855,6 +862,7 @@ namespace Net_2kBot.Modules
                     {
                         Console.WriteLine($"已屏蔽 {victim} 在所有群的消息");
                     }
+                    Update.Execute();
                 }
                 else
                 {

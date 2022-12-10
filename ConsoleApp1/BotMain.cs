@@ -129,6 +129,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                 await cmd.ExecuteNonQueryAsync();
             }
             // 在这里添加你的代码，比如订阅消息/事件之类的
+            Update.Execute();
             // 戳一戳效果
             bot.EventReceived
             .OfType<NudgeEvent>()
@@ -1013,7 +1014,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_22w23e\r\n上次更新日期：2022/12/10\r\n更新内容：修复了复读机问题\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_22w23f\r\n上次更新日期：2022/12/10\r\n更新内容：将列表更新方式改为按需更新\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
@@ -1036,8 +1037,6 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
             });
             // 运行面包厂生产任务
             await BreadFactory.BreadProduce();
-            // 自动更新列表
-            await Update.Execute();
             Console.ReadLine();
         }
     }
