@@ -108,7 +108,7 @@ namespace Net_2kBot.Modules
                         if (item.Contains("faceid:"))
                         {
                             string face_id = item.Replace("faceid:", ""); ;
-                            if (receiver.MessageChain[1].ToString().Contains($"FaceId = {face_id}"))
+                            if (receiver.MessageChain.Count == 2 && receiver.MessageChain[1].ToString().Contains($"FaceId = {face_id}"))
                             {
                                 Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                                 using (var msc = new MySqlConnection(Global.connectstring))
