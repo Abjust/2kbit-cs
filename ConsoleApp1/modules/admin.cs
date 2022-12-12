@@ -849,7 +849,7 @@ namespace Net_2kBot.Modules
             await msc.OpenAsync();
             if (Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.g_ignores == null || Global.g_ignores.Contains(victim))
+                if (Global.g_ignores == null || !Global.g_ignores.Contains(victim))
                 {
                     cmd.CommandText = $"INSERT INTO g_ignores (qid) VALUES ({victim});";
                     await cmd.ExecuteNonQueryAsync();
