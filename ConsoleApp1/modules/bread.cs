@@ -36,7 +36,9 @@ namespace Net_2kBot.Modules
                 int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                 if (i == 0)
                 {
-                    cmd.CommandText = $"INSERT INTO bread (qid) VALUES ({group});";
+                    cmd.CommandText = $"INSERT INTO bread (gid) VALUES ({group});";
+                    await cmd.ExecuteNonQueryAsync();
+                    cmd.CommandText = $"INSERT INTO material (gid) VALUES ({group});";
                     await cmd.ExecuteNonQueryAsync();
                     try
                     {
@@ -123,7 +125,7 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(group, "在开启多样化生产模式的情况下，你不能给2kbot面包！");
+                            await MessageManager.SendGroupMessageAsync(group, "除非本群供应模式为“单一化供应”，否则你无法给予2kbot面包！");
                         }
                         catch
                         {
@@ -160,11 +162,13 @@ namespace Net_2kBot.Modules
                 {
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
-                    if (reader.GetInt32("breads") >= number)
+                    if (reader.GetInt32("bread_diversity") != 2)
                     {
-                        if (reader.GetInt32("bread_diversity") == 1)
+                        if (reader.GetInt32("breads") >= number)
                         {
-                            List<string> bread_types = new()
+                            if (reader.GetInt32("bread_diversity") == 1)
+                            {
+                                List<string> bread_types = new()
                             {
                             "🍞",
                             "🥖",
@@ -172,41 +176,74 @@ namespace Net_2kBot.Modules
                             "🥯",
                             "🍩"
                             };
-                            if (number >= bread_types.Count)
+                                if (number >= bread_types.Count)
+                                {
+                                    int ExpectedSum = number;
+                                    Random rnd = new Random();
+                                    int[] fields = new int[bread_types.Count];
+                                    int sum = 0;
+                                    for (int i = 0; i < fields.Length - 1; i++)
+                                    {
+                                        fields[i] = rnd.Next(ExpectedSum);
+                                        sum += fields[i];
+                                    }
+                                    int actualSum = sum * fields.Length / (fields.Length - 1);
+                                    sum = 0;
+                                    for (int i = 0; i < fields.Length - 1; i++)
+                                    {
+                                        fields[i] = fields[i] * ExpectedSum / actualSum;
+                                        sum += fields[i];
+                                    }
+                                    fields[fields.Length - 1] = ExpectedSum - sum;
+                                    string text = "";
+                                    for (int i = 0; i < bread_types.Count; i++)
+                                    {
+                                        if (i == 0)
+                                        {
+                                            text = $"\n{bread_types[i]}*{fields[i]}";
+                                        }
+                                        else
+                                        {
+                                            text += $"\n{bread_types[i]}*{fields[i]}";
+                                        }
+                                    }
+                                    MessageChain? messageChain = new MessageChainBuilder()
+                                   .At(executor)
+                                   .Plain(text)
+                                   .Build();
+                                    using (var msc1 = new MySqlConnection(Global.connectstring))
+                                    {
+                                        await msc1.OpenAsync();
+                                        MySqlCommand cmd1 = new()
+                                        {
+                                            Connection = msc1
+                                        };
+                                        cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") - number} WHERE gid = {group};";
+                                        await cmd1.ExecuteNonQueryAsync();
+                                    }
+                                    try
+                                    {
+                                        await MessageManager.SendGroupMessageAsync(group, messageChain);
+                                    }
+                                    catch
+                                    {
+                                        Console.WriteLine("群消息发送失败");
+                                    }
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        await MessageManager.SendGroupMessageAsync(group, $"你请求进货的面包数太少了！（至少要有 {bread_types.Count} 块）");
+                                    }
+                                    catch
+                                    {
+                                        Console.WriteLine("群消息发送失败");
+                                    }
+                                }
+                            }
+                            else
                             {
-                                int ExpectedSum = number;
-                                Random rnd = new Random();
-                                int[] fields = new int[bread_types.Count];
-                                int sum = 0;
-                                for (int i = 0; i < fields.Length - 1; i++)
-                                {
-                                    fields[i] = rnd.Next(ExpectedSum);
-                                    sum += fields[i];
-                                }
-                                int actualSum = sum * fields.Length / (fields.Length - 1);
-                                sum = 0;
-                                for (int i = 0; i < fields.Length - 1; i++)
-                                {
-                                    fields[i] = fields[i] * ExpectedSum / actualSum;
-                                    sum += fields[i];
-                                }
-                                fields[fields.Length - 1] = ExpectedSum - sum;
-                                string text = "";
-                                for (int i = 0; i < bread_types.Count; i++)
-                                {
-                                    if (i == 0)
-                                    {
-                                        text = $"\n{bread_types[i]}*{fields[i]}";
-                                    }
-                                    else
-                                    {
-                                        text += $"\n{bread_types[i]}*{fields[i]}";
-                                    }
-                                }
-                                MessageChain? messageChain = new MessageChainBuilder()
-                               .At(executor)
-                               .Plain(text)
-                               .Build();
                                 using (var msc1 = new MySqlConnection(Global.connectstring))
                                 {
                                     await msc1.OpenAsync();
@@ -217,6 +254,10 @@ namespace Net_2kBot.Modules
                                     cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") - number} WHERE gid = {group};";
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
+                                MessageChain? messageChain = new MessageChainBuilder()
+                               .At(executor)
+                               .Plain($" 🍞*{number}")
+                               .Build();
                                 try
                                 {
                                     await MessageManager.SendGroupMessageAsync(group, messageChain);
@@ -226,37 +267,12 @@ namespace Net_2kBot.Modules
                                     Console.WriteLine("群消息发送失败");
                                 }
                             }
-                            else
-                            {
-                                try
-                                {
-                                    await MessageManager.SendGroupMessageAsync(group, $"你请求进货的面包数太少了！（至少要有 {bread_types.Count} 块）");
-                                }
-                                catch
-                                {
-                                    Console.WriteLine("群消息发送失败");
-                                }
-                            }
                         }
                         else
                         {
-                            using (var msc1 = new MySqlConnection(Global.connectstring))
-                            {
-                                await msc1.OpenAsync();
-                                MySqlCommand cmd1 = new()
-                                {
-                                    Connection = msc1
-                                };
-                                cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") - number} WHERE gid = {group};";
-                                await cmd1.ExecuteNonQueryAsync();
-                            }
-                            MessageChain? messageChain = new MessageChainBuilder()
-                           .At(executor)
-                           .Plain($" 🍞*{number}")
-                           .Build();
                             try
                             {
-                                await MessageManager.SendGroupMessageAsync(group, messageChain);
+                                await MessageManager.SendGroupMessageAsync(group, "抱歉，面包不够了。。。");
                             }
                             catch
                             {
@@ -266,16 +282,19 @@ namespace Net_2kBot.Modules
                     }
                     else
                     {
+                        MessageChain? messageChain = new MessageChainBuilder()
+                               .At(executor)
+                               .Plain($" 🍞*{number}")
+                               .Build();
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(group, "抱歉，面包不够了。。。");
+                            await MessageManager.SendGroupMessageAsync(group, messageChain);
                         }
                         catch
                         {
                             Console.WriteLine("群消息发送失败");
                         }
                     }
-                    await reader.DisposeAsync();
                 }
                 catch
                 {
@@ -332,8 +351,8 @@ namespace Net_2kBot.Modules
                 }
             }
         }
-        // 多样化生产
-        public static async void Diversity(string group, int status)
+        // 修改生产模式
+        public static async void ChangeMode(string group, int mode)
         {
             // 连接数据库
             using (var msc = new MySqlConnection(Global.connectstring))
@@ -353,47 +372,68 @@ namespace Net_2kBot.Modules
                     await reader.ReadAsync();
                     if (reader.GetInt32("breads") == 0)
                     {
-                        if (status == 1)
+                        switch (mode)
                         {
-                            using (var msc1 = new MySqlConnection(Global.connectstring))
-                            {
-                                await msc1.OpenAsync();
-                                MySqlCommand cmd1 = new()
+                            case 2:
+                                using (var msc1 = new MySqlConnection(Global.connectstring))
                                 {
-                                    Connection = msc1
-                                };
-                                cmd1.CommandText = $"UPDATE bread SET bread_diversity = 1 WHERE gid = {group};";
-                                await cmd1.ExecuteNonQueryAsync();
-                            }
-                            try
-                            {
-                                await MessageManager.SendGroupMessageAsync(group, "已为本群启用多样化生产！");
-                            }
-                            catch
-                            {
-                                Console.WriteLine("群消息发送失败");
-                            }
-                        }
-                        else
-                        {
-                            using (var msc1 = new MySqlConnection(Global.connectstring))
-                            {
-                                await msc1.OpenAsync();
-                                MySqlCommand cmd1 = new()
+                                    await msc1.OpenAsync();
+                                    MySqlCommand cmd1 = new()
+                                    {
+                                        Connection = msc1
+                                    };
+                                    cmd1.CommandText = $"UPDATE bread SET bread_diversity = 2 WHERE gid = {group};";
+                                    await cmd1.ExecuteNonQueryAsync();
+                                }
+                                try
                                 {
-                                    Connection = msc1
-                                };
-                                cmd1.CommandText = $"UPDATE bread SET bread_diversity = 0 WHERE gid = {group};";
-                                await cmd1.ExecuteNonQueryAsync();
-                            }
-                            try
-                            {
-                                await MessageManager.SendGroupMessageAsync(group, "已为本群禁用多样化生产！");
-                            }
-                            catch
-                            {
-                                Console.WriteLine("群消息发送失败");
-                            }
+                                    await MessageManager.SendGroupMessageAsync(group, "已将本群供应模式修改为：无限供应");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
+                                break;
+                            case 1:
+                                using (var msc1 = new MySqlConnection(Global.connectstring))
+                                {
+                                    await msc1.OpenAsync();
+                                    MySqlCommand cmd1 = new()
+                                    {
+                                        Connection = msc1
+                                    };
+                                    cmd1.CommandText = $"UPDATE bread SET bread_diversity = 1 WHERE gid = {group};";
+                                    await cmd1.ExecuteNonQueryAsync();
+                                }
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(group, "已将本群供应模式修改为：多样化供应");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
+                                break;
+                            case 0:
+                                using (var msc1 = new MySqlConnection(Global.connectstring))
+                                {
+                                    await msc1.OpenAsync();
+                                    MySqlCommand cmd1 = new()
+                                    {
+                                        Connection = msc1
+                                    };
+                                    cmd1.CommandText = $"UPDATE bread SET bread_diversity = 1 WHERE gid = {group};";
+                                    await cmd1.ExecuteNonQueryAsync();
+                                }
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(group, "已将本群供应模式修改为：单一化供应");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
+                                break;
                         }
                     }
                     else
@@ -671,6 +711,96 @@ namespace Net_2kBot.Modules
                             Console.WriteLine("群消息发送失败");
                         }
                     }
+                }
+            }
+        }
+        // 查询原材料库存
+        public static async void QueryMaterial(string group, string executor)
+        {
+            // 连接数据库
+            using (var msc = new MySqlConnection(Global.connectstring))
+            {
+                await msc.OpenAsync();
+                MySqlCommand cmd = new()
+                {
+                    Connection = msc
+                };
+                try
+                {
+                    cmd.CommandText = $"SELECT * FROM material WHERE gid = {group};";
+                    MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                    await reader.ReadAsync();
+                    MessageChain? messageChain = new MessageChainBuilder()
+                    .At(executor)
+                    .Plain($" 现在库存有 {reader.GetInt32("flour")} 份面粉、{reader.GetInt32("egg")} 份鸡蛋、{reader.GetInt32("yeast")} 份酵母")
+                    .Build();
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, messageChain);
+                    }
+                    catch
+                    {
+                        Console.WriteLine("群消息发送失败");
+                    }
+                }
+                catch
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, "本群还没有面包厂！");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("群消息发送失败");
+                    }
+                }
+            }
+        }
+        public static async void QueryMode(string group, string executor)
+        {
+            // 连接数据库
+            using (var msc = new MySqlConnection(Global.connectstring))
+            {
+                await msc.OpenAsync();
+                MySqlCommand cmd = new()
+                {
+                    Connection = msc
+                };
+                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                await reader.ReadAsync();
+                switch (reader.GetInt32("bread_diversity"))
+                {
+                    case 2:
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, "本群供应模式为：无限供应");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("群消息发送失败");
+                        }
+                        break;
+                    case 1:
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, "本群供应模式为：多样化供应");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("群消息发送失败");
+                        }
+                        break;
+                    case 0:
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, "本群供应模式为：单一化供应");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("群消息发送失败");
+                        }
+                        break;
                 }
             }
         }

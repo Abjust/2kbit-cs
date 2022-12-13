@@ -125,7 +125,16 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
   `last_expfull` bigint NOT NULL DEFAULT '946656000' COMMENT '上次达到经验上限时间',
   `last_expgain` bigint NOT NULL DEFAULT '946656000' COMMENT '近24小时首次获取经验时间',
   `last_produce` bigint NOT NULL DEFAULT '946656000' COMMENT '上次完成一轮生产周期时间',
-  PRIMARY KEY (`id`))";
+  PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`material` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `gid` varchar(10) NOT NULL COMMENT 'Q群号',
+  `flour` int NOT NULL DEFAULT 0 COMMENT '面粉数量',
+  `egg` int NOT NULL DEFAULT 0 COMMENT '鸡蛋数量',
+  `yeast` int NOT NULL DEFAULT 0 COMMENT '酵母数量',
+  `last_produce` bigint NOT NULL DEFAULT '946656000' COMMENT '上次完成一轮生产周期时间',
+  PRIMARY KEY (`id`));
+INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid FROM `2kbot`.`bread`";
                 await cmd.ExecuteNonQueryAsync();
             }
             // 在这里添加你的代码，比如订阅消息/事件之类的
@@ -293,14 +302,17 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                                     Bread.Get(x.GroupId, x.Sender.Id, number);
                                 }
                                 break;
-                            case "/bread_diversity":
+                            case "/change_mode":
                                 switch (text1[1])
                                 {
-                                    case "on":
-                                        Bread.Diversity(x.GroupId, 1);
+                                    case "infinite":
+                                        Bread.ChangeMode(x.GroupId, 2);
                                         break;
-                                    case "off":
-                                        Bread.Diversity(x.GroupId, 0);
+                                    case "diversity":
+                                        Bread.ChangeMode(x.GroupId, 1);
+                                        break;
+                                    case "normal":
+                                        Bread.ChangeMode(x.GroupId, 0);
                                         break;
                                 }
                                 break;
@@ -310,7 +322,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     {
                         switch (text1[0])
                         {
-                            case "/querybread":
+                            case "/query_bread":
                                 Bread.Query(x.GroupId, x.Sender.Id);
                                 break;
                             case "/upgrade_factory":
@@ -321,6 +333,12 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                                 break;
                             case "/upgrade_storage":
                                 Bread.UpgradeStorage(x.GroupId);
+                                break;
+                            case "/query_material":
+                                Bread.QueryMaterial(x.GroupId, x.Sender.Id);
+                                break;
+                            case "/query_mode":
+                                Bread.QueryMode(x.GroupId, x.Sender.Id);
                                 break;
                         }
                     }
@@ -1029,7 +1047,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_22w25f\r\n上次更新日期：2022/12/13\r\n更新内容：修复了祖安功能本不该有的bug\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_22w26a\r\n上次更新日期：2022/12/14\r\n更新内容：面包厂机制大更新！\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
@@ -1051,6 +1069,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                 }
             });
             // 运行面包厂生产任务
+            await BreadFactory.MaterialProduce();
             await BreadFactory.BreadProduce();
             Console.ReadLine();
         }
