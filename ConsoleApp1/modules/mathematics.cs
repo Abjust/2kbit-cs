@@ -47,6 +47,8 @@ namespace Net_2kBot.Modules
                 {
                     string formula = receiver.MessageChain.GetPlainMessage().Split(" ")[1];
                     bool is_int = true;
+                    bool negative = false;
+                    double double_ans = 0;
                     decimal decimal_ans = 0;
                     long int_ans = 0;
                     double operand;
@@ -59,7 +61,7 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number) % 1 != 0)
+                                if (double.Parse(number.Replace("n","")) % 1 != 0)
                                 {
                                     is_int = false;
                                     break;
@@ -71,22 +73,50 @@ namespace Net_2kBot.Modules
                                 {
                                     if (i == 0)
                                     {
-                                        int_ans = int.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            int_ans = 0 - int.Parse(operands[i].Replace("n", ""));
+                                        }
+                                        else
+                                        {
+                                            int_ans = int.Parse(operands[i]);
+                                        }
                                     }
                                     else
                                     {
-                                        int_ans += int.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            int_ans += 0 - int.Parse(operands[i]);
+                                        }
+                                        else
+                                        {
+                                            int_ans += int.Parse(operands[i]);
+                                        }
                                     }
                                 }
                                 else
                                 {
                                     if (i == 0)
                                     {
-                                        decimal_ans = (decimal)double.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            decimal_ans = (decimal)(0 - double.Parse(operands[i]));
+                                        }
+                                        else
+                                        {
+                                            decimal_ans = (decimal)double.Parse(operands[i]);
+                                        }
                                     }
                                     else
                                     {
-                                        decimal_ans += (decimal)double.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            decimal_ans += (decimal)(0 - double.Parse(operands[i]));
+                                        }
+                                        else
+                                        {
+                                            decimal_ans += (decimal)(double.Parse(operands[i]));
+                                        }
                                     }
                                 }
                             }
@@ -132,7 +162,7 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number) % 1 != 0)
+                                if (double.Parse(number.Replace("n", "")) % 1 != 0)
                                 {
                                     is_int = false;
                                     break;
@@ -144,22 +174,50 @@ namespace Net_2kBot.Modules
                                 {
                                     if (i == 0)
                                     {
-                                        int_ans = int.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            int_ans = 0 - int.Parse(operands[i].Replace("n", ""));
+                                        }
+                                        else
+                                        {
+                                            int_ans = int.Parse(operands[i]);
+                                        }
                                     }
                                     else
                                     {
-                                        int_ans -= int.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            int_ans -= 0 - int.Parse(operands[i]);
+                                        }
+                                        else
+                                        {
+                                            int_ans -= int.Parse(operands[i]);
+                                        }
                                     }
                                 }
                                 else
                                 {
                                     if (i == 0)
                                     {
-                                        decimal_ans = (decimal)double.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            decimal_ans = (decimal)(0 - double.Parse(operands[i]));
+                                        }
+                                        else
+                                        {
+                                            decimal_ans = (decimal)double.Parse(operands[i]);
+                                        }
                                     }
                                     else
                                     {
-                                        decimal_ans -= (decimal)double.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            decimal_ans -= (decimal)(0 - double.Parse(operands[i]));
+                                        }
+                                        else
+                                        {
+                                            decimal_ans -= (decimal)(double.Parse(operands[i]));
+                                        }
                                     }
                                 }
                             }
@@ -205,7 +263,7 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number) % 1 != 0)
+                                if (double.Parse(number.Replace("n", "")) % 1 != 0)
                                 {
                                     is_int = false;
                                     break;
@@ -217,22 +275,50 @@ namespace Net_2kBot.Modules
                                 {
                                     if (i == 0)
                                     {
-                                        int_ans = int.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            int_ans = 0 - int.Parse(operands[i].Replace("n", ""));
+                                        }
+                                        else
+                                        {
+                                            int_ans = int.Parse(operands[i]);
+                                        }
                                     }
                                     else
                                     {
-                                        int_ans *= int.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            int_ans *= 0 - int.Parse(operands[i]);
+                                        }
+                                        else
+                                        {
+                                            int_ans *= int.Parse(operands[i]);
+                                        }
                                     }
                                 }
                                 else
                                 {
                                     if (i == 0)
                                     {
-                                        decimal_ans = (decimal)double.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            decimal_ans = (decimal)(0 - double.Parse(operands[i]));
+                                        }
+                                        else
+                                        {
+                                            decimal_ans = (decimal)double.Parse(operands[i]);
+                                        }
                                     }
                                     else
                                     {
-                                        decimal_ans *= (decimal)double.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            decimal_ans *= (decimal)(0 - double.Parse(operands[i]));
+                                        }
+                                        else
+                                        {
+                                            decimal_ans *= (decimal)(double.Parse(operands[i]));
+                                        }
                                     }
                                 }
                             }
@@ -278,7 +364,7 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number) % 1 != 0)
+                                if (double.Parse(number.Replace("n", "")) % 1 != 0)
                                 {
                                     is_int = false;
                                     break;
@@ -290,22 +376,50 @@ namespace Net_2kBot.Modules
                                 {
                                     if (i == 0)
                                     {
-                                        int_ans = int.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            int_ans = 0 - int.Parse(operands[i].Replace("n", ""));
+                                        }
+                                        else
+                                        {
+                                            int_ans = int.Parse(operands[i]);
+                                        }
                                     }
                                     else
                                     {
-                                        int_ans /= int.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            int_ans /= 0 - int.Parse(operands[i]);
+                                        }
+                                        else
+                                        {
+                                            int_ans /= int.Parse(operands[i]);
+                                        }
                                     }
                                 }
                                 else
                                 {
                                     if (i == 0)
                                     {
-                                        decimal_ans = (decimal)double.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            decimal_ans = (decimal)(0 - double.Parse(operands[i]));
+                                        }
+                                        else
+                                        {
+                                            decimal_ans = (decimal)double.Parse(operands[i]);
+                                        }
                                     }
                                     else
                                     {
-                                        decimal_ans /= (decimal)double.Parse(operands[i]);
+                                        if (operands[i].Contains("n"))
+                                        {
+                                            decimal_ans /= (decimal)(0 - double.Parse(operands[i]));
+                                        }
+                                        else
+                                        {
+                                            decimal_ans /= (decimal)(double.Parse(operands[i]));
+                                        }
                                     }
                                 }
                             }
@@ -351,8 +465,18 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number) % 1 != 0)
+                                if (!number.Contains("n") && double.Parse(number) % 1 != 0)
                                 {
+                                    is_int = false;
+                                    break;
+                                }
+                                else if (operands[0].Contains("n"))
+                                {
+                                    negative = true;
+                                }
+                                else if (operands[1].Contains("n"))
+                                {
+                                    negative = true;
                                     is_int = false;
                                     break;
                                 }
@@ -363,11 +487,29 @@ namespace Net_2kBot.Modules
                                 {
                                     if (i == 0)
                                     {
-                                        int_ans = int.Parse(operands[i]);
+                                        if (!negative)
+                                        {
+                                            int_ans = int.Parse(operands[i]);
+                                        }
+                                        else
+                                        {
+                                            int_ans = 0 - int.Parse(operands[i].Replace("n", ""));
+                                        }
                                     }
                                     else
                                     {
                                         int_ans = (long)Math.Pow(int_ans, int.Parse(operands[i]));
+                                    }
+                                }
+                                else if (negative && !is_int)
+                                {
+                                    if (i == 0)
+                                    {
+                                        double_ans = double.Parse(operands[i].Replace("n", ""));
+                                    }
+                                    else
+                                    {
+                                        double_ans = Math.Pow(double_ans, 0 - int.Parse(operands[i].Replace("n", "")));
                                     }
                                 }
                                 else
@@ -387,6 +529,17 @@ namespace Net_2kBot.Modules
                                 try
                                 {
                                     await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{int_ans}");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
+                            }
+                            else if (negative && !is_int)
+                            {
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(receiver.GroupId, $"这个算式的答案是：{double_ans}");
                                 }
                                 catch
                                 {
@@ -422,7 +575,14 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            operand = double.Parse(formula.Split("sin")[1]);
+                            if (formula.Split("sin")[1].Contains("n"))
+                            {
+                                operand = 0 - double.Parse(formula.Split("sin")[1].Replace("n",""));
+                            }
+                            else
+                            {
+                                operand = double.Parse(formula.Split("sin")[1]);
+                            }
                             decimal_ans = (decimal)Math.Sin(operand * Math.PI / 180);
                             try
                             {
@@ -449,7 +609,14 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            operand = double.Parse(formula.Split("cos")[1]);
+                            if (formula.Split("cos")[1].Contains("n"))
+                            {
+                                operand = 0 - double.Parse(formula.Split("cos")[1].Replace("n", ""));
+                            }
+                            else
+                            {
+                                operand = double.Parse(formula.Split("cos")[1]);
+                            }
                             decimal_ans = (decimal)Math.Cos(operand * Math.PI / 180);
                             try
                             {
@@ -476,7 +643,14 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            operand = double.Parse(formula.Split("tan")[1]);
+                            if (formula.Split("tan")[1].Contains("n"))
+                            {
+                                operand = 0 - double.Parse(formula.Split("tan")[1].Replace("n", ""));
+                            }
+                            else
+                            {
+                                operand = double.Parse(formula.Split("tan")[1]);
+                            }
                             decimal_ans = (decimal)Math.Tan(operand * Math.PI / 180);
                             try
                             {
@@ -503,7 +677,14 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            operand = double.Parse(formula.Split("cot")[1]);
+                            if (formula.Split("cot")[1].Contains("n"))
+                            {
+                                operand = 0 - double.Parse(formula.Split("cot")[1].Replace("n", ""));
+                            }
+                            else
+                            {
+                                operand = double.Parse(formula.Split("cot")[1]);
+                            }
                             decimal_ans = 1 / (decimal)Math.Tan(operand * Math.PI / 180);
                             try
                             {
