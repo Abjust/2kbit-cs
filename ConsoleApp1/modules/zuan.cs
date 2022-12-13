@@ -63,13 +63,13 @@ namespace Net_2kBot.Modules
                 .Plain(" 你就是歌姬吧")
                 .Build();
             Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-            if (Global.time_now - last_zuanctrl >= zuan_cd)
+            if ((message != null && message[1] == messageChain[0] && message[2] == messageChain[1]) || (@event != null && @event is NudgeEvent))
             {
-                if (Global.time_now - last_zuan <= zuan_cd)
+                if (Global.time_now - last_zuanctrl >= zuan_cd)
                 {
-                    if (zuan_count <= zuan_threshold)
+                    if (Global.time_now - last_zuan <= zuan_cd)
                     {
-                        if ((message != null && message[1] == messageChain[0] && message[2] == messageChain[1]) || (@event != null && @event is NudgeEvent))
+                        if (zuan_count <= zuan_threshold)
                         {
                             Random r = new();
                             int index = r.Next(words.Length);
@@ -89,39 +89,39 @@ namespace Net_2kBot.Modules
                                 Console.WriteLine("祖安失败（恼）");
                             }
                         }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(group, $"祖安太多了，收手罢（恼）（祖安功能将被禁用 {zuan_cd} 秒）");
+                                last_zuanctrl = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                                zuan_count = 0;
+                            }
+                            catch
+                            {
+                                Console.WriteLine("祖安失败（恼）");
+                            }
+                        }
                     }
                     else
                     {
+                        Random r = new();
+                        int index = r.Next(words.Length);
+                        MessageChain? messageChain1 = new MessageChainBuilder()
+                        .At(sender)
+                        .Plain(" ")
+                        .Plain(words[index])
+                        .Build();
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(group, $"祖安太多了，收手罢（恼）（祖安功能将被禁用 {zuan_cd} 秒）");
-                            last_zuanctrl = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-                            zuan_count = 0;
+                            await MessageManager.SendGroupMessageAsync(group, messageChain1);
+                            last_zuan = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                            zuan_count = 1;
                         }
                         catch
                         {
                             Console.WriteLine("祖安失败（恼）");
                         }
-                    }
-                }
-                else
-                {
-                    Random r = new();
-                    int index = r.Next(words.Length);
-                    MessageChain? messageChain1 = new MessageChainBuilder()
-                    .At(sender)
-                    .Plain(" ")
-                    .Plain(words[index])
-                    .Build();
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(group, messageChain1);
-                        last_zuan = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-                        zuan_count = 1;
-                    }
-                    catch
-                    {
-                        Console.WriteLine("祖安失败（恼）");
                     }
                 }
             }
