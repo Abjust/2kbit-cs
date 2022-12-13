@@ -61,7 +61,7 @@ namespace Net_2kBot.Modules
                         {
                             foreach (string number in operands)
                             {
-                                if (double.Parse(number.Replace("n","")) % 1 != 0)
+                                if (double.Parse(number.Replace("n", "")) % 1 != 0)
                                 {
                                     is_int = false;
                                     break;
@@ -577,7 +577,7 @@ namespace Net_2kBot.Modules
                         {
                             if (formula.Split("sin")[1].Contains("n"))
                             {
-                                operand = 0 - double.Parse(formula.Split("sin")[1].Replace("n",""));
+                                operand = 0 - double.Parse(formula.Split("sin")[1].Replace("n", ""));
                             }
                             else
                             {

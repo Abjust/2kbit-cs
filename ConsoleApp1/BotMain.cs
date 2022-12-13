@@ -133,22 +133,11 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
             // 戳一戳效果
             bot.EventReceived
             .OfType<NudgeEvent>()
-            .Subscribe(async receiver =>
+            .Subscribe(receiver =>
             {
                 if (receiver.Target == Global.bot_qq && receiver.Subject.Kind == "Group")
                 {
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(receiver.Subject.Id, "握草泥马呀—\r\n我操尼玛啊啊啊啊—\r\n我—操—你—妈—\r\n听到没，我—操—你—妈—");
-                    }
-                    catch
-                    {
-                        Console.WriteLine("握草泥马呀—\r\n我操尼玛啊啊啊啊—\r\n我—操—你—妈—\r\n听到没，我—操—你—妈—");
-                    }
-                }
-                else if (receiver.Target == Global.bot_qq && receiver.Subject.Kind == "Friend")
-                {
-                    await MessageManager.SendFriendMessageAsync(receiver.Subject.Id, "cnmlgbd，还跑到私信里来了？");
+                    Zuan.Execute(receiver.FromId, receiver.Subject.Id, @event: receiver);
                 }
             });
             // bot加群
@@ -548,7 +537,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                     // 精神心理疾病科普
                     MentalHealth.Execute(x);
                     // 处理“你就是歌姬吧”（祖安）
-                    Zuan.Execute(x);
+                    Zuan.Execute(x.Sender.Id, x.GroupId, x.MessageChain);
                     // 群管功能
                     // 禁言
                     if (x.MessageChain.GetPlainMessage().StartsWith("/mute") && !x.MessageChain.GetPlainMessage().StartsWith("/muteme"))
@@ -1040,7 +1029,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_22w25d\r\n上次更新日期：2022/12/13\r\n更新内容：将一些无需全局调用的全局变量改为了局部变量\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_22w25e\r\n上次更新日期：2022/12/13\r\n更新内容：优化了祖安功能\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {

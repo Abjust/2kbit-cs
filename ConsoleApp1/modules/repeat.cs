@@ -280,7 +280,7 @@ namespace Net_2kBot.Modules
                             }
                         }
                     }
-                }      
+                }
             }
         }
     }
