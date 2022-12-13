@@ -18,6 +18,9 @@ namespace Net_2kBot.Modules
 {
     public class Repeat
     {
+        public const int repeat_cd = 300;
+        public const int repeat_threshold = 5;
+        public const int repeat_interval = 10;
         public static async void Execute(MessageReceiverBase @base)
         {
             string[] repeatwords =
@@ -131,9 +134,9 @@ namespace Net_2kBot.Modules
                                     cmd.CommandText = $"SELECT * FROM repeatctrl WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                     await reader.ReadAsync();
-                                    if (Global.time_now - reader.GetInt64("last_repeatctrl") >= Global.repeat_cd)
+                                    if (Global.time_now - reader.GetInt64("last_repeatctrl") >= repeat_cd)
                                     {
-                                        if (Global.time_now - reader.GetInt64("last_repeat") <= Global.repeat_interval)
+                                        if (Global.time_now - reader.GetInt64("last_repeat") <= repeat_interval)
                                         {
                                             using (var msc1 = new MySqlConnection(Global.connectstring))
                                             {
@@ -142,7 +145,7 @@ namespace Net_2kBot.Modules
                                                 {
                                                     Connection = msc1
                                                 };
-                                                if (reader.GetInt32("repeat_count") <= Global.repeat_threshold)
+                                                if (reader.GetInt32("repeat_count") <= repeat_threshold)
                                                 {
                                                     cmd1.CommandText = $"UPDATE repeatctrl SET last_repeat = {Global.time_now} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                                     await cmd1.ExecuteNonQueryAsync();
@@ -157,7 +160,7 @@ namespace Net_2kBot.Modules
                                                     {
                                                         var messageChain = new MessageChainBuilder()
                                                        .At(receiver.Sender.Id)
-                                                       .Plain($" 你话太多了（恼）（你的消息将在 {Global.repeat_cd} 秒内不被复读）")
+                                                       .Plain($" 你话太多了（恼）（你的消息将在 {repeat_cd} 秒内不被复读）")
                                                        .Build();
                                                         await receiver.SendMessageAsync(messageChain);
                                                         await reader.CloseAsync();
@@ -216,9 +219,9 @@ namespace Net_2kBot.Modules
                                     cmd.CommandText = $"SELECT * FROM repeatctrl WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                     await reader.ReadAsync();
-                                    if (Global.time_now - reader.GetInt64("last_repeatctrl") >= Global.repeat_cd)
+                                    if (Global.time_now - reader.GetInt64("last_repeatctrl") >= repeat_cd)
                                     {
-                                        if (Global.time_now - reader.GetInt64("last_repeat") <= Global.repeat_interval)
+                                        if (Global.time_now - reader.GetInt64("last_repeat") <= repeat_interval)
                                         {
                                             using (var msc1 = new MySqlConnection(Global.connectstring))
                                             {
@@ -227,7 +230,7 @@ namespace Net_2kBot.Modules
                                                 {
                                                     Connection = msc1
                                                 };
-                                                if (reader.GetInt32("repeat_count") <= Global.repeat_threshold)
+                                                if (reader.GetInt32("repeat_count") <= repeat_threshold)
                                                 {
                                                     cmd1.CommandText = $"UPDATE repeatctrl SET last_repeat = {Global.time_now} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                                     await cmd1.ExecuteNonQueryAsync();
@@ -242,7 +245,7 @@ namespace Net_2kBot.Modules
                                                     {
                                                         var messageChain = new MessageChainBuilder()
                                                        .At(receiver.Sender.Id)
-                                                       .Plain($" 你话太多了（恼）（你的消息将在 {Global.repeat_cd} 秒内不被复读）")
+                                                       .Plain($" 你话太多了（恼）（你的消息将在 {repeat_cd} 秒内不被复读）")
                                                        .Build();
                                                         await receiver.SendMessageAsync(messageChain);
                                                         await reader.CloseAsync();

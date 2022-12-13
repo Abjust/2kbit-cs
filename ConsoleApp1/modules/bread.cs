@@ -19,6 +19,7 @@ namespace Net_2kBot.Modules
 {
     public static class Bread
     {
+        public const int breadfactory_maxlevel = 5;
         // 建造面包厂
         public static async void BuildFactory(string group)
         {
@@ -538,7 +539,7 @@ namespace Net_2kBot.Modules
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
                     int exp_formula = (int)(900 * Math.Pow(2, reader.GetInt32("factory_level") - 1));
-                    if (reader.GetInt32("factory_level") < Global.breadfactory_maxlevel)
+                    if (reader.GetInt32("factory_level") < breadfactory_maxlevel)
                     {
                         if (reader.GetInt32("factory_exp") >= exp_formula)
                         {
@@ -620,7 +621,7 @@ namespace Net_2kBot.Modules
                     cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
-                    if (reader.GetInt32("factory_level") == Global.breadfactory_maxlevel)
+                    if (reader.GetInt32("factory_level") == breadfactory_maxlevel)
                     {
                         if (reader.GetInt32("factory_exp") >= 2000)
                         {
@@ -663,7 +664,7 @@ namespace Net_2kBot.Modules
                     {
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(group, $"本群面包厂尚未满级！（tips：面包厂满级为 {Global.breadfactory_maxlevel} 级）");
+                            await MessageManager.SendGroupMessageAsync(group, $"本群面包厂尚未满级！（tips：面包厂满级为 {breadfactory_maxlevel} 级）");
                         }
                         catch
                         {

@@ -16,6 +16,8 @@ namespace Net_2kBot.Modules
 {
     public class Call
     {
+        public const int call_cd = 40;
+        public static long last_call;
         // 叫人功能
         public static async void Execute(string victim, string group, int times)
         {
@@ -28,14 +30,14 @@ namespace Net_2kBot.Modules
                                .Plain(" 机器人正在呼叫你")
                                .Build();
             Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-            if (Global.time_now - Global.last_call >= Global.call_cd)
+            if (Global.time_now - last_call >= call_cd)
             {
                 for (int i = 0; i < times; i++)
                 {
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(group, messageChain);
-                        Global.last_call = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                        last_call = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                     }
                     catch
                     {
@@ -48,7 +50,7 @@ namespace Net_2kBot.Modules
                 Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                 try
                 {
-                    await MessageManager.SendGroupMessageAsync(group, $"CD未到，请别急！CD还剩： {Global.call_cd - (Global.time_now - Global.last_call)} 秒");
+                    await MessageManager.SendGroupMessageAsync(group, $"CD未到，请别急！CD还剩： {call_cd - (Global.time_now - last_call)} 秒");
                 }
                 catch
                 {

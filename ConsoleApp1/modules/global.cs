@@ -19,13 +19,7 @@ namespace Net_2kBot.Modules
         public static List<string>? g_blocklist;
         public static List<string>? ignores;
         public static List<string>? g_ignores;
-        public static long last_call;
         public static long time_now;
-        public const int call_cd = 40;
-        public const int repeat_cd = 300;
-        public const int repeat_threshold = 5;
-        public const int repeat_interval = 10;
-        public const int breadfactory_maxlevel = 5;
         public static readonly string path = Directory.GetCurrentDirectory();
         public static string owner_qq = "";
         public static string api = "";
