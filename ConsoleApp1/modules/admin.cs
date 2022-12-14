@@ -671,7 +671,7 @@ namespace Net_2kBot.Modules
             await msc.OpenAsync();
             if (executor == Global.owner_qq || Global.g_ops != null && Global.g_ops.Contains(executor))
             {
-                if (Global.g_ops != null && !Global.g_ops.Contains(victim))
+                if (Global.g_ops == null || !Global.g_ops.Contains(victim))
                 {
                     cmd.CommandText = $"INSERT INTO g_ops (qid) VALUES ({victim});";
                     await cmd.ExecuteNonQueryAsync();
