@@ -661,7 +661,7 @@ namespace Net_2kBot.Modules
                     cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
-                    int exp_formula = (int)(2000 * Math.Pow(1.28, reader.GetInt32("factory_level") - 1));
+                    int exp_formula = (int)(2000 * Math.Pow(1.28, reader.GetInt32("storage_upgraded")));
                     if (reader.GetInt32("factory_level") == breadfactory_maxlevel)
                     {
                         if (reader.GetInt32("factory_exp") >= exp_formula)
@@ -675,7 +675,7 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET storage_upgraded = {reader.GetInt32("storage_upgraded") + 1}, factory_exp = {reader.GetInt32("factory_exp") - 2000} WHERE gid = {group};";
+                                    cmd1.CommandText = $"UPDATE bread SET storage_upgraded = {reader.GetInt32("storage_upgraded") + 1}, factory_exp = {reader.GetInt32("factory_exp") - exp_formula} WHERE gid = {group};";
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 await reader.CloseAsync();
@@ -707,7 +707,7 @@ namespace Net_2kBot.Modules
                         {
                             try
                             {
-                                await MessageManager.SendGroupMessageAsync(group, $"很抱歉，目前本群还需要 {2000 - reader.GetInt32("factory_exp")} 经验才能升级");
+                                await MessageManager.SendGroupMessageAsync(group, $"很抱歉，目前本群还需要 {exp_formula - reader.GetInt32("factory_exp")} 经验才能升级");
                             }
                             catch
                             {

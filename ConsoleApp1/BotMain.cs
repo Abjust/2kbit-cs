@@ -1047,7 +1047,7 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_22w26b\r\n上次更新日期：2022/12/14\r\n更新内容：修复了面包厂机制更新导致的bug；调整面包厂库存升级经验公式\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_22w26c\r\n上次更新日期：2022/12/14\r\n更新内容：修复了面包厂库存升级经验公式的bug\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
