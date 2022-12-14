@@ -661,31 +661,46 @@ namespace Net_2kBot.Modules
                     cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
+                    int exp_formula = (int)(2000 * Math.Pow(1.28, reader.GetInt32("factory_level") - 1));
                     if (reader.GetInt32("factory_level") == breadfactory_maxlevel)
                     {
-                        if (reader.GetInt32("factory_exp") >= 2000)
+                        if (reader.GetInt32("factory_exp") >= exp_formula)
                         {
-                            using (var msc1 = new MySqlConnection(Global.connectstring))
+                            if (reader.GetInt32("storage_upgraded") < 16)
                             {
-                                await msc1.OpenAsync();
-                                MySqlCommand cmd1 = new()
+                                using (var msc1 = new MySqlConnection(Global.connectstring))
                                 {
-                                    Connection = msc1
-                                };
-                                cmd1.CommandText = $"UPDATE bread SET storage_upgraded = {reader.GetInt32("storage_upgraded") + 1}, factory_exp = {reader.GetInt32("factory_exp") - 2000} WHERE gid = {group};";
-                                await cmd1.ExecuteNonQueryAsync();
+                                    await msc1.OpenAsync();
+                                    MySqlCommand cmd1 = new()
+                                    {
+                                        Connection = msc1
+                                    };
+                                    cmd1.CommandText = $"UPDATE bread SET storage_upgraded = {reader.GetInt32("storage_upgraded") + 1}, factory_exp = {reader.GetInt32("factory_exp") - 2000} WHERE gid = {group};";
+                                    await cmd1.ExecuteNonQueryAsync();
+                                }
+                                await reader.CloseAsync();
+                                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                                reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                                await reader.ReadAsync();
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(group, $"恭喜，本群面包厂库存升级成功辣！现在面包厂可以储存 {(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块面包");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
                             }
-                            await reader.CloseAsync();
-                            cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
-                            reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
-                            await reader.ReadAsync();
-                            try
+                            else
                             {
-                                await MessageManager.SendGroupMessageAsync(group, $"恭喜，本群面包厂库存升级成功辣！现在面包厂可以储存 {(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块面包");
-                            }
-                            catch
-                            {
-                                Console.WriteLine("群消息发送失败");
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(group, "本群面包厂库存已经无法再升级了！（tips：目前本群面包厂的库存已经可以存放2^30块面包了！）");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
                             }
                         }
                         else
@@ -756,7 +771,8 @@ namespace Net_2kBot.Modules
                 }
             }
         }
-        public static async void QueryMode(string group, string executor)
+        // 查询生产模式
+        public static async void QueryMode(string group)
         {
             // 连接数据库
             using (var msc = new MySqlConnection(Global.connectstring))

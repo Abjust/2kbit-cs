@@ -9,7 +9,6 @@
 
 // 致所有构建及修改2kbot代码片段的用户：作者（Abjust）并不承担构建2kbot代码片段（包括修改过的版本）所产生的一切风险，但是用户有权在2kbot的GitHub项目页提出issue，并有权在代码片段修复这些问题后获取这些更新，但是，作者不会对修改过的代码版本做质量保证，也没有义务修正在修改过的代码片段中存在的任何缺陷。
 
-using Mirai.Net.Data.Shared;
 using MySql.Data.MySqlClient;
 
 namespace Net_2kBot.Modules
@@ -50,8 +49,14 @@ namespace Net_2kBot.Modules
                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                             await reader.ReadAsync();
                             int formula = (int)Math.Pow(4, reader.GetInt32("factory_level"));
-                            speed1 = 270 - (20 * (reader.GetInt32("factory_level") - 1));
-                            if (reader.GetInt32("bread_diversity") != 2)
+                            int maxstorage = (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")));
+                            bool is_full = false;
+                            if (reader.GetInt32("breads") == maxstorage) 
+                            {
+                                is_full = true;
+                            }
+                            speed1 = 300 - (20 * (reader.GetInt32("factory_level") - 1));
+                            if (reader.GetInt32("bread_diversity") != 2 && !is_full)
                             {
                                 Random r = new();
                                 int random = r.Next(1, formula);
@@ -72,7 +77,6 @@ namespace Net_2kBot.Modules
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                 }
-                                await reader.CloseAsync();
                             }
                             await reader.CloseAsync();
                         }
@@ -113,22 +117,22 @@ namespace Net_2kBot.Modules
                             await reader.ReadAsync();
                             if (reader.GetInt32("bread_diversity") != 2)
                             {
-                                int formula = (int)Math.Pow(4, reader.GetInt32("factory_level"));
                                 speed2 = 300 - (20 * (reader.GetInt32("factory_level") - 1));
                                 int maxstorage = (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")));
+                                int bread_diversity = reader.GetInt32("bread_diversity");
                                 await reader.CloseAsync();
                                 int random = 0;
                                 Random r = new();
                                 cmd.CommandText = $"SELECT * FROM material WHERE gid = {groupid};";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
-                                if (reader.GetInt32("yeast") == 1)
+                                if (Math.Floor(reader.GetInt32("yeast") / Math.Pow(4, bread_diversity)) == 1)
                                 {
                                     random = 1;
                                 }
-                                else
+                                else if (reader.GetInt32("yeast") > 1)
                                 {
-                                    random = r.Next(1, reader.GetInt32("yeast"));
+                                    random = r.Next(1, (int)Math.Floor(reader.GetInt32("yeast") / Math.Pow(4, bread_diversity)));
                                 }
                                 await reader.CloseAsync();
                                 cmd.CommandText = $"SELECT * FROM bread WHERE gid = {groupid};";
@@ -149,24 +153,33 @@ namespace Net_2kBot.Modules
                                         };
                                         if (reader.GetInt32("breads") + random < maxstorage)
                                         {
-                                            cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") + random} WHERE gid = {groupid};";
+                                            cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") + random * Math.Pow(4, bread_diversity)} WHERE gid = {groupid};";
                                             await cmd1.ExecuteNonQueryAsync();
-                                            cmd1.CommandText = $"UPDATE material SET flour = {reader.GetInt32("flour") - random * 5 * Math.Pow(4, reader.GetInt32("bread_diversity"))}, egg = {reader.GetInt32("egg") - random * 2 * Math.Pow(4, reader.GetInt32("bread_diversity"))}, yeast = {reader.GetInt32("yeast") - random * Math.Pow(4, reader.GetInt32("bread_diversity"))} WHERE gid = {groupid};";
+                                            await reader.CloseAsync();
+                                            cmd.CommandText = $"SELECT * FROM material WHERE gid = {groupid};";
+                                            reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                                            await reader.ReadAsync();
+                                            cmd1.CommandText = $"UPDATE material SET flour = {reader.GetInt32("flour") - random * 5 * Math.Pow(4, bread_diversity)}, egg = {reader.GetInt32("egg") - random * 2 * Math.Pow(4, bread_diversity)}, yeast = {reader.GetInt32("yeast") - random * Math.Pow(4, bread_diversity)} WHERE gid = {groupid};";
                                             await cmd1.ExecuteNonQueryAsync();
                                         }
                                         else if (reader.GetInt32("breads") + random >= maxstorage)
                                         {
+                                            int difference = maxstorage - reader.GetInt32("breads");
                                             cmd1.CommandText = $"UPDATE bread SET breads = {maxstorage} WHERE gid = {groupid};";
                                             await cmd1.ExecuteNonQueryAsync();
-                                            cmd1.CommandText = $"UPDATE material SET flour = {reader.GetInt32("flour") - (reader.GetInt32("breads") - maxstorage) * 5 * Math.Pow(4, reader.GetInt32("bread_diversity"))}, egg = {reader.GetInt32("egg") - (reader.GetInt32("breads") - maxstorage) * 2 * Math.Pow(4, reader.GetInt32("bread_diversity"))}, yeast = {reader.GetInt32("yeast") - (reader.GetInt32("breads") - maxstorage) * Math.Pow(4, reader.GetInt32("bread_diversity"))} WHERE gid = {groupid};";
+                                            await reader.CloseAsync();
+                                            cmd.CommandText = $"SELECT * FROM material WHERE gid = {groupid};";
+                                            reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                                            await reader.ReadAsync();
+                                            cmd1.CommandText = $"UPDATE material SET flour = {reader.GetInt32("flour") - difference * 5 * Math.Pow(4, bread_diversity)}, egg = {reader.GetInt32("egg") - difference * 2 * Math.Pow(4, bread_diversity)}, yeast = {reader.GetInt32("yeast") - difference * Math.Pow(4, bread_diversity)} WHERE gid = {groupid};";
                                             await cmd1.ExecuteNonQueryAsync();
                                         }
                                         cmd1.CommandText = $"UPDATE bread SET last_produce = {new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()} WHERE gid = {groupid};";
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                 }
-                                await reader.CloseAsync();
                             }
+                            await reader.CloseAsync();
                         }
                     }
                     Thread.Sleep(500);

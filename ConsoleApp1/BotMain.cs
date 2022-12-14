@@ -338,7 +338,7 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                                 Bread.QueryMaterial(x.GroupId, x.Sender.Id);
                                 break;
                             case "/query_mode":
-                                Bread.QueryMode(x.GroupId, x.Sender.Id);
+                                Bread.QueryMode(x.GroupId);
                                 break;
                         }
                     }
@@ -1047,7 +1047,7 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_22w26a\r\n上次更新日期：2022/12/14\r\n更新内容：面包厂机制大更新！\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_22w26b\r\n上次更新日期：2022/12/14\r\n更新内容：修复了面包厂机制更新导致的bug；调整面包厂库存升级经验公式\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
@@ -1069,8 +1069,12 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                 }
             });
             // 运行面包厂生产任务
-            await BreadFactory.MaterialProduce();
-            await BreadFactory.BreadProduce();
+            var Tasks = new Task[]
+            {
+                Task.Run(async () => await BreadFactory.MaterialProduce()),
+                Task.Run(async () => await BreadFactory.BreadProduce())
+            };
+            await Task.WhenAll(Tasks);
             Console.ReadLine();
         }
     }
