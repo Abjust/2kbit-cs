@@ -151,7 +151,14 @@ namespace Net_2kBot.Modules
                                                     await cmd1.ExecuteNonQueryAsync();
                                                     cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = {reader.GetInt32("repeat_count") + 1} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                                     await cmd1.ExecuteNonQueryAsync();
-                                                    await receiver.SendMessageAsync(receiver.MessageChain[1].ToMessageChain());
+                                                    try
+                                                    {
+                                                        await receiver.SendMessageAsync(receiver.MessageChain[1].ToMessageChain());
+                                                    }
+                                                    catch
+                                                    {
+                                                        Console.WriteLine("复读失败（恼）");
+                                                    }
                                                     await reader.CloseAsync();
                                                 }
                                                 else
@@ -186,7 +193,14 @@ namespace Net_2kBot.Modules
                                                 };
                                                 cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = 1, last_repeat = {Global.time_now} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                                 await cmd1.ExecuteNonQueryAsync();
-                                                await receiver.SendMessageAsync(receiver.MessageChain[1].ToMessageChain());
+                                                try
+                                                {
+                                                    await receiver.SendMessageAsync(receiver.MessageChain[1].ToMessageChain());
+                                                }
+                                                catch
+                                                {
+                                                    Console.WriteLine("复读失败（恼）");
+                                                }
                                                 await reader.CloseAsync();
                                             }
                                         }
@@ -236,7 +250,14 @@ namespace Net_2kBot.Modules
                                                     await cmd1.ExecuteNonQueryAsync();
                                                     cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = {reader.GetInt32("repeat_count") + 1} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                                     await cmd1.ExecuteNonQueryAsync();
-                                                    await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                                    try
+                                                    {
+                                                        await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                                    }
+                                                    catch
+                                                    {
+                                                        Console.WriteLine("复读失败（恼）");
+                                                    }
                                                     await reader.CloseAsync();
                                                 }
                                                 else
@@ -271,7 +292,14 @@ namespace Net_2kBot.Modules
                                                 };
                                                 cmd1.CommandText = $"UPDATE repeatctrl SET repeat_count = 1, last_repeat = {Global.time_now} WHERE qid = {receiver.Sender.Id} AND gid = {receiver.GroupId};";
                                                 await cmd1.ExecuteNonQueryAsync();
-                                                await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                                try
+                                                {
+                                                    await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                                }
+                                                catch
+                                                {
+                                                    Console.WriteLine("复读失败（恼）");
+                                                }
                                                 await reader.CloseAsync();
                                             }
                                         }

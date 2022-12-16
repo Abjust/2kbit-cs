@@ -14,12 +14,14 @@ using Mirai.Net.Data.Events.Concretes.Group;
 using Mirai.Net.Data.Events.Concretes.Message;
 using Mirai.Net.Data.Events.Concretes.Request;
 using Mirai.Net.Data.Messages;
+using Mirai.Net.Data.Messages.Concretes;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Data.Shared;
 using Mirai.Net.Sessions;
 using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
 using MySql.Data.MySqlClient;
+using MySqlX.XDevAPI.Common;
 using Net_2kBot.Modules;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -149,6 +151,13 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                     Zuan.Execute(receiver.FromId, receiver.Subject.Id, @event: receiver);
                 }
             });
+            // bot被加好友
+            bot.EventReceived
+            .OfType<NewFriendRequestedEvent>()
+            .Subscribe(async e =>
+            {
+                await e.ApproveAsync();
+            });
             // bot加群
             bot.EventReceived
             .OfType<NewInvitationRequestedEvent>()
@@ -276,7 +285,63 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                     Console.WriteLine("群消息发送失败");
                 }
             });
-            // bot对接收消息的处理
+            // bot对接收私聊消息的处理
+            bot.MessageReceived
+           .OfType<FriendMessageReceiver>()
+           .Subscribe(async x =>
+           {
+               if (x.FriendId != Global.owner_qq)
+               {
+                   MessageChain? messageChain = new MessageChainBuilder()
+                   .Plain($"消息来自：{x.FriendName} ({x.FriendId})\n消息内容：")
+                   .Build();
+                   foreach (MessageBase message in x.MessageChain)
+                   {
+                       messageChain.Add(message);
+                   }
+                   await MessageManager.SendFriendMessageAsync(Global.owner_qq, messageChain);
+                   await MessageManager.SendFriendMessageAsync(Global.owner_qq, "你可以使用/send <目标QQ> <消息>来发送私聊消息");
+               }
+               else if (x.FriendId == Global.owner_qq && x.MessageChain.GetPlainMessage().StartsWith("/send"))
+               {
+                   string[] result = x.MessageChain.GetPlainMessage().Split(" ");
+                   if (result.Length > 2)
+                   {
+                       try
+                       {
+                           string results = "";
+                           for (int i = 2; i < result.Length; i++)
+                           {
+                               if (i == 2)
+                               {
+                                   results = result[i];
+                               }
+                               else
+                               {
+                                   results = results + " " + result[i];
+                               }
+                           }
+                           try
+                           {
+                               await MessageManager.SendFriendMessageAsync(result[1], results);
+                           }
+                           catch
+                           {
+                               await x.SendMessageAsync("私聊消息发送失败");
+                           }
+                       }
+                       catch
+                       {
+                           await x.SendMessageAsync("参数错误");
+                       }
+                   }
+                   else
+                   {
+                       await x.SendMessageAsync("参数错误");
+                   }
+               }
+            });
+            // bot对接收群消息的处理
             bot.MessageReceived
             .OfType<GroupMessageReceiver>()
             .Subscribe(async x =>
@@ -1047,7 +1112,7 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_22w26d\r\n上次更新日期：2022/12/14\r\n更新内容：解决了无法设置全局管理员的问题\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_22w27a\r\n上次更新日期：2022/12/16\r\n更新内容：现在私聊消息会转发给机器人主人了；主人现在可以向其他人发送私聊消息\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
