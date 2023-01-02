@@ -80,7 +80,7 @@ namespace Net_2kBot.Modules
                     await reader.ReadAsync();
                     if (reader.GetInt32("bread_diversity") == 0)
                     {
-                        if (number + reader.GetInt32("breads") <= (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded"))))
+                        if (number >= 1 && number + reader.GetInt32("breads") <= (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded"))))
                         {
                             using (var msc1 = new MySqlConnection(Global.connectstring))
                             {
@@ -107,6 +107,17 @@ namespace Net_2kBot.Modules
                                 {
                                     Console.WriteLine("群消息发送失败");
                                 }
+                            }
+                        }
+                        else if (number < 1)
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(group, "这样的数字是没有意义的。。。");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
                             }
                         }
                         else
@@ -244,27 +255,41 @@ namespace Net_2kBot.Modules
                             }
                             else
                             {
-                                using (var msc1 = new MySqlConnection(Global.connectstring))
+                                if (number >= 1)
                                 {
-                                    await msc1.OpenAsync();
-                                    MySqlCommand cmd1 = new()
+                                    using (var msc1 = new MySqlConnection(Global.connectstring))
                                     {
-                                        Connection = msc1
-                                    };
-                                    cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") - number} WHERE gid = {group};";
-                                    await cmd1.ExecuteNonQueryAsync();
+                                        await msc1.OpenAsync();
+                                        MySqlCommand cmd1 = new()
+                                        {
+                                            Connection = msc1
+                                        };
+                                        cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") - number} WHERE gid = {group};";
+                                        await cmd1.ExecuteNonQueryAsync();
+                                    }
+                                    MessageChain? messageChain = new MessageChainBuilder()
+                                   .At(executor)
+                                   .Plain($" 🍞*{number}")
+                                   .Build();
+                                    try
+                                    {
+                                        await MessageManager.SendGroupMessageAsync(group, messageChain);
+                                    }
+                                    catch
+                                    {
+                                        Console.WriteLine("群消息发送失败");
+                                    }
                                 }
-                                MessageChain? messageChain = new MessageChainBuilder()
-                               .At(executor)
-                               .Plain($" 🍞*{number}")
-                               .Build();
-                                try
+                                else
                                 {
-                                    await MessageManager.SendGroupMessageAsync(group, messageChain);
-                                }
-                                catch
-                                {
-                                    Console.WriteLine("群消息发送失败");
+                                    try
+                                    {
+                                        await MessageManager.SendGroupMessageAsync(group, "这样的数字是没有意义的。。。");
+                                    }
+                                    catch
+                                    {
+                                        Console.WriteLine("群消息发送失败");
+                                    }
                                 }
                             }
                         }
@@ -453,7 +478,7 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET bread_diversity = 1 WHERE gid = {group};";
+                                    cmd1.CommandText = $"UPDATE bread SET bread_diversity = 0 WHERE gid = {group};";
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 try
