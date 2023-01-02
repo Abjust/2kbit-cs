@@ -309,7 +309,7 @@ namespace Net_2kBot.Modules
                 }
             }
         }
-        // 查询面包库存
+        // 查询面包厂信息
         public static async void Query(string group, string executor)
         {
             // 连接数据库
@@ -322,12 +322,43 @@ namespace Net_2kBot.Modules
                 };
                 try
                 {
-                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                    cmd.CommandText = $"SELECT * FROM material WHERE gid = {group};";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
+                    int flour = reader.GetInt32("flour");
+                    int egg = reader.GetInt32("egg");
+                    int yeast = reader.GetInt32("yeast");
+                    await reader.CloseAsync();
+                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                    reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                    await reader.ReadAsync();
+                    string mode = "";
+                    switch (reader.GetInt32("bread_diversity"))
+                    {
+                        case 2:
+                            mode = "无限供应";
+                            break;
+                        case 1:
+                            mode = "多样化供应";
+                            break;
+                        case 0:
+                            mode = "单一化供应";
+                            break;
+                    }
                     MessageChain? messageChain = new MessageChainBuilder()
                     .At(executor)
-                    .Plain($" 现在库存有 {reader.GetInt32("breads")} 块面包，本群面包厂目前最多可储存 {(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块面包")
+                    .Plain($@"
+本群 ({group}) 面包厂信息如下：
+-----面包厂属性-----
+面包厂等级：{reader.GetInt32("factory_level")}/{breadfactory_maxlevel} 级
+库存升级次数：{reader.GetInt32("storage_upgraded")} 次
+面包厂经验：{reader.GetInt32("factory_exp")} XP
+今日已获得经验：{reader.GetInt32("exp_gained_today")}/{(int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
+生产（供应）模式：{mode}
+-----物品库存-----
+现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
+现有面包：{reader.GetInt32("breads")}/{(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
+")
                     .Build();
                     try
                     {

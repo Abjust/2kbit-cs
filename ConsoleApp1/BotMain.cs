@@ -14,14 +14,12 @@ using Mirai.Net.Data.Events.Concretes.Group;
 using Mirai.Net.Data.Events.Concretes.Message;
 using Mirai.Net.Data.Events.Concretes.Request;
 using Mirai.Net.Data.Messages;
-using Mirai.Net.Data.Messages.Concretes;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Data.Shared;
 using Mirai.Net.Sessions;
 using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
 using MySql.Data.MySqlClient;
-using MySqlX.XDevAPI.Common;
 using Net_2kBot.Modules;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -387,7 +385,7 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                     {
                         switch (text1[0])
                         {
-                            case "/query_bread":
+                            case "/query":
                                 Bread.Query(x.GroupId, x.Sender.Id);
                                 break;
                             case "/upgrade_factory":
@@ -398,12 +396,6 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                                 break;
                             case "/upgrade_storage":
                                 Bread.UpgradeStorage(x.GroupId);
-                                break;
-                            case "/query_material":
-                                Bread.QueryMaterial(x.GroupId, x.Sender.Id);
-                                break;
-                            case "/query_mode":
-                                Bread.QueryMode(x.GroupId);
                                 break;
                         }
                     }
@@ -1112,7 +1104,7 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_22w27a\r\n上次更新日期：2022/12/16\r\n更新内容：现在私聊消息会转发给机器人主人了；主人现在可以向其他人发送私聊消息\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_22w27b\r\n上次更新日期：2023/1/2\r\n更新内容：将面包厂查询功能进行了合并和修改\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
