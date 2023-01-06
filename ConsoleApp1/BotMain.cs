@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`material` (
   `yeast` int NOT NULL DEFAULT 0 COMMENT '酵母数量',
   `last_produce` bigint NOT NULL DEFAULT '946656000' COMMENT '上次完成一轮生产周期时间',
   PRIMARY KEY (`id`));
-INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid FROM `2kbot`.`bread`";
+INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid FROM `{Global.database_name}`.`bread`";
                 await cmd.ExecuteNonQueryAsync();
             }
             // 在这里添加你的代码，比如订阅消息/事件之类的
@@ -1104,7 +1104,7 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_22w27c\r\n上次更新日期：2023/1/2\r\n更新内容：修复了可以获取或者给予零块甚至负数块面包的bug；修复了无法切换成单一化供应的bug\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_22w27d\r\n上次更新日期：2023/1/6\r\n更新内容：修复了无法将面包厂数据表的编号和群号复制到原材料数据表的bug\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
