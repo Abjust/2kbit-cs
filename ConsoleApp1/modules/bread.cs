@@ -358,6 +358,11 @@ namespace Net_2kBot.Modules
                     reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
                     string mode = "";
+                    bool is_maxlevel = false;
+                    if (reader.GetInt32("factory_level") == breadfactory_maxlevel)
+                    {
+                        is_maxlevel = true;
+                    }
                     switch (reader.GetInt32("bread_diversity"))
                     {
                         case 2:
@@ -370,21 +375,43 @@ namespace Net_2kBot.Modules
                             mode = "单一化供应";
                             break;
                     }
-                    MessageChain? messageChain = new MessageChainBuilder()
+                    MessageChain messageChain;
+                    if (is_maxlevel)
+                    {
+                     messageChain = new MessageChainBuilder()
                     .At(executor)
                     .Plain($@"
 本群 ({group}) 面包厂信息如下：
 -----面包厂属性-----
-面包厂等级：{reader.GetInt32("factory_level")}/{breadfactory_maxlevel} 级
+面包厂等级：{reader.GetInt32("factory_level")} / {breadfactory_maxlevel} 级
 库存升级次数：{reader.GetInt32("storage_upgraded")} 次
-面包厂经验：{reader.GetInt32("factory_exp")} XP
-今日已获得经验：{reader.GetInt32("exp_gained_today")}/{(int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
+面包厂经验：{reader.GetInt32("factory_exp")} / {(int)(2000 * Math.Pow(1.28, reader.GetInt32("storage_upgraded")))} XP
+今日已获得经验：{reader.GetInt32("exp_gained_today")} / {(int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
 生产（供应）模式：{mode}
 -----物品库存-----
 现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
-现有面包：{reader.GetInt32("breads")}/{(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
+现有面包：{reader.GetInt32("breads")} / {(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
 ")
                     .Build();
+                    }
+                    else
+                    {
+                        messageChain = new MessageChainBuilder()
+                       .At(executor)
+                       .Plain($@"
+本群 ({group}) 面包厂信息如下：
+-----面包厂属性-----
+面包厂等级：{reader.GetInt32("factory_level")} / {breadfactory_maxlevel} 级
+库存升级次数：{reader.GetInt32("storage_upgraded")} 次
+面包厂经验：{reader.GetInt32("factory_exp")} / {(int)(900 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
+今日已获得经验：{reader.GetInt32("exp_gained_today")} / {(int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
+生产（供应）模式：{mode}
+-----物品库存-----
+现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
+现有面包：{reader.GetInt32("breads")} / {(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
+")
+                       .Build();
+                    }
                     try
                     {
                         await MessageManager.SendGroupMessageAsync(group, messageChain);
