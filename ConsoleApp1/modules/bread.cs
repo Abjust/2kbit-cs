@@ -383,12 +383,12 @@ namespace Net_2kBot.Modules
 今日已获得经验：{reader.GetInt32("exp_gained_today")} / {(int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
 生产（供应）模式：{mode}
 -----面包厂配置-----
-面包库存上限：{(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
-生产周期：{300 - (20 * (reader.GetInt32("factory_level") - 1)) - (10 * (reader.GetInt32("speed_upgraded")))} 秒
-每周期最大产量：{(int)Math.Pow(4, reader.GetInt32("factory_level")) * (int)Math.Pow(2, reader.GetInt32("output_upgraded"))} 块
+面包库存上限：{(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1))} 块
+生产周期：{300 - (20 * (reader.GetInt32("factory_level") - 1))} 秒
+每周期最大产量：{(int)Math.Pow(4, reader.GetInt32("factory_level"))} 块
 -----物品库存-----
 现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
-现有面包：{reader.GetInt32("breads")} / {(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
+现有面包：{reader.GetInt32("breads")} / {(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1))} 块
 ")
                        .Build();
                     }
