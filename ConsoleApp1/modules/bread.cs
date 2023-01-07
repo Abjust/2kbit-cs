@@ -78,9 +78,9 @@ namespace Net_2kBot.Modules
                 {
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
-                    if (reader.GetInt32("bread_diversity") == 0)
+                    if (reader.GetInt32("factory_mode") == 0)
                     {
-                        if (number >= 1 && number + reader.GetInt32("breads") <= (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded"))))
+                        if (number >= 1 && number + reader.GetInt32("breads") <= (int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded"))))
                         {
                             using (var msc1 = new MySqlConnection(Global.connectstring))
                             {
@@ -173,11 +173,11 @@ namespace Net_2kBot.Modules
                 {
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
-                    if (reader.GetInt32("bread_diversity") != 2)
+                    if (reader.GetInt32("factory_mode") != 2)
                     {
                         if (reader.GetInt32("breads") >= number)
                         {
-                            if (reader.GetInt32("bread_diversity") == 1)
+                            if (reader.GetInt32("factory_mode") == 1)
                             {
                                 List<string> bread_types = new()
                             {
@@ -189,23 +189,15 @@ namespace Net_2kBot.Modules
                             };
                                 if (number >= bread_types.Count)
                                 {
-                                    int ExpectedSum = number;
                                     Random rnd = new Random();
                                     int[] fields = new int[bread_types.Count];
                                     int sum = 0;
                                     for (int i = 0; i < fields.Length - 1; i++)
                                     {
-                                        fields[i] = rnd.Next(ExpectedSum);
+                                        fields[i] = rnd.Next(1, number - sum);
                                         sum += fields[i];
                                     }
-                                    int actualSum = sum * fields.Length / (fields.Length - 1);
-                                    sum = 0;
-                                    for (int i = 0; i < fields.Length - 1; i++)
-                                    {
-                                        fields[i] = fields[i] * ExpectedSum / actualSum;
-                                        sum += fields[i];
-                                    }
-                                    fields[fields.Length - 1] = ExpectedSum - sum;
+                                    fields[fields.Length - 1] = number - sum;
                                     string text = "";
                                     for (int i = 0; i < bread_types.Count; i++)
                                     {
@@ -213,7 +205,7 @@ namespace Net_2kBot.Modules
                                         {
                                             text = $"\n{bread_types[i]}*{fields[i]}";
                                         }
-                                        else
+                                        else if (i < bread_types.Count)
                                         {
                                             text += $"\n{bread_types[i]}*{fields[i]}";
                                         }
@@ -363,7 +355,7 @@ namespace Net_2kBot.Modules
                     {
                         is_maxlevel = true;
                     }
-                    switch (reader.GetInt32("bread_diversity"))
+                    switch (reader.GetInt32("factory_mode"))
                     {
                         case 2:
                             mode = "无限供应";
@@ -378,21 +370,27 @@ namespace Net_2kBot.Modules
                     MessageChain messageChain;
                     if (is_maxlevel)
                     {
-                     messageChain = new MessageChainBuilder()
-                    .At(executor)
-                    .Plain($@"
+                        messageChain = new MessageChainBuilder()
+                       .At(executor)
+                       .Plain($@"
 本群 ({group}) 面包厂信息如下：
 -----面包厂属性-----
 面包厂等级：{reader.GetInt32("factory_level")} / {breadfactory_maxlevel} 级
 库存升级次数：{reader.GetInt32("storage_upgraded")} 次
-面包厂经验：{reader.GetInt32("factory_exp")} / {(int)(2000 * Math.Pow(1.28, reader.GetInt32("storage_upgraded")))} XP
+生产速度升级次数：{reader.GetInt32("speed_upgraded")} 次
+产量升级次数：{reader.GetInt32("output_upgraded")} 次
+面包厂经验：{reader.GetInt32("factory_exp")} XP
 今日已获得经验：{reader.GetInt32("exp_gained_today")} / {(int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
 生产（供应）模式：{mode}
+-----面包厂配置-----
+面包库存上限：{(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
+生产周期：{300 - (20 * (reader.GetInt32("factory_level") - 1)) - (10 * (reader.GetInt32("speed_upgraded")))} 秒
+每周期最大产量：{(int)Math.Pow(4, reader.GetInt32("factory_level")) * (int)Math.Pow(2, reader.GetInt32("output_upgraded"))} 块
 -----物品库存-----
 现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
-现有面包：{reader.GetInt32("breads")} / {(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
+现有面包：{reader.GetInt32("breads")} / {(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
 ")
-                    .Build();
+                       .Build();
                     }
                     else
                     {
@@ -403,12 +401,18 @@ namespace Net_2kBot.Modules
 -----面包厂属性-----
 面包厂等级：{reader.GetInt32("factory_level")} / {breadfactory_maxlevel} 级
 库存升级次数：{reader.GetInt32("storage_upgraded")} 次
+生产速度升级次数：{reader.GetInt32("speed_upgraded")} 次
+产量升级次数：{reader.GetInt32("output_upgraded")} 次
 面包厂经验：{reader.GetInt32("factory_exp")} / {(int)(900 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
 今日已获得经验：{reader.GetInt32("exp_gained_today")} / {(int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
 生产（供应）模式：{mode}
+-----面包厂配置-----
+面包库存上限：{(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
+生产周期：{300 - (20 * (reader.GetInt32("factory_level") - 1)) - (10 * (reader.GetInt32("speed_upgraded")))} 秒
+每周期最大产量：{(int)Math.Pow(4, reader.GetInt32("factory_level")) * (int)Math.Pow(2, reader.GetInt32("output_upgraded"))} 块
 -----物品库存-----
 现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
-现有面包：{reader.GetInt32("breads")} / {(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
+现有面包：{reader.GetInt32("breads")} / {(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
 ")
                        .Build();
                     }
@@ -465,7 +469,7 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET bread_diversity = 2 WHERE gid = {group};";
+                                    cmd1.CommandText = $"UPDATE bread SET factory_mode = 2 WHERE gid = {group};";
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 try
@@ -485,7 +489,7 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET bread_diversity = 1 WHERE gid = {group};";
+                                    cmd1.CommandText = $"UPDATE bread SET factory_mode = 1 WHERE gid = {group};";
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 try
@@ -505,7 +509,7 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET bread_diversity = 0 WHERE gid = {group};";
+                                    cmd1.CommandText = $"UPDATE bread SET factory_mode = 0 WHERE gid = {group};";
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 try
@@ -747,9 +751,9 @@ namespace Net_2kBot.Modules
                     int exp_formula = (int)(2000 * Math.Pow(1.28, reader.GetInt32("storage_upgraded")));
                     if (reader.GetInt32("factory_level") == breadfactory_maxlevel)
                     {
-                        if (reader.GetInt32("factory_exp") >= exp_formula)
+                        if (reader.GetInt32("storage_upgraded") < 16)
                         {
-                            if (reader.GetInt32("storage_upgraded") < 16)
+                            if (reader.GetInt32("factory_exp") >= exp_formula)
                             {
                                 using (var msc1 = new MySqlConnection(Global.connectstring))
                                 {
@@ -767,7 +771,7 @@ namespace Net_2kBot.Modules
                                 await reader.ReadAsync();
                                 try
                                 {
-                                    await MessageManager.SendGroupMessageAsync(group, $"恭喜，本群面包厂库存升级成功辣！现在面包厂可以储存 {(int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块面包");
+                                    await MessageManager.SendGroupMessageAsync(group, $"恭喜，本群面包厂库存升级成功辣！现在面包厂可以储存 {(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块面包");
                                 }
                                 catch
                                 {
@@ -778,7 +782,7 @@ namespace Net_2kBot.Modules
                             {
                                 try
                                 {
-                                    await MessageManager.SendGroupMessageAsync(group, "本群面包厂库存已经无法再升级了！（tips：目前本群面包厂的库存已经可以存放2^30块面包了！）");
+                                    await MessageManager.SendGroupMessageAsync(group, $"很抱歉，目前本群还需要 {exp_formula - reader.GetInt32("factory_exp")} 经验才能升级");
                                 }
                                 catch
                                 {
@@ -790,7 +794,7 @@ namespace Net_2kBot.Modules
                         {
                             try
                             {
-                                await MessageManager.SendGroupMessageAsync(group, $"很抱歉，目前本群还需要 {exp_formula - reader.GetInt32("factory_exp")} 经验才能升级");
+                                await MessageManager.SendGroupMessageAsync(group, "本群面包厂库存已经无法再升级了！（tips：目前本群面包厂的库存已经可以存放2^30块面包了！）");
                             }
                             catch
                             {
@@ -812,10 +816,9 @@ namespace Net_2kBot.Modules
                 }
             }
         }
-        // 查询原材料库存
-        public static async void QueryMaterial(string group, string executor)
+        // 升级生产速度
+        public static async void UpgradeSpeed(string group)
         {
-            // 连接数据库
             using (var msc = new MySqlConnection(Global.connectstring))
             {
                 await msc.OpenAsync();
@@ -823,41 +826,85 @@ namespace Net_2kBot.Modules
                 {
                     Connection = msc
                 };
-                try
+                // 判断数据是否存在
+                cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {group};";
+                int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                if (i == 1)
                 {
-                    cmd.CommandText = $"SELECT * FROM material WHERE gid = {group};";
+                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
-                    MessageChain? messageChain = new MessageChainBuilder()
-                    .At(executor)
-                    .Plain($" 现在库存有 {reader.GetInt32("flour")} 份面粉、{reader.GetInt32("egg")} 份鸡蛋、{reader.GetInt32("yeast")} 份酵母")
-                    .Build();
-                    try
+                    int exp_formula = (int)(9600 * Math.Pow(1.14, reader.GetInt32("speed_upgraded")));
+                    if (reader.GetInt32("factory_level") == breadfactory_maxlevel)
                     {
-                        await MessageManager.SendGroupMessageAsync(group, messageChain);
+                        if (reader.GetInt32("speed_upgraded") < 16)
+                        {
+                            if (reader.GetInt32("factory_exp") >= exp_formula)
+                            {
+                                using (var msc1 = new MySqlConnection(Global.connectstring))
+                                {
+                                    await msc1.OpenAsync();
+                                    MySqlCommand cmd1 = new()
+                                    {
+                                        Connection = msc1
+                                    };
+                                    cmd1.CommandText = $"UPDATE bread SET speed_upgraded = {reader.GetInt32("speed_upgraded") + 1}, factory_exp = {reader.GetInt32("factory_exp") - exp_formula} WHERE gid = {group};";
+                                    await cmd1.ExecuteNonQueryAsync();
+                                }
+                                await reader.CloseAsync();
+                                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                                reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                                await reader.ReadAsync();
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(group, $"恭喜，本群面包厂生产速度升级成功辣！现在面包厂的生产周期是 {300 - (20 * (reader.GetInt32("factory_level") - 1)) - (10 * (reader.GetInt32("speed_upgraded")))} 秒");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(group, $"很抱歉，目前本群还需要 {exp_formula - reader.GetInt32("factory_exp")} 经验才能升级");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(group, "本群面包厂生产速度已经无法再升级了！（tips：目前本群面包厂的生产周期已经只有60秒了！）");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
+                        }
                     }
-                    catch
+                    else
                     {
-                        Console.WriteLine("群消息发送失败");
-                    }
-                }
-                catch
-                {
-                    try
-                    {
-                        await MessageManager.SendGroupMessageAsync(group, "本群还没有面包厂！");
-                    }
-                    catch
-                    {
-                        Console.WriteLine("群消息发送失败");
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, $"本群面包厂尚未满级！（tips：面包厂满级为 {breadfactory_maxlevel} 级）");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("群消息发送失败");
+                        }
                     }
                 }
             }
         }
-        // 查询生产模式
-        public static async void QueryMode(string group)
+        // 升级产量
+        public static async void UpgradeOutput(string group)
         {
-            // 连接数据库
             using (var msc = new MySqlConnection(Global.connectstring))
             {
                 await msc.OpenAsync();
@@ -865,41 +912,79 @@ namespace Net_2kBot.Modules
                 {
                     Connection = msc
                 };
-                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
-                MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
-                await reader.ReadAsync();
-                switch (reader.GetInt32("bread_diversity"))
+                // 判断数据是否存在
+                cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {group};";
+                int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                if (i == 1)
                 {
-                    case 2:
+                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                    MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                    await reader.ReadAsync();
+                    int exp_formula = (int)(4800 * Math.Pow(1.21, reader.GetInt32("output_upgraded")));
+                    if (reader.GetInt32("factory_level") == breadfactory_maxlevel)
+                    {
+                        if (reader.GetInt32("output_upgraded") < 16)
+                        {
+                            if (reader.GetInt32("factory_exp") >= exp_formula)
+                            {
+                                using (var msc1 = new MySqlConnection(Global.connectstring))
+                                {
+                                    await msc1.OpenAsync();
+                                    MySqlCommand cmd1 = new()
+                                    {
+                                        Connection = msc1
+                                    };
+                                    cmd1.CommandText = $"UPDATE bread SET output_upgraded = {reader.GetInt32("output_upgraded") + 1}, factory_exp = {reader.GetInt32("factory_exp") - exp_formula} WHERE gid = {group};";
+                                    await cmd1.ExecuteNonQueryAsync();
+                                }
+                                await reader.CloseAsync();
+                                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                                reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                                await reader.ReadAsync();
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(group, $"恭喜，本群面包厂产量升级成功辣！现在面包厂的每周期最大产量是 {(int)Math.Pow(4, reader.GetInt32("factory_level")) * (int)Math.Pow(2, reader.GetInt32("output_upgraded"))} 块面包");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    await MessageManager.SendGroupMessageAsync(group, $"很抱歉，目前本群还需要 {exp_formula - reader.GetInt32("factory_exp")} 经验才能升级");
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("群消息发送失败");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(group, "本群面包厂产量已经无法再升级了！（tips：目前本群面包厂的产量最大已经可以达到2^26块面包了！）");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
+                        }
+                    }
+                    else
+                    {
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(group, "本群供应模式为：无限供应");
+                            await MessageManager.SendGroupMessageAsync(group, $"本群面包厂尚未满级！（tips：面包厂满级为 {breadfactory_maxlevel} 级）");
                         }
                         catch
                         {
                             Console.WriteLine("群消息发送失败");
                         }
-                        break;
-                    case 1:
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(group, "本群供应模式为：多样化供应");
-                        }
-                        catch
-                        {
-                            Console.WriteLine("群消息发送失败");
-                        }
-                        break;
-                    case 0:
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(group, "本群供应模式为：单一化供应");
-                        }
-                        catch
-                        {
-                            Console.WriteLine("群消息发送失败");
-                        }
-                        break;
+                    }
                 }
             }
         }

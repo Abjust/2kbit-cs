@@ -83,7 +83,9 @@ namespace Net_2kBot.Modules
 查询面包厂信息：/query
 修改生产（供应）模式：/change_mode <infinite/diversity/normal> （无限、多样化、单一化）
 升级面包厂：/upgrade_factory
-升级库存（满级后）：/upgrade_storage",
+升级库存（满级后）：/upgrade_storage
+升级生产速度（满级后）：/upgrade_speed
+升级产量（满级后）：/upgrade_output",
                     "https://github.com/Abjust/2kbot",
                     "使用/calc可以显示计算器说明"
                 };

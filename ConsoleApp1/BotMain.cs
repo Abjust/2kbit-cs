@@ -118,7 +118,9 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
   `gid` varchar(10) NOT NULL COMMENT 'Q群号',
   `factory_level` int NOT NULL DEFAULT '1' COMMENT '面包厂等级',
   `storage_upgraded` int NOT NULL DEFAULT '0' COMMENT '库存升级次数',
-  `bread_diversity` tinyint NOT NULL DEFAULT '0' COMMENT '多样化生产状态',
+  `speed_upgraded` int NOT NULL DEFAULT '0' COMMENT '生产速度升级次数',
+  `output_upgraded` int NOT NULL DEFAULT '0' COMMENT '产量升级次数',
+  `factory_mode` tinyint NOT NULL DEFAULT '0' COMMENT '面包厂生产模式',
   `factory_exp` int NOT NULL DEFAULT '0' COMMENT '面包厂经验',
   `breads` int NOT NULL DEFAULT '0' COMMENT '面包库存',
   `exp_gained_today` int NOT NULL DEFAULT '0' COMMENT '近24小时获取经验数',
@@ -136,6 +138,17 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`material` (
   PRIMARY KEY (`id`));
 INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid FROM `{Global.database_name}`.`bread`";
                 await cmd.ExecuteNonQueryAsync();
+                // 更新数据表
+                try
+                {
+                    cmd.CommandText = @$"
+ALTER TABLE `{Global.database_name}`.`bread`
+ADD COLUMN `speed_upgraded` INT NOT NULL DEFAULT 0 COMMENT '生产速度升级次数' AFTER `storage_upgraded`,
+ADD COLUMN `output_upgraded` INT NOT NULL DEFAULT 0 COMMENT '产量升级次数' AFTER `speed_upgraded`,
+CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMMENT '面包厂生产模式' ;";
+                    await cmd.ExecuteNonQueryAsync();
+                }
+                catch { }
             }
             // 在这里添加你的代码，比如订阅消息/事件之类的
             Update.Execute();
@@ -396,6 +409,12 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                                 break;
                             case "/upgrade_storage":
                                 Bread.UpgradeStorage(x.GroupId);
+                                break;
+                            case "/upgrade_speed":
+                                Bread.UpgradeSpeed(x.GroupId);
+                                break;
+                            case "/upgrade_output":
+                                Bread.UpgradeOutput(x.GroupId);
                                 break;
                         }
                     }
@@ -1104,7 +1123,7 @@ INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid 
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w01a\r\n上次更新日期：2023/1/6\r\n更新内容：没活整了，咬个打火机（就更新了个版本号）\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w02a\r\n上次更新日期：2023/1/7\r\n更新内容：面包厂现在可以升级生产速度和产量了；现在可以查询面包厂的生产周期和最大产量；微调了满级之后的提醒\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {

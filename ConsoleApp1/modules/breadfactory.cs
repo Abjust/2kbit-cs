@@ -48,15 +48,15 @@ namespace Net_2kBot.Modules
                             cmd.CommandText = $"SELECT * FROM bread WHERE gid = {groupid};";
                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                             await reader.ReadAsync();
-                            int formula = (int)Math.Pow(4, reader.GetInt32("factory_level"));
-                            int maxstorage = (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")));
+                            int formula = (int)Math.Pow(4, reader.GetInt32("factory_level")) * (int)Math.Pow(2, reader.GetInt32("output_upgraded"));
+                            int maxstorage = (int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")));
                             bool is_full = false;
                             if (reader.GetInt32("breads") == maxstorage) 
                             {
                                 is_full = true;
                             }
-                            speed1 = 300 - (20 * (reader.GetInt32("factory_level") - 1));
-                            if (reader.GetInt32("bread_diversity") != 2 && !is_full)
+                            speed1 = 300 - (20 * (reader.GetInt32("factory_level") - 1)) - (10 * (reader.GetInt32("speed_upgraded")));
+                            if (reader.GetInt32("factory_mode") != 2 && !is_full)
                             {
                                 Random r = new();
                                 int random = r.Next(1, formula);
@@ -115,11 +115,11 @@ namespace Net_2kBot.Modules
                             cmd.CommandText = $"SELECT * FROM bread WHERE gid = {groupid};";
                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                             await reader.ReadAsync();
-                            if (reader.GetInt32("bread_diversity") != 2)
+                            if (reader.GetInt32("factory_mode") != 2)
                             {
-                                speed2 = 300 - (20 * (reader.GetInt32("factory_level") - 1));
-                                int maxstorage = (int)(32 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")));
-                                int bread_diversity = reader.GetInt32("bread_diversity");
+                                speed2 = 300 - (20 * (reader.GetInt32("factory_level") - 1)) - (10 * (reader.GetInt32("speed_upgraded")));
+                                int maxstorage = (int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")));
+                                int bread_diversity = reader.GetInt32("factory_mode");
                                 await reader.CloseAsync();
                                 int random = 0;
                                 Random r = new();
