@@ -64,7 +64,7 @@ namespace Net_2kBot.Modules
                                 cmd.CommandText = $"SELECT * FROM material WHERE gid = {groupid};";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
-                                if (Global.time_now - reader.GetInt64("last_produce") >= speed1)
+                                if (Global.time_now - reader.GetInt64("last_produce") >= speed1 && reader.GetInt32("yeast") <= formula)
                                 {
                                     using (var msc1 = new MySqlConnection(Global.connectstring))
                                     {

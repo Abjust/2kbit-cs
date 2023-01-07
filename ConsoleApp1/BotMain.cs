@@ -1123,7 +1123,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w02a\r\n上次更新日期：2023/1/7\r\n更新内容：面包厂现在可以升级生产速度和产量了；现在可以查询面包厂的生产周期和最大产量；微调了满级之后的提醒\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w02b\r\n上次更新日期：2023/1/7\r\n更新内容：当面包厂剩余原材料超出周期内最大产量时，面包厂将暂停生产原材料\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
