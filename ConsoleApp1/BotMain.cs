@@ -381,15 +381,9 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                             case "/change_mode":
                                 switch (text1[1])
                                 {
-                                    case "infinite":
-                                        Bread.ChangeMode(x.GroupId, 2);
-                                        break;
-                                    case "diversity":
-                                        Bread.ChangeMode(x.GroupId, 1);
-                                        break;
-                                    case "normal":
-                                        Bread.ChangeMode(x.GroupId, 0);
-                                        break;
+                                    case "infinite": Bread.ChangeMode(x.GroupId, 2); break;
+                                    case "diversity": Bread.ChangeMode(x.GroupId, 1); break;
+                                    case "normal": Bread.ChangeMode(x.GroupId, 0); break;
                                 }
                                 break;
                         }
@@ -398,24 +392,12 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                     {
                         switch (text1[0])
                         {
-                            case "/query":
-                                Bread.Query(x.GroupId, x.Sender.Id);
-                                break;
-                            case "/upgrade_factory":
-                                Bread.UpgradeFactory(x.GroupId);
-                                break;
-                            case "/build_factory":
-                                Bread.BuildFactory(x.GroupId);
-                                break;
-                            case "/upgrade_storage":
-                                Bread.UpgradeStorage(x.GroupId);
-                                break;
-                            case "/upgrade_speed":
-                                Bread.UpgradeSpeed(x.GroupId);
-                                break;
-                            case "/upgrade_output":
-                                Bread.UpgradeOutput(x.GroupId);
-                                break;
+                            case "/query": Bread.Query(x.GroupId, x.Sender.Id); break;
+                            case "/upgrade_factory": Bread.UpgradeFactory(x.GroupId); break;
+                            case "/build_factory": Bread.BuildFactory(x.GroupId); break;
+                            case "/upgrade_storage": Bread.UpgradeStorage(x.GroupId); break;
+                            case "/upgrade_speed": Bread.UpgradeSpeed(x.GroupId); break;
+                            case "/upgrade_output": Bread.UpgradeOutput(x.GroupId); break;
                         }
                     }
                     // 计算经验
@@ -1123,7 +1105,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w02b\r\n上次更新日期：2023/1/7\r\n更新内容：当面包厂剩余原材料超出周期内最大产量时，面包厂将暂停生产原材料\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w02c\r\n上次更新日期：2023/1/7\r\n更新内容：移除了him（确信）\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {

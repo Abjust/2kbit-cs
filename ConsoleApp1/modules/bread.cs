@@ -205,7 +205,7 @@ namespace Net_2kBot.Modules
                                         {
                                             text = $"\n{bread_types[i]}*{fields[i]}";
                                         }
-                                        else if (i < bread_types.Count)
+                                        else
                                         {
                                             text += $"\n{bread_types[i]}*{fields[i]}";
                                         }
@@ -375,7 +375,7 @@ namespace Net_2kBot.Modules
                        .Plain($@"
 本群 ({group}) 面包厂信息如下：
 -----面包厂属性-----
-面包厂等级：{reader.GetInt32("factory_level")} / {breadfactory_maxlevel} 级
+面包厂等级： {breadfactory_maxlevel} 级（满级）
 库存升级次数：{reader.GetInt32("storage_upgraded")} 次
 生产速度升级次数：{reader.GetInt32("speed_upgraded")} 次
 产量升级次数：{reader.GetInt32("output_upgraded")} 次
@@ -400,9 +400,6 @@ namespace Net_2kBot.Modules
 本群 ({group}) 面包厂信息如下：
 -----面包厂属性-----
 面包厂等级：{reader.GetInt32("factory_level")} / {breadfactory_maxlevel} 级
-库存升级次数：{reader.GetInt32("storage_upgraded")} 次
-生产速度升级次数：{reader.GetInt32("speed_upgraded")} 次
-产量升级次数：{reader.GetInt32("output_upgraded")} 次
 面包厂经验：{reader.GetInt32("factory_exp")} / {(int)(900 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
 今日已获得经验：{reader.GetInt32("exp_gained_today")} / {(int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
 生产（供应）模式：{mode}
