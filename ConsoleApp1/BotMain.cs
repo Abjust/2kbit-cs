@@ -105,15 +105,43 @@ namespace Net_2kBot
                     Connection = msc
                 };
                 // 若数据表不存在则创建
-                cmd.CommandText = @$"
-CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`blocklist` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));
-CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`ops` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));
-CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`ignores` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',PRIMARY KEY (`id`));
-CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`g_blocklist` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',PRIMARY KEY (`id`));
-CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`g_ops` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',PRIMARY KEY (`id`));
-CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`g_ignores` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',PRIMARY KEY (`id`));
-CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`repeatctrl` (`id` INT NOT NULL AUTO_INCREMENT,`qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',`gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',`last_repeat` bigint NOT NULL DEFAULT '946656000' COMMENT '上次复读时间',`last_repeatctrl` bigint NOT NULL DEFAULT '946656000' COMMENT '上次复读控制时间',`repeat_count` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '复读计数',PRIMARY KEY (`id`));
-CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
+                cmd.CommandText = @"
+CREATE TABLE IF NOT EXISTS blocklist (
+ `id` INT NOT NULL AUTO_INCREMENT,
+ `qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',
+ `gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',
+ PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS ops (
+ `id` INT NOT NULL AUTO_INCREMENT,
+ `qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',
+ `gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',
+ PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS ignores (
+ `id` INT NOT NULL AUTO_INCREMENT,
+ `qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',
+ `gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',
+ PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS g_blocklist (
+ `id` INT NOT NULL AUTO_INCREMENT,
+ `qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',
+ PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS g_ops (
+ `id` INT NOT NULL AUTO_INCREMENT,
+ `qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',
+ PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS g_ignores (
+ `id` INT NOT NULL AUTO_INCREMENT,
+ `qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',
+ PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS repeatctrl (
+ `id` INT NOT NULL AUTO_INCREMENT,
+ `qid` VARCHAR(10) NOT NULL COMMENT 'QQ号',
+ `gid` VARCHAR(10) NOT NULL COMMENT 'Q群号',
+ `last_repeat` bigint NOT NULL DEFAULT '946656000' COMMENT '上次复读时间',
+ `last_repeatctrl` bigint NOT NULL DEFAULT '946656000' COMMENT '上次复读控制时间',
+ `repeat_count` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '复读计数',
+PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS bread (
   `id` int NOT NULL AUTO_INCREMENT,
   `gid` varchar(10) NOT NULL COMMENT 'Q群号',
   `factory_level` int NOT NULL DEFAULT '1' COMMENT '面包厂等级',
@@ -128,7 +156,7 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`bread` (
   `last_expgain` bigint NOT NULL DEFAULT '946656000' COMMENT '近24小时首次获取经验时间',
   `last_produce` bigint NOT NULL DEFAULT '946656000' COMMENT '上次完成一轮生产周期时间',
   PRIMARY KEY (`id`));
-CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`material` (
+CREATE TABLE IF NOT EXISTS material (
   `id` int NOT NULL AUTO_INCREMENT,
   `gid` varchar(10) NOT NULL COMMENT 'Q群号',
   `flour` int NOT NULL DEFAULT 0 COMMENT '面粉数量',
@@ -136,13 +164,13 @@ CREATE TABLE IF NOT EXISTS `{Global.database_name}`.`material` (
   `yeast` int NOT NULL DEFAULT 0 COMMENT '酵母数量',
   `last_produce` bigint NOT NULL DEFAULT '946656000' COMMENT '上次完成一轮生产周期时间',
   PRIMARY KEY (`id`));
-INSERT IGNORE INTO `{Global.database_name}`.`material` (id, gid) SELECT id, gid FROM `{Global.database_name}`.`bread`";
+INSERT IGNORE INTO material (id, gid) SELECT id, gid FROM bread";
                 await cmd.ExecuteNonQueryAsync();
                 // 更新数据表
                 try
                 {
-                    cmd.CommandText = @$"
-ALTER TABLE `{Global.database_name}`.`bread`
+                    cmd.CommandText = @"
+ALTER TABLE bread
 ADD COLUMN `speed_upgraded` INT NOT NULL DEFAULT 0 COMMENT '生产速度升级次数' AFTER `storage_upgraded`,
 ADD COLUMN `output_upgraded` INT NOT NULL DEFAULT 0 COMMENT '产量升级次数' AFTER `speed_upgraded`,
 CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMMENT '面包厂生产模式' ;";
@@ -192,7 +220,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
             .OfType<NewMemberRequestedEvent>()
             .Subscribe(async e =>
             {
-                if ((Global.blocklist != null && Global.blocklist.Contains($"{e.GroupId}_{e.FromId}")) || (Global.blocklist != null && Global.blocklist.Contains(e.FromId)))
+                if ((Global.blocklist != null && Global.blocklist.Contains($"{e.GroupId}_{e.FromId}")) || (Global.g_blocklist != null && Global.g_blocklist.Contains(e.FromId)))
                 {
                     await e.RejectAsync();
                 }
@@ -351,7 +379,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                        await x.SendMessageAsync("参数错误");
                    }
                }
-            });
+           });
             // bot对接收群消息的处理
             bot.MessageReceived
             .OfType<GroupMessageReceiver>()
@@ -1105,7 +1133,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w02c\r\n上次更新日期：2023/1/7\r\n更新内容：移除了him（确信）\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w03a_su\r\n上次更新日期：2023/1/8\r\n更新内容：这是2kbot历年来的首个安全更新！该更新全面将SQL语句改为参数化语句，最大限度挫败利用2kbot的功能实现SQL注入攻击的企图，且优化了数据表初始化SQL语句的格式\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {

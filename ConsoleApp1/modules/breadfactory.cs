@@ -38,6 +38,7 @@ namespace Net_2kBot.Modules
                     group_ids1 = groupids;
                 }
                 await reader.CloseAsync();
+                cmd.Parameters.Add("@gid", MySqlDbType.String);
                 while (true)
                 {
                     Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
@@ -45,13 +46,14 @@ namespace Net_2kBot.Modules
                     {
                         foreach (string groupid in group_ids1)
                         {
-                            cmd.CommandText = $"SELECT * FROM bread WHERE gid = {groupid};";
+                            cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
+                            cmd.Parameters["@gid"].Value = groupid;
                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                             await reader.ReadAsync();
                             int formula = (int)Math.Pow(4, reader.GetInt32("factory_level")) * (int)Math.Pow(2, reader.GetInt32("output_upgraded"));
                             int maxstorage = (int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")));
                             bool is_full = false;
-                            if (reader.GetInt32("breads") == maxstorage) 
+                            if (reader.GetInt32("breads") == maxstorage)
                             {
                                 is_full = true;
                             }
@@ -61,7 +63,7 @@ namespace Net_2kBot.Modules
                                 Random r = new();
                                 int random = r.Next(1, formula);
                                 await reader.CloseAsync();
-                                cmd.CommandText = $"SELECT * FROM material WHERE gid = {groupid};";
+                                cmd.CommandText = "SELECT * FROM material WHERE gid = @gid;";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
                                 if (Global.time_now - reader.GetInt64("last_produce") >= speed1 && reader.GetInt32("yeast") <= formula)
@@ -73,7 +75,12 @@ namespace Net_2kBot.Modules
                                         {
                                             Connection = msc1
                                         };
-                                        cmd1.CommandText = $"UPDATE material SET flour = {reader.GetInt32("flour") + random * 5}, egg = {reader.GetInt32("egg") + random * 2}, yeast = {reader.GetInt32("yeast") + random}, last_produce = {Global.time_now} WHERE gid = {groupid};";
+                                        cmd1.CommandText = "UPDATE material SET flour = @flour, egg = @egg, yeast = @yeast, last_produce = @time_now WHERE gid = @gid;";
+                                        cmd1.Parameters.AddWithValue("@flour", reader.GetInt32("flour") + random * 5);
+                                        cmd1.Parameters.AddWithValue("@egg", reader.GetInt32("egg") + random * 2);
+                                        cmd1.Parameters.AddWithValue("@yeast", reader.GetInt32("yeast") + random);
+                                        cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                        cmd1.Parameters.AddWithValue("@gid", groupid);
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                 }
@@ -105,6 +112,7 @@ namespace Net_2kBot.Modules
                     group_ids2 = groupids;
                 }
                 await reader.CloseAsync();
+                cmd.Parameters.Add("@gid", MySqlDbType.String);
                 while (true)
                 {
                     Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
@@ -112,7 +120,8 @@ namespace Net_2kBot.Modules
                     {
                         foreach (string groupid in group_ids2)
                         {
-                            cmd.CommandText = $"SELECT * FROM bread WHERE gid = {groupid};";
+                            cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
+                            cmd.Parameters["@gid"].Value = groupid;
                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                             await reader.ReadAsync();
                             if (reader.GetInt32("factory_mode") != 2)
@@ -123,7 +132,7 @@ namespace Net_2kBot.Modules
                                 await reader.CloseAsync();
                                 int random = 0;
                                 Random r = new();
-                                cmd.CommandText = $"SELECT * FROM material WHERE gid = {groupid};";
+                                cmd.CommandText = "SELECT * FROM material WHERE gid = @gid;";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
                                 if (Math.Floor(reader.GetInt32("yeast") / Math.Pow(4, bread_diversity)) == 1)
@@ -135,13 +144,13 @@ namespace Net_2kBot.Modules
                                     random = r.Next(1, (int)Math.Floor(reader.GetInt32("yeast") / Math.Pow(4, bread_diversity)));
                                 }
                                 await reader.CloseAsync();
-                                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {groupid};";
+                                cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
                                 if (Global.time_now - reader.GetInt64("last_produce") >= speed2)
                                 {
                                     await reader.CloseAsync();
-                                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {groupid};";
+                                    cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid";
                                     reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                     await reader.ReadAsync();
                                     using (var msc1 = new MySqlConnection(Global.connectstring))
@@ -151,30 +160,47 @@ namespace Net_2kBot.Modules
                                         {
                                             Connection = msc1
                                         };
+                                        cmd1.Parameters.Add("@breads", MySqlDbType.Int32);
+                                        cmd1.Parameters.Add("@gid", MySqlDbType.String);
+                                        cmd1.Parameters.Add("@flour", MySqlDbType.Int32);
+                                        cmd1.Parameters.Add("@egg", MySqlDbType.Int32);
+                                        cmd1.Parameters.Add("@yeast", MySqlDbType.Int32);
+                                        cmd1.Parameters.Add("@time_now", MySqlDbType.Int64);
                                         if (reader.GetInt32("breads") + random < maxstorage)
                                         {
-                                            cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") + random * Math.Pow(4, bread_diversity)} WHERE gid = {groupid};";
+                                            cmd1.CommandText = "UPDATE bread SET breads = @breads WHERE gid = @gid;";
+                                            cmd1.Parameters["@breads"].Value = reader.GetInt32("breads") + random * Math.Pow(4, bread_diversity);
+                                            cmd1.Parameters["@gid"].Value = groupid;
                                             await cmd1.ExecuteNonQueryAsync();
                                             await reader.CloseAsync();
-                                            cmd.CommandText = $"SELECT * FROM material WHERE gid = {groupid};";
+                                            cmd.CommandText = "SELECT * FROM material WHERE gid = @gid;";
                                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                             await reader.ReadAsync();
-                                            cmd1.CommandText = $"UPDATE material SET flour = {reader.GetInt32("flour") - random * 5 * Math.Pow(4, bread_diversity)}, egg = {reader.GetInt32("egg") - random * 2 * Math.Pow(4, bread_diversity)}, yeast = {reader.GetInt32("yeast") - random * Math.Pow(4, bread_diversity)} WHERE gid = {groupid};";
+                                            cmd1.CommandText = "UPDATE material SET flour = @flour, egg = @egg, yeast = @yeast WHERE gid = @gid;";
+                                            cmd1.Parameters["@flour"].Value = reader.GetInt32("flour") - random * 5 * Math.Pow(4, bread_diversity);
+                                            cmd1.Parameters["@egg"].Value = reader.GetInt32("egg") - random * 2 * Math.Pow(4, bread_diversity);
+                                            cmd1.Parameters["@yeast"].Value = reader.GetInt32("yeast") - random * Math.Pow(4, bread_diversity);
                                             await cmd1.ExecuteNonQueryAsync();
                                         }
                                         else if (reader.GetInt32("breads") + random >= maxstorage)
                                         {
                                             int difference = maxstorage - reader.GetInt32("breads");
-                                            cmd1.CommandText = $"UPDATE bread SET breads = {maxstorage} WHERE gid = {groupid};";
+                                            cmd1.CommandText = "UPDATE bread SET breads = @breads WHERE gid = @gid;";
+                                            cmd1.Parameters["@breads"].Value = maxstorage;
+                                            cmd1.Parameters["@gid"].Value = groupid;
                                             await cmd1.ExecuteNonQueryAsync();
                                             await reader.CloseAsync();
-                                            cmd.CommandText = $"SELECT * FROM material WHERE gid = {groupid};";
+                                            cmd.CommandText = "SELECT * FROM material WHERE gid = @gid;";
                                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                             await reader.ReadAsync();
-                                            cmd1.CommandText = $"UPDATE material SET flour = {reader.GetInt32("flour") - difference * 5 * Math.Pow(4, bread_diversity)}, egg = {reader.GetInt32("egg") - difference * 2 * Math.Pow(4, bread_diversity)}, yeast = {reader.GetInt32("yeast") - difference * Math.Pow(4, bread_diversity)} WHERE gid = {groupid};";
+                                            cmd1.CommandText = "UPDATE material SET flour = @flour, egg = @egg, yeast = @yeast WHERE gid = @gid;";
+                                            cmd1.Parameters["@flour"].Value = reader.GetInt32("flour") - difference * 5 * Math.Pow(4, bread_diversity);
+                                            cmd1.Parameters["@egg"].Value = reader.GetInt32("egg") - difference * 2 * Math.Pow(4, bread_diversity);
+                                            cmd1.Parameters["@yeast"].Value = reader.GetInt32("yeast") - difference * Math.Pow(4, bread_diversity);
                                             await cmd1.ExecuteNonQueryAsync();
                                         }
-                                        cmd1.CommandText = $"UPDATE bread SET last_produce = {new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()} WHERE gid = {groupid};";
+                                        cmd1.CommandText = "UPDATE bread SET last_produce = @time_now WHERE gid = @gid;";
+                                        cmd1.Parameters["@time_now"].Value = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                 }

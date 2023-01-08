@@ -219,7 +219,9 @@ namespace Net_2kBot.Modules
                 {
                     if (Global.blocklist?.Contains(victim) == false)
                     {
-                        cmd.CommandText = $"INSERT INTO blocklist (qid,gid) VALUES ({victim},{group});";
+                        cmd.CommandText = "INSERT INTO blocklist (qid,gid) VALUES (@qid,@gid);";
+                        cmd.Parameters.AddWithValue("@qid", victim);
+                        cmd.Parameters.AddWithValue("@gid", group);
                         await cmd.ExecuteNonQueryAsync();
                         await msc.CloseAsync();
                         try
@@ -321,7 +323,9 @@ namespace Net_2kBot.Modules
             {
                 if (Global.blocklist != null && Global.blocklist.Contains($"{group}_{victim}"))
                 {
-                    cmd.CommandText = $"DELETE FROM blocklist WHERE qid = {victim} AND gid = {group};";
+                    cmd.CommandText = "DELETE FROM blocklist WHERE qid = @qid AND gid = @gid;";
+                    cmd.Parameters.AddWithValue("@qid", victim);
+                    cmd.Parameters.AddWithValue("@gid", group);
                     await cmd.ExecuteNonQueryAsync();
                     await msc.CloseAsync();
                     try
@@ -385,7 +389,8 @@ namespace Net_2kBot.Modules
                 {
                     if (Global.g_blocklist == null || !Global.g_blocklist.Contains(victim))
                     {
-                        cmd.CommandText = $"INSERT INTO g_blocklist (qid) VALUES ({victim});";
+                        cmd.CommandText = "INSERT INTO g_blocklist (qid) VALUES (@qid);";
+                        cmd.Parameters.AddWithValue("@qid", victim);
                         await cmd.ExecuteNonQueryAsync();
                         await msc.CloseAsync();
                         try
@@ -486,7 +491,8 @@ namespace Net_2kBot.Modules
             {
                 if (Global.g_blocklist != null && Global.g_blocklist.Contains(victim))
                 {
-                    cmd.CommandText = $"DELETE FROM g_blocklist WHERE qid = {victim};";
+                    cmd.CommandText = "DELETE FROM g_blocklist WHERE qid = @qid;";
+                    cmd.Parameters.AddWithValue("@qid", victim);
                     await cmd.ExecuteNonQueryAsync();
                     await msc.CloseAsync();
                     try
@@ -548,7 +554,9 @@ namespace Net_2kBot.Modules
             {
                 if (Global.ops == null || !Global.ops.Contains($"{group}_{victim}"))
                 {
-                    cmd.CommandText = $"INSERT INTO ops (qid,gid) VALUES ({victim},{group});";
+                    cmd.CommandText = "INSERT INTO ops (qid,gid) VALUES (@qid,@gid);";
+                    cmd.Parameters.AddWithValue("@qid", victim);
+                    cmd.Parameters.AddWithValue("@gid", group);
                     await cmd.ExecuteNonQueryAsync();
                     await msc.CloseAsync();
                     try
@@ -610,7 +618,9 @@ namespace Net_2kBot.Modules
                 {
                     if (victim != group_owner)
                     {
-                        cmd.CommandText = $"DELETE FROM ops WHERE qid = {victim} AND gid = {group};";
+                        cmd.CommandText = "DELETE FROM ops WHERE qid = @qid AND gid = @gid;";
+                        cmd.Parameters.AddWithValue("@qid", victim);
+                        cmd.Parameters.AddWithValue("@gid", group);
                         await cmd.ExecuteNonQueryAsync();
                         await msc.CloseAsync();
                         try
@@ -673,7 +683,8 @@ namespace Net_2kBot.Modules
             {
                 if (Global.g_ops == null || !Global.g_ops.Contains(victim))
                 {
-                    cmd.CommandText = $"INSERT INTO g_ops (qid) VALUES ({victim});";
+                    cmd.CommandText = "INSERT INTO g_ops (qid) VALUES (@qid);";
+                    cmd.Parameters.AddWithValue("@qid", victim);
                     await cmd.ExecuteNonQueryAsync();
                     await msc.CloseAsync();
                     try
@@ -726,7 +737,8 @@ namespace Net_2kBot.Modules
                 {
                     if (victim != Global.owner_qq)
                     {
-                        cmd.CommandText = $"DELETE FROM g_ops WHERE qid = {victim};";
+                        cmd.CommandText = "DELETE FROM g_ops WHERE qid = @qid;";
+                        cmd.Parameters.AddWithValue("@qid", victim);
                         await cmd.ExecuteNonQueryAsync();
                         await msc.CloseAsync();
                         try
@@ -789,7 +801,9 @@ namespace Net_2kBot.Modules
             {
                 if (Global.ignores == null || !Global.ignores.Contains($"{group}_{victim}"))
                 {
-                    cmd.CommandText = $"INSERT INTO ignores (qid,gid) VALUES ({victim},{group});";
+                    cmd.CommandText = "INSERT INTO ignores (qid,gid) VALUES (@qid,@gid);";
+                    cmd.Parameters.AddWithValue("@qid", victim);
+                    cmd.Parameters.AddWithValue("@gid", group);
                     await cmd.ExecuteNonQueryAsync();
                     await msc.CloseAsync();
                     try
@@ -851,7 +865,8 @@ namespace Net_2kBot.Modules
             {
                 if (Global.g_ignores == null || !Global.g_ignores.Contains(victim))
                 {
-                    cmd.CommandText = $"INSERT INTO g_ignores (qid) VALUES ({victim});";
+                    cmd.CommandText = "INSERT INTO g_ignores (qid) VALUES (@qid);";
+                    cmd.Parameters.AddWithValue("@qid", victim);
                     await cmd.ExecuteNonQueryAsync();
                     await msc.CloseAsync();
                     try

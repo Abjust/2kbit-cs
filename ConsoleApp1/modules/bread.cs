@@ -32,13 +32,14 @@ namespace Net_2kBot.Modules
                     Connection = msc
                 };
                 // 判断数据是否存在
-                cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {group};";
+                cmd.CommandText = "SELECT COUNT(*) gid FROM bread WHERE gid = @gid;";
+                cmd.Parameters.AddWithValue("@gid", group);
                 int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                 if (i == 0)
                 {
-                    cmd.CommandText = $"INSERT INTO bread (gid) VALUES ({group});";
+                    cmd.CommandText = "INSERT INTO bread (gid) VALUES (@gid);";
                     await cmd.ExecuteNonQueryAsync();
-                    cmd.CommandText = $"INSERT INTO material (gid) VALUES ({group});";
+                    cmd.CommandText = "INSERT INTO material (gid) VALUES (@gid);";
                     await cmd.ExecuteNonQueryAsync();
                     try
                     {
@@ -73,7 +74,8 @@ namespace Net_2kBot.Modules
                 {
                     Connection = msc
                 };
-                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
+                cmd.Parameters.AddWithValue("@gid", group);
                 try
                 {
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
@@ -89,10 +91,12 @@ namespace Net_2kBot.Modules
                                 {
                                     Connection = msc1
                                 };
-                                cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") + number} WHERE gid = {group};";
+                                cmd1.CommandText = "UPDATE bread SET breads = @breads WHERE gid = @gid;";
+                                cmd1.Parameters.AddWithValue("@breads", reader.GetInt32("breads") + number);
+                                cmd1.Parameters.AddWithValue("@gid", group);
                                 await cmd1.ExecuteNonQueryAsync();
                                 await reader.CloseAsync();
-                                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                                cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
                                 MessageChain? messageChain = new MessageChainBuilder()
@@ -168,7 +172,8 @@ namespace Net_2kBot.Modules
                 {
                     Connection = msc
                 };
-                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
+                cmd.Parameters.AddWithValue("@gid", group);
                 try
                 {
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
@@ -221,7 +226,9 @@ namespace Net_2kBot.Modules
                                         {
                                             Connection = msc1
                                         };
-                                        cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") - number} WHERE gid = {group};";
+                                        cmd1.CommandText = "UPDATE bread SET breads = @breads WHERE gid = @gid;";
+                                        cmd1.Parameters.AddWithValue("@breads", reader.GetInt32("breads") - number);
+                                        cmd1.Parameters.AddWithValue("@gid", group);
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                     try
@@ -256,7 +263,9 @@ namespace Net_2kBot.Modules
                                         {
                                             Connection = msc1
                                         };
-                                        cmd1.CommandText = $"UPDATE bread SET breads = {reader.GetInt32("breads") - number} WHERE gid = {group};";
+                                        cmd1.CommandText = "UPDATE bread SET breads = @breads WHERE gid = @gid;";
+                                        cmd1.Parameters.AddWithValue("@breads", reader.GetInt32("breads") - number);
+                                        cmd1.Parameters.AddWithValue("@gid", group);
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                     MessageChain? messageChain = new MessageChainBuilder()
@@ -339,14 +348,15 @@ namespace Net_2kBot.Modules
                 };
                 try
                 {
-                    cmd.CommandText = $"SELECT * FROM material WHERE gid = {group};";
+                    cmd.CommandText = "SELECT * FROM material WHERE gid = @gid;";
+                    cmd.Parameters.AddWithValue("@gid", group);
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
                     int flour = reader.GetInt32("flour");
                     int egg = reader.GetInt32("egg");
                     int yeast = reader.GetInt32("yeast");
                     await reader.CloseAsync();
-                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                    cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                     reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
                     string mode = "";
@@ -383,12 +393,12 @@ namespace Net_2kBot.Modules
 今日已获得经验：{reader.GetInt32("exp_gained_today")} / {(int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1))} XP
 生产（供应）模式：{mode}
 -----面包厂配置-----
-面包库存上限：{(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1))} 块
-生产周期：{300 - (20 * (reader.GetInt32("factory_level") - 1))} 秒
-每周期最大产量：{(int)Math.Pow(4, reader.GetInt32("factory_level"))} 块
+面包库存上限：{(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1)) * Math.Pow(2, reader.GetInt32("storage_upgraded"))} 块
+生产周期：{300 - (20 * (reader.GetInt32("factory_level") - 1)) - (10 * (reader.GetInt32("speed_upgraded")))} 秒
+每周期最大产量：{(int)Math.Pow(4, reader.GetInt32("factory_level")) * (int)Math.Pow(2, reader.GetInt32("output_upgraded"))} 块
 -----物品库存-----
 现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
-现有面包：{reader.GetInt32("breads")} / {(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1))} 块
+现有面包：{reader.GetInt32("breads")} / {(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1)) * Math.Pow(2, reader.GetInt32("storage_upgraded"))} 块
 ")
                        .Build();
                     }
@@ -409,7 +419,7 @@ namespace Net_2kBot.Modules
 每周期最大产量：{(int)Math.Pow(4, reader.GetInt32("factory_level"))} 块
 -----物品库存-----
 现有原材料：{flour} 份面粉、{egg} 份鸡蛋、{yeast} 份酵母
-现有面包：{reader.GetInt32("breads")} / {(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1) * Math.Pow(2, reader.GetInt32("storage_upgraded")))} 块
+现有面包：{reader.GetInt32("breads")} / {(int)(64 * Math.Pow(4, reader.GetInt32("factory_level") - 1))} 块
 ")
                        .Build();
                     }
@@ -447,11 +457,12 @@ namespace Net_2kBot.Modules
                     Connection = msc
                 };
                 // 判断数据是否存在
-                cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {group};";
+                cmd.CommandText = "SELECT COUNT(*) gid FROM bread WHERE gid = @gid;";
+                cmd.Parameters.AddWithValue("@gid", group);
                 int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                 if (i == 1)
                 {
-                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                    cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
                     if (reader.GetInt32("breads") == 0)
@@ -466,7 +477,8 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET factory_mode = 2 WHERE gid = {group};";
+                                    cmd1.CommandText = "UPDATE bread SET factory_mode = 2 WHERE gid = @gid;";
+                                    cmd1.Parameters.AddWithValue("@gid", group);
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 try
@@ -486,7 +498,8 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET factory_mode = 1 WHERE gid = {group};";
+                                    cmd1.CommandText = "UPDATE bread SET factory_mode = 1 WHERE gid = @gid;";
+                                    cmd1.Parameters.AddWithValue("@gid", group);
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 try
@@ -506,7 +519,8 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET factory_mode = 0 WHERE gid = {group};";
+                                    cmd1.CommandText = "UPDATE bread SET factory_mode = 0 WHERE gid = @gid;";
+                                    cmd1.Parameters.AddWithValue("@gid", group);
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 try
@@ -559,11 +573,12 @@ namespace Net_2kBot.Modules
                         Connection = msc
                     };
                     // 判断数据是否存在
-                    cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {receiver.GroupId};";
+                    cmd.CommandText = "SELECT COUNT(*) gid FROM bread WHERE gid = @gid;";
+                    cmd.Parameters.AddWithValue("@gid", receiver.GroupId);
                     int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                     if (i == 1)
                     {
-                        cmd.CommandText = $"SELECT * FROM bread WHERE gid = {receiver.GroupId};";
+                        cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                         MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                         await reader.ReadAsync();
                         int maxexp_formula = (int)(300 * Math.Pow(2, reader.GetInt32("factory_level") - 1));
@@ -579,26 +594,11 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET exp_gained_today = 0, last_expgain = {Global.time_now} WHERE gid = {receiver.GroupId};";
+                                    cmd1.CommandText = "UPDATE bread SET last_expgain = @time_now, factory_exp = @exp, exp_gained_today = 1 WHERE gid = @gid;";
+                                    cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                    cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
+                                    cmd1.Parameters.AddWithValue("@exp", reader.GetInt32("factory_exp") + 1);
                                     await cmd1.ExecuteNonQueryAsync();
-                                    if (reader.GetInt32("exp_gained_today") <= maxexp_formula)
-                                    {
-                                        cmd1.CommandText = $"UPDATE bread SET factory_exp = {reader.GetInt32("factory_exp") + 1}, exp_gained_today = {reader.GetInt32("exp_gained_today") + 1} WHERE gid = {receiver.GroupId};";
-                                        await cmd1.ExecuteNonQueryAsync();
-                                    }
-                                    else
-                                    {
-                                        cmd1.CommandText = $"UPDATE bread SET last_expfull = {Global.time_now}, exp_gained_today = 0 WHERE gid = {receiver.GroupId};";
-                                        await cmd1.ExecuteNonQueryAsync();
-                                        try
-                                        {
-                                            await MessageManager.SendGroupMessageAsync(receiver.GroupId, "本群已达到今日获取经验上限！");
-                                        }
-                                        catch
-                                        {
-                                            Console.WriteLine("群消息发送失败");
-                                        }
-                                    }
                                 }
                             }
                             else
@@ -612,7 +612,10 @@ namespace Net_2kBot.Modules
                                         {
                                             Connection = msc1
                                         };
-                                        cmd1.CommandText = $"UPDATE bread SET factory_exp = {reader.GetInt32("factory_exp") + 1}, exp_gained_today = {reader.GetInt32("exp_gained_today") + 1} WHERE gid = {receiver.GroupId};";
+                                        cmd1.CommandText = "UPDATE bread SET factory_exp = @exp, exp_gained_today = @egt WHERE gid = @gid;";
+                                        cmd1.Parameters.AddWithValue("@exp", reader.GetInt32("factory_exp") + 1);
+                                        cmd1.Parameters.AddWithValue("@egt", reader.GetInt32("exp_gained_today") + 1);
+                                        cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                 }
@@ -625,7 +628,9 @@ namespace Net_2kBot.Modules
                                         {
                                             Connection = msc1
                                         };
-                                        cmd1.CommandText = $"UPDATE bread SET last_expfull = {Global.time_now}, exp_gained_today = 0 WHERE gid = {receiver.GroupId};";
+                                        cmd1.CommandText = "UPDATE bread SET last_expfull = @time_now, exp_gained_today = 0 WHERE gid = @gid;";
+                                        cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                        cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                     try
@@ -655,11 +660,12 @@ namespace Net_2kBot.Modules
                     Connection = msc
                 };
                 // 判断数据是否存在
-                cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {group};";
+                cmd.CommandText = "SELECT COUNT(*) gid FROM bread WHERE gid = @gid;";
+                cmd.Parameters.AddWithValue("@gid", group);
                 int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                 if (i == 1)
                 {
-                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                    cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
                     int exp_formula = (int)(900 * Math.Pow(2, reader.GetInt32("factory_level") - 1));
@@ -674,11 +680,14 @@ namespace Net_2kBot.Modules
                                 {
                                     Connection = msc1
                                 };
-                                cmd1.CommandText = $"UPDATE bread SET factory_level = {reader.GetInt32("factory_level") + 1}, factory_exp = {reader.GetInt32("factory_exp") - exp_formula} WHERE gid = {group};";
+                                cmd1.CommandText = "UPDATE bread SET factory_level = @level, factory_exp = @exp WHERE gid = @gid;";
+                                cmd1.Parameters.AddWithValue("@level", reader.GetInt32("factory_level") + 1);
+                                cmd1.Parameters.AddWithValue("@exp", reader.GetInt32("factory_exp") - exp_formula);
+                                cmd1.Parameters.AddWithValue("@gid", group);
                                 await cmd1.ExecuteNonQueryAsync();
                             }
                             await reader.CloseAsync();
-                            cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                            cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                             await reader.ReadAsync();
                             try
@@ -738,11 +747,12 @@ namespace Net_2kBot.Modules
                     Connection = msc
                 };
                 // 判断数据是否存在
-                cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {group};";
+                cmd.CommandText = "SELECT COUNT(*) gid FROM bread WHERE gid = @gid;";
+                cmd.Parameters.AddWithValue("@gid", group);
                 int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                 if (i == 1)
                 {
-                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                    cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
                     int exp_formula = (int)(2000 * Math.Pow(1.28, reader.GetInt32("storage_upgraded")));
@@ -759,11 +769,14 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET storage_upgraded = {reader.GetInt32("storage_upgraded") + 1}, factory_exp = {reader.GetInt32("factory_exp") - exp_formula} WHERE gid = {group};";
+                                    cmd1.CommandText = "UPDATE bread SET storage_upgraded = @upgrades, factory_exp = @exp WHERE gid = @gid;";
+                                    cmd1.Parameters.AddWithValue("@upgrades", reader.GetInt32("storage_upgraded") + 1);
+                                    cmd1.Parameters.AddWithValue("@exp", reader.GetInt32("factory_exp") - exp_formula);
+                                    cmd1.Parameters.AddWithValue("@gid", group);
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 await reader.CloseAsync();
-                                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                                cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
                                 try
@@ -824,11 +837,12 @@ namespace Net_2kBot.Modules
                     Connection = msc
                 };
                 // 判断数据是否存在
-                cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {group};";
+                cmd.CommandText = "SELECT COUNT(*) gid FROM bread WHERE gid = @gid;";
+                cmd.Parameters.AddWithValue("@gid", group);
                 int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                 if (i == 1)
                 {
-                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                    cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
                     int exp_formula = (int)(9600 * Math.Pow(1.14, reader.GetInt32("speed_upgraded")));
@@ -845,11 +859,14 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET speed_upgraded = {reader.GetInt32("speed_upgraded") + 1}, factory_exp = {reader.GetInt32("factory_exp") - exp_formula} WHERE gid = {group};";
+                                    cmd1.CommandText = $"UPDATE bread SET speed_upgraded = @upgrades, factory_exp = @exp WHERE gid = @gid;";
+                                    cmd1.Parameters.AddWithValue("@upgrades", reader.GetInt32("speed_upgraded") + 1);
+                                    cmd1.Parameters.AddWithValue("@exp", reader.GetInt32("factory_exp") - exp_formula);
+                                    cmd1.Parameters.AddWithValue("@gid", group);
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 await reader.CloseAsync();
-                                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                                cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
                                 try
@@ -910,11 +927,12 @@ namespace Net_2kBot.Modules
                     Connection = msc
                 };
                 // 判断数据是否存在
-                cmd.CommandText = $"SELECT COUNT(*) gid FROM bread WHERE gid = {group};";
+                cmd.CommandText = "SELECT COUNT(*) gid FROM bread WHERE gid = @gid;";
+                cmd.Parameters.AddWithValue("@gid", group);
                 int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                 if (i == 1)
                 {
-                    cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                    cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     await reader.ReadAsync();
                     int exp_formula = (int)(4800 * Math.Pow(1.21, reader.GetInt32("output_upgraded")));
@@ -931,11 +949,14 @@ namespace Net_2kBot.Modules
                                     {
                                         Connection = msc1
                                     };
-                                    cmd1.CommandText = $"UPDATE bread SET output_upgraded = {reader.GetInt32("output_upgraded") + 1}, factory_exp = {reader.GetInt32("factory_exp") - exp_formula} WHERE gid = {group};";
+                                    cmd1.CommandText = "UPDATE bread SET output_upgraded = @upgrades, factory_exp = @exp WHERE gid = @gid;";
+                                    cmd1.Parameters.AddWithValue("@upgrades", reader.GetInt32("output_upgraded") + 1);
+                                    cmd1.Parameters.AddWithValue("@exp", reader.GetInt32("factory_exp") - exp_formula);
+                                    cmd1.Parameters.AddWithValue("@gid", group);
                                     await cmd1.ExecuteNonQueryAsync();
                                 }
                                 await reader.CloseAsync();
-                                cmd.CommandText = $"SELECT * FROM bread WHERE gid = {group};";
+                                cmd.CommandText = "SELECT * FROM bread WHERE gid = @gid;";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
                                 try
