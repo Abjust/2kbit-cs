@@ -1133,7 +1133,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w03b\r\n上次更新日期：2023/1/9\r\n更新内容：将代码内所有的“2kbot”替换成了“2kbit”，以对应新的名称\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w03c\r\n上次更新日期：2023/1/9\r\n更新内容：当现有原材料数量加上新生产的原材料数量大于或者等于周期内最大产量（比如3+2>4），那么就会把原材料数量卡在最大产量，以限制产能并防止数据溢出\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {

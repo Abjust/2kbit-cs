@@ -66,7 +66,7 @@ namespace Net_2kBit.Modules
                                 cmd.CommandText = "SELECT * FROM material WHERE gid = @gid;";
                                 reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                                 await reader.ReadAsync();
-                                if (Global.time_now - reader.GetInt64("last_produce") >= speed1 && reader.GetInt32("yeast") <= formula)
+                                if (Global.time_now - reader.GetInt64("last_produce") >= speed1 && reader.GetInt32("yeast") + random <= formula)
                                 {
                                     using (var msc1 = new MySqlConnection(Global.connectstring))
                                     {
@@ -79,6 +79,24 @@ namespace Net_2kBit.Modules
                                         cmd1.Parameters.AddWithValue("@flour", reader.GetInt32("flour") + random * 5);
                                         cmd1.Parameters.AddWithValue("@egg", reader.GetInt32("egg") + random * 2);
                                         cmd1.Parameters.AddWithValue("@yeast", reader.GetInt32("yeast") + random);
+                                        cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                        cmd1.Parameters.AddWithValue("@gid", groupid);
+                                        await cmd1.ExecuteNonQueryAsync();
+                                    }
+                                }
+                                else
+                                {
+                                    using (var msc1 = new MySqlConnection(Global.connectstring))
+                                    {
+                                        await msc1.OpenAsync();
+                                        MySqlCommand cmd1 = new()
+                                        {
+                                            Connection = msc1
+                                        };
+                                        cmd1.CommandText = "UPDATE material SET flour = @flour, egg = @egg, yeast = @yeast, last_produce = @time_now WHERE gid = @gid;";
+                                        cmd1.Parameters.AddWithValue("@flour", formula * 5);
+                                        cmd1.Parameters.AddWithValue("@egg", formula * 2);
+                                        cmd1.Parameters.AddWithValue("@yeast", formula);
                                         cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
                                         cmd1.Parameters.AddWithValue("@gid", groupid);
                                         await cmd1.ExecuteNonQueryAsync();
