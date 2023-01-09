@@ -1,4 +1,4 @@
-﻿// 2kbot，一款用C#编写的基于mirai和mirai.net的自由机器人软件
+﻿// 2kbit C# Edition，2kbit的C#分支版本
 // Copyright(C) 2022 Abjust 版权所有。
 
 // 本程序是自由软件：你可以根据自由软件基金会发布的GNU Affero通用公共许可证的条款，即许可证的第3版或（您选择的）任何后来的版本重新发布它和/或修改它。。
@@ -7,7 +7,7 @@
 
 // 您应该已经收到了一份GNU Affero通用公共许可证的副本。 如果没有，请参见<https://www.gnu.org/licenses/>。
 
-// 致所有构建及修改2kbot代码片段的用户：作者（Abjust）并不承担构建2kbot代码片段（包括修改过的版本）所产生的一切风险，但是用户有权在2kbot的GitHub项目页提出issue，并有权在代码片段修复这些问题后获取这些更新，但是，作者不会对修改过的代码版本做质量保证，也没有义务修正在修改过的代码片段中存在的任何缺陷。
+// 致所有构建及修改2kbit代码片段的用户：作者（Abjust）并不承担构建2kbit代码片段（包括修改过的版本）所产生的一切风险，但是用户有权在2kbit的GitHub项目页提出issue，并有权在代码片段修复这些问题后获取这些更新，但是，作者不会对修改过的代码版本做质量保证，也没有义务修正在修改过的代码片段中存在的任何缺陷。
 
 using Manganese.Text;
 using Mirai.Net.Data.Events.Concretes.Group;
@@ -20,12 +20,12 @@ using Mirai.Net.Sessions;
 using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
 using MySql.Data.MySqlClient;
-using Net_2kBot.Modules;
+using Net_2kBit.Modules;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Reactive.Linq;
 
-namespace Net_2kBot
+namespace Net_2kBit
 {
     public static class BotMain
     {
@@ -94,7 +94,7 @@ namespace Net_2kBot
             // 注意: `LaunchAsync`是一个异步方法，请确保`Main`方法的返回值为`Task`
             await bot.LaunchAsync();
             // 启动成功提示
-            Console.WriteLine("2kbot已启动！");
+            Console.WriteLine("2kbit已启动！");
             // 初始化
             // 连接数据库
             using (var msc = new MySqlConnection(Global.connectstring))
@@ -1133,7 +1133,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w03a_su\r\n上次更新日期：2023/1/8\r\n更新内容：这是2kbot历年来的首个安全更新！该更新全面将SQL语句改为参数化语句，最大限度挫败利用2kbot的功能实现SQL注入攻击的企图，且优化了数据表初始化SQL语句的格式\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w03b\r\n上次更新日期：2023/1/9\r\n更新内容：将代码内所有的“2kbot”替换成了“2kbit”，以对应新的名称\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
@@ -1145,7 +1145,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                     {
                         try
                         {
-                            await MessageManager.SendGroupMessageAsync(x.GroupId, "请前往https://github.com/Abjust/2kbot获取2kbot的源码！");
+                            await MessageManager.SendGroupMessageAsync(x.GroupId, "请前往https://github.com/Abjust/2kbit-cs获取2kbit C# Edition的源码！");
                         }
                         catch
                         {

@@ -1,4 +1,4 @@
-﻿// 2kbot，一款用C#编写的基于mirai和mirai.net的自由机器人软件
+﻿// 2kbit C# Edition，2kbit的C#分支版本
 // Copyright(C) 2022 Abjust 版权所有。
 
 // 本程序是自由软件：你可以根据自由软件基金会发布的GNU Affero通用公共许可证的条款，即许可证的第3版或（您选择的）任何后来的版本重新发布它和/或修改它。。
@@ -7,14 +7,14 @@
 
 // 您应该已经收到了一份GNU Affero通用公共许可证的副本。 如果没有，请参见<https://www.gnu.org/licenses/>。
 
-// 致所有构建及修改2kbot代码片段的用户：作者（Abjust）并不承担构建2kbot代码片段（包括修改过的版本）所产生的一切风险，但是用户有权在2kbot的GitHub项目页提出issue，并有权在代码片段修复这些问题后获取这些更新，但是，作者不会对修改过的代码版本做质量保证，也没有义务修正在修改过的代码片段中存在的任何缺陷。
+// 致所有构建及修改2kbit代码片段的用户：作者（Abjust）并不承担构建2kbit代码片段（包括修改过的版本）所产生的一切风险，但是用户有权在2kbit的GitHub项目页提出issue，并有权在代码片段修复这些问题后获取这些更新，但是，作者不会对修改过的代码版本做质量保证，也没有义务修正在修改过的代码片段中存在的任何缺陷。
 
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Utils.Scaffolds;
 using MySql.Data.MySqlClient;
 
-namespace Net_2kBot.Modules
+namespace Net_2kBit.Modules
 {
     public class Repeat
     {
@@ -215,96 +215,46 @@ namespace Net_2kBot.Modules
                                 }
                             }
                         }
-                        else
+                        else if (item.Equals(receiver.MessageChain.GetPlainMessage()))
                         {
-                            if (item.Equals(receiver.MessageChain.GetPlainMessage()))
+                            Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                            using (var msc = new MySqlConnection(Global.connectstring))
                             {
-                                Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-                                using (var msc = new MySqlConnection(Global.connectstring))
+                                await msc.OpenAsync();
+                                MySqlCommand cmd = new()
                                 {
-                                    await msc.OpenAsync();
-                                    MySqlCommand cmd = new()
+                                    Connection = msc
+                                };
+                                // 判断数据是否存在
+                                cmd.CommandText = "SELECT COUNT(*) qid FROM repeatctrl WHERE qid = @qid AND gid = @gid;";
+                                cmd.Parameters.AddWithValue("@qid", receiver.Sender.Id);
+                                cmd.Parameters.AddWithValue("@gid", receiver.GroupId);
+                                int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                                while (i == 0)
+                                {
+                                    cmd.CommandText = "INSERT INTO repeatctrl (qid,gid) VALUES (@qid,@gid);";
+                                    await cmd.ExecuteNonQueryAsync();
+                                    break;
+                                }
+                                cmd.CommandText = "SELECT * FROM repeatctrl WHERE qid = @qid AND gid = @gid;";
+                                MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                                await reader.ReadAsync();
+                                if (Global.time_now - reader.GetInt64("last_repeatctrl") >= repeat_cd)
+                                {
+                                    if (Global.time_now - reader.GetInt64("last_repeat") <= repeat_interval)
                                     {
-                                        Connection = msc
-                                    };
-                                    // 判断数据是否存在
-                                    cmd.CommandText = "SELECT COUNT(*) qid FROM repeatctrl WHERE qid = @qid AND gid = @gid;";
-                                    cmd.Parameters.AddWithValue("@qid", receiver.Sender.Id);
-                                    cmd.Parameters.AddWithValue("@gid", receiver.GroupId);
-                                    int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-                                    while (i == 0)
-                                    {
-                                        cmd.CommandText = "INSERT INTO repeatctrl (qid,gid) VALUES (@qid,@gid);";
-                                        await cmd.ExecuteNonQueryAsync();
-                                        break;
-                                    }
-                                    cmd.CommandText = "SELECT * FROM repeatctrl WHERE qid = @qid AND gid = @gid;";
-                                    MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
-                                    await reader.ReadAsync();
-                                    if (Global.time_now - reader.GetInt64("last_repeatctrl") >= repeat_cd)
-                                    {
-                                        if (Global.time_now - reader.GetInt64("last_repeat") <= repeat_interval)
+                                        using (var msc1 = new MySqlConnection(Global.connectstring))
                                         {
-                                            using (var msc1 = new MySqlConnection(Global.connectstring))
+                                            await msc1.OpenAsync();
+                                            MySqlCommand cmd1 = new()
                                             {
-                                                await msc1.OpenAsync();
-                                                MySqlCommand cmd1 = new()
-                                                {
-                                                    Connection = msc1
-                                                };
-                                                if (reader.GetInt32("repeat_count") <= repeat_threshold)
-                                                {
-                                                    cmd1.CommandText = "UPDATE repeatctrl SET last_repeat = @time_now, repeat_count = @count WHERE qid = @qid AND gid = @gid;";
-                                                    cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
-                                                    cmd1.Parameters.AddWithValue("@count", reader.GetInt32("repeat_count") + 1);
-                                                    cmd1.Parameters.AddWithValue("@qid", receiver.Sender.Id);
-                                                    cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
-                                                    await cmd1.ExecuteNonQueryAsync();
-                                                    try
-                                                    {
-                                                        await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
-                                                    }
-                                                    catch
-                                                    {
-                                                        Console.WriteLine("复读失败（恼）");
-                                                    }
-                                                    await reader.CloseAsync();
-                                                }
-                                                else
-                                                {
-                                                    try
-                                                    {
-                                                        var messageChain = new MessageChainBuilder()
-                                                       .At(receiver.Sender.Id)
-                                                       .Plain($" 你话太多了（恼）（你的消息将在 {repeat_cd} 秒内不被复读）")
-                                                       .Build();
-                                                        await receiver.SendMessageAsync(messageChain);
-                                                        await reader.CloseAsync();
-                                                    }
-                                                    catch
-                                                    {
-                                                        Console.WriteLine("群消息发送失败");
-                                                    }
-                                                    cmd1.CommandText = "UPDATE repeatctrl SET last_repeatctrl = @time_now, repeat_count = 0 WHERE qid = @qid AND gid = @gid;";
-                                                    cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
-                                                    cmd1.Parameters.AddWithValue("@qid", receiver.Sender.Id);
-                                                    cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
-                                                    await cmd1.ExecuteNonQueryAsync();
-                                                    await reader.CloseAsync();
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            using (var msc1 = new MySqlConnection(Global.connectstring))
+                                                Connection = msc1
+                                            };
+                                            if (reader.GetInt32("repeat_count") <= repeat_threshold)
                                             {
-                                                await msc1.OpenAsync();
-                                                MySqlCommand cmd1 = new()
-                                                {
-                                                    Connection = msc1
-                                                };
-                                                cmd1.CommandText = "UPDATE repeatctrl SET last_repeat = @time_now, repeat_count = 1 WHERE qid = @qid AND gid = @gid;";
+                                                cmd1.CommandText = "UPDATE repeatctrl SET last_repeat = @time_now, repeat_count = @count WHERE qid = @qid AND gid = @gid;";
                                                 cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                                cmd1.Parameters.AddWithValue("@count", reader.GetInt32("repeat_count") + 1);
                                                 cmd1.Parameters.AddWithValue("@qid", receiver.Sender.Id);
                                                 cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
                                                 await cmd1.ExecuteNonQueryAsync();
@@ -318,6 +268,53 @@ namespace Net_2kBot.Modules
                                                 }
                                                 await reader.CloseAsync();
                                             }
+                                            else
+                                            {
+                                                try
+                                                {
+                                                    var messageChain = new MessageChainBuilder()
+                                                   .At(receiver.Sender.Id)
+                                                   .Plain($" 你话太多了（恼）（你的消息将在 {repeat_cd} 秒内不被复读）")
+                                                   .Build();
+                                                    await receiver.SendMessageAsync(messageChain);
+                                                    await reader.CloseAsync();
+                                                }
+                                                catch
+                                                {
+                                                    Console.WriteLine("群消息发送失败");
+                                                }
+                                                cmd1.CommandText = "UPDATE repeatctrl SET last_repeatctrl = @time_now, repeat_count = 0 WHERE qid = @qid AND gid = @gid;";
+                                                cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                                cmd1.Parameters.AddWithValue("@qid", receiver.Sender.Id);
+                                                cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
+                                                await cmd1.ExecuteNonQueryAsync();
+                                                await reader.CloseAsync();
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        using (var msc1 = new MySqlConnection(Global.connectstring))
+                                        {
+                                            await msc1.OpenAsync();
+                                            MySqlCommand cmd1 = new()
+                                            {
+                                                Connection = msc1
+                                            };
+                                            cmd1.CommandText = "UPDATE repeatctrl SET last_repeat = @time_now, repeat_count = 1 WHERE qid = @qid AND gid = @gid;";
+                                            cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                            cmd1.Parameters.AddWithValue("@qid", receiver.Sender.Id);
+                                            cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
+                                            await cmd1.ExecuteNonQueryAsync();
+                                            try
+                                            {
+                                                await receiver.SendMessageAsync(receiver.MessageChain.GetPlainMessage());
+                                            }
+                                            catch
+                                            {
+                                                Console.WriteLine("复读失败（恼）");
+                                            }
+                                            await reader.CloseAsync();
                                         }
                                     }
                                 }
