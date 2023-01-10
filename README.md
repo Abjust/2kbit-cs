@@ -41,3 +41,7 @@
 ## Visual Studio需要安装什么？
 
 打开Visual Studio Installer后，勾选“.NET 桌面开发”和“通用 Windows 平台开发”，然后继续安装即可
+
+## 特别鸣谢
+
+1.[HanTools](https://github.com/daizihan233)
