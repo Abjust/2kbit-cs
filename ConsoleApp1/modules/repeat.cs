@@ -127,11 +127,10 @@ namespace Net_2kBit.Modules
                                     cmd.Parameters.AddWithValue("@gid", receiver.GroupId);
                                     int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                                     // 如不存在便创建
-                                    while (i == 0)
+                                    if (i == 0)
                                     {
                                         cmd.CommandText = "INSERT INTO repeatctrl (qid,gid) VALUES (@qid,@gid);";
                                         await cmd.ExecuteNonQueryAsync();
-                                        break;
                                     }
                                     cmd.CommandText = "SELECT * FROM repeatctrl WHERE qid = @qid AND gid = @gid;";
                                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();

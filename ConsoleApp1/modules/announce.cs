@@ -11,8 +11,11 @@
 
 using Mirai.Net.Data.Messages;
 using Mirai.Net.Data.Messages.Receivers;
+using Mirai.Net.Data.Shared;
 using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
+using MySqlX.XDevAPI.Common;
+using System;
 
 namespace Net_2kBit.Modules
 {
@@ -77,6 +80,31 @@ namespace Net_2kBit.Modules
                         Console.WriteLine("群消息发送失败");
                     }
                 }
+            }
+        }
+        public static async Task Notification()
+        {
+            while (true)
+            {
+                TimeSpan timeSpan = new TimeSpan(14, 0, 0);
+                DateTime utc = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds, DateTimeKind.Utc);
+                DateTime time_now = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+                if (TimeZoneInfo.ConvertTime(utc, TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time")) == time_now)
+                {
+                    IEnumerable<Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
+                    foreach (Group group in groups)
+                    {
+                        try
+                        {
+                            await MessageManager.SendGroupMessageAsync(group, "同志们，该准备休息了，身体是革命的本钱！");
+                        }
+                        catch
+                        {
+                            Console.WriteLine("群消息发送失败");
+                        }
+                    }
+                }
+                Thread.Sleep(500);
             }
         }
     }

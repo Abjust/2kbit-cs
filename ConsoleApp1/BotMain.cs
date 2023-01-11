@@ -164,6 +164,22 @@ CREATE TABLE IF NOT EXISTS material (
   `yeast` int NOT NULL DEFAULT 0 COMMENT '酵母数量',
   `last_produce` bigint NOT NULL DEFAULT '946656000' COMMENT '上次完成一轮生产周期时间',
   PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS woodenfish (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `uid` varchar(10) NOT NULL COMMENT '赛博账号',
+  `time` bigint NOT NULL COMMENT '上次计算时间',
+  `level` int NOT NULL DEFAULT '1' COMMENT '木鱼等级',
+  `exp` bigint unsigned NOT NULL DEFAULT '1' COMMENT '木鱼经验',
+  `gongde` bigint unsigned NOT NULL COMMENT '功德',
+  `ban` int NOT NULL DEFAULT '0' COMMENT '封禁状态',
+  `dt` bigint NOT NULL DEFAULT '946656000' COMMENT '封禁结束时间',
+  `end_time` bigint NOT NULL DEFAULT '946656000' COMMENT '最近一次敲木鱼时间',
+  `hit_count` int NOT NULL DEFAULT '0' COMMENT '敲木鱼次数',
+  `info_time` bigint NOT NULL DEFAULT '0' COMMENT '最近一次信息查询时间',
+  `info_count` int NOT NULL DEFAULT '0' COMMENT '信息查询次数',
+  `info_ctrl` bigint NOT NULL DEFAULT '946656000' COMMENT '信息查询限制结束时间',
+  `total_ban` int NOT NULL DEFAULT '0' COMMENT '累计封禁次数',
+  PRIMARY KEY (`id`));
 INSERT IGNORE INTO material (id, gid) SELECT id, gid FROM bread";
                 await cmd.ExecuteNonQueryAsync();
                 // 更新数据表
@@ -1103,37 +1119,164 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                     {
                         await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
                     }
+                    // 电子木鱼
+                    if (x.MessageChain.GetPlainMessage() == "我的木鱼")
+                    {
+                        WoodenFish.Info(x.GroupId, x.Sender.Id);
+                    }
+                    if (x.MessageChain.GetPlainMessage() == "给我木鱼")
+                    {
+                        WoodenFish.Register(x.GroupId, x.Sender.Id);
+                    }
+                    if (x.MessageChain.GetPlainMessage() == "敲木鱼")
+                    {
+                        WoodenFish.Hit(x.GroupId, x.Sender.Id);
+                    }
+                    if (x.MessageChain.GetPlainMessage() == "1")
+                    {
+                        WoodenFish.Laugh(x.GroupId, x.Sender.Id);
+                    }
+                    // 精神状况监控（beta）
+                    List<string> words = new()
+                        {
+                            "我想自杀",
+                            "我想自残",
+                            "我想死",
+                            "想自杀",
+                            "想自残",
+                            "想死",
+                            "我想zs",
+                            "我想zc",
+                            "我想s",
+                            "想zs",
+                            "想zc",
+                            "想s",
+                            "zs",
+                            "zc",
+                            "心烦",
+                            "我累了",
+                            "我一点都不难过",
+                            "我很开心啊"
+                        };
+                    foreach (string word in words)
+                    {
+                        if (x.MessageChain.GetPlainMessage().ToLower().Contains(word))
+                        {
+                            Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                            using (var msc = new MySqlConnection(Global.connectstring))
+                            {
+                                await msc.OpenAsync();
+                                MySqlCommand cmd = new()
+                                {
+                                    Connection = msc
+                                };
+                                cmd.CommandText = "SELECT COUNT(*) qid FROM mentalhealth WHERE qid = @qid;";
+                                cmd.Parameters.AddWithValue("@qid", x.Sender.Id);
+                                int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                                // 如不存在便创建
+                                if (i == 0)
+                                {
+                                    cmd.CommandText = "INSERT INTO mentalhealth (qid) VALUES (@qid);";
+                                    await cmd.ExecuteNonQueryAsync();
+                                }
+                                cmd.CommandText = "SELECT * FROM mentalhealth WHERE qid = @qid;";
+                                MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                                while (reader.Read())
+                                {
+                                    using (var msc1 = new MySqlConnection(Global.connectstring))
+                                    {
+                                        await msc1.OpenAsync();
+                                        MySqlCommand cmd1 = new()
+                                        {
+                                            Connection = msc1
+                                        };
+                                        cmd1.CommandText = "UPDATE mentalhealth SET attempts = @attempts, last_record = @time_now WHERE qid = @qid";
+                                        cmd1.Parameters.AddWithValue("@attempts", reader.GetInt32("attempts") + 1);
+                                        cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                        cmd1.Parameters.AddWithValue("@qid", x.Sender.Id);
+                                        await cmd1.ExecuteNonQueryAsync();
+                                        break;
+                                    }
+                                }
+                                await reader.CloseAsync();
+                                List<string> poems = new()
+                                {
+                                    @"
+假如生活欺骗了你，
+不要悲伤，不要心急！
+忧郁的日子里须要镇静：
+相信吧，快乐的日子将会来临！
+心儿永远向往着未来；
+现在却常是忧郁：
+一切都是瞬息，一切都将会过去；
+而那过去了的，就会成为亲切的怀恋。
+",
+                                    @"
+整个自然都是艺术，不过你不领悟；
+一切偶然都是规定，只是你没有看清；
+一切不协，是你不理解的和谐；
+一切局部的祸，乃是全体的福。
+高傲可鄙，只因它不近情理。
+凡存在的都合理，乃是清楚的道理。
+",
+                                    " 感谢科学，它不仅使生活充满快乐与欢欣，并且给生活以支柱和自尊心。",
+                                    " 生活本来是个沉重的话题，它带给我们压力责任和使命，但如果我们用好的心态去面对，用宽广的胸怀去接纳，那快乐就会不期而至，伴随左右。心态决定想法，想法决定做法，做法决定结果。",
+                                    " 应当赶紧地，充分地生活，因为意外的疾病或悲惨的事故随时都可以突然结束他的生命。",
+                                    " 人是用心去活，而不是用脸去活，用心去活无非是认真的去感受生活中的点滴，享受生活的每一次给予。",
+                                    " 生活的真谛就是懂得享受生活，而享受生活的真正目的就是使自己的心情达到一种舒畅或平静的状态，做事完全是自觉、自愿而且带着兴趣的。随心所欲并不是指金钱的方向和改变，而是指心灵的自由。",
+                                    " 根本不必回头去看咒骂你的人是谁？如果有一条疯狗咬你一口，难道你也要趴下去反咬他一口吗？",
+                                    " 世界的设计创造应以人为中心，而不是以谋取金钱，人并非以金钱为对象而生活，人的对象往往是人。",
+                                    " 享受生活不需要寻找特殊的日子，因为每一天都是特殊的，享受生活就是享受今天。",
+                                    " 应该相信，自己是生活的战胜者。",
+                                    @"
+从一粒沙看世界，
+从一朵花看天堂，
+把永恒纳进一个时辰，
+把无限握在自己手心。",
+                                    " 天若有情人亦老，人间正道是沧桑。"
+                                };
+                                Random r = new();
+                                int random = r.Next(poems.Count);
+                                MessageChain messageChain = new MessageChainBuilder()
+                                    .At(x.Sender.Id)
+                                    .Plain(poems[random])
+                                    .Build();
+                                await MessageManager.SendGroupMessageAsync(x.GroupId, messageChain);
+                                break;
+                            }
+                        }
+                    }
                     // 版本
                     if (x.MessageChain.GetPlainMessage() == "版本")
                     {
                         List<string> splashes = new()
-                    {
-                        "也试试HanBot罢！Also try HanBot!",
-                        "誓死捍卫微软苏维埃！",
-                        "打倒MF独裁分子！",
-                        "要把反革命分子的恶臭思想，扫进历史的垃圾堆！",
-                        "PHP是世界上最好的编程语言（雾）",
-                        "社会主义好，社会主义好~",
-                        "Minecraft很好玩，但也可以试试Terraria！",
-                        "So Nvidia, f**k you!",
-                        "战无不胜的马克思列宁主义万岁！",
-                        "Bug是杀不完的，你杀死了一个Bug，就会有千千万万个Bug站起来！",
-                        "跟张浩扬博士一起来学Jvav罢！",
-                        "哼哼哼，啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊",
-                        "你知道吗？其实你什么都不知道！",
-                        "Tips:这是一条烫...烫..烫知识（）",
-                        "你知道成功的秘诀吗？我告诉你成功的秘诀就是：我操你妈的大臭逼",
-                        "有时候ctmd不一定是骂人 可能是传统美德",
-                        "python不一定是编程语言 也可能是屁眼通红",
-                        "这条标语虽然没有用，但是是有用的，因为他被加上了标语",
-                        "使用C#编写！"
-                    };
+                        {
+                            "也试试HanBot罢！Also try HanBot!",
+                            "誓死捍卫微软苏维埃！",
+                            "打倒MF独裁分子！",
+                            "要把反革命分子的恶臭思想，扫进历史的垃圾堆！",
+                            "PHP是世界上最好的编程语言（雾）",
+                            "社会主义好，社会主义好~",
+                            "Minecraft很好玩，但也可以试试Terraria！",
+                            "So Nvidia, f**k you!",
+                            "战无不胜的马克思列宁主义万岁！",
+                            "Bug是杀不完的，你杀死了一个Bug，就会有千千万万个Bug站起来！",
+                            "跟张浩扬博士一起来学Jvav罢！",
+                            "哼哼哼，啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊",
+                            "你知道吗？其实你什么都不知道！",
+                            "Tips:这是一条烫...烫..烫知识（）",
+                            "你知道成功的秘诀吗？我告诉你成功的秘诀就是：我操你妈的大臭逼",
+                            "有时候ctmd不一定是骂人 可能是传统美德",
+                            "python不一定是编程语言 也可能是屁眼通红",
+                            "这条标语虽然没有用，但是是有用的，因为他被加上了标语",
+                            "使用C#编写！"
+                        };
                         Random r = new();
                         int random = r.Next(splashes.Count);
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w03c\r\n上次更新日期：2023/1/9\r\n更新内容：当现有原材料数量加上新生产的原材料数量大于或者等于周期内最大产量（比如3+2>4），那么就会把原材料数量卡在最大产量，以限制产能并防止数据溢出\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w04a\r\n上次更新日期：2023/1/11\r\n更新内容：添加了电子木鱼功能；添加了精神状况监控功能；添加了整点报时（仅22点整）\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
@@ -1154,11 +1297,13 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                     }
                 }
             });
-            // 运行面包厂生产任务
+            // 运行各项自动化任务
             var Tasks = new Task[]
             {
                 Task.Run(async () => await BreadFactory.MaterialProduce()),
-                Task.Run(async () => await BreadFactory.BreadProduce())
+                Task.Run(async () => await BreadFactory.BreadProduce()),
+                Task.Run(async () => await WoodenFish.ExpUpgrade()),
+                Task.Run(async () => await Announce.Notification())
             };
             await Task.WhenAll(Tasks);
             Console.ReadLine();

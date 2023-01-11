@@ -98,6 +98,8 @@ namespace Net_2kBit.Modules
                     "艾森克",
                     "大五",
                     "九型",
+                    "黑暗人格",
+                    "道德九宫格",
                     "SCL90",
                     "SDS",
                     "SAS",
@@ -109,10 +111,12 @@ namespace Net_2kBit.Modules
                 };
                 var links = new List<string>
                 {
-                    "(1)https://16personalities.com/ch/\r\n(2)https://www.jungus.cn/zh-hans/test/\r\n(3)https://www.zxgj.cn/g/mbti28",
-                    "https://www.zxgj.cn/g/askj/",
+                    "(1)https://16personalities.com/ch/\r\n(2)https://www.jungus.cn/zh-hans/test/",
+                    "7-15：https://www.psy525.cn/ceshi/84336.html\r\n16+：https://www.psy525.cn/ceshi/84335.html",
                     "http://www.apesk.com/bigfive/",
                     "http://www.cnenn.cn/html/jiuxingrengeceshi/test.asp",
+                    "http://qst.darkfactor.org",
+                    "https://unnamed42.github.io/2016-06-30-%E5%AE%98%E6%96%B9%E7%89%88DnD%E9%98%B5%E8%90%A5%E6%B5%8B%E8%AF%95.html",
                     "http://www.ntneuro.org/scale/scl90.asp",
                     "https://www.zxgj.cn/g/yiyuzheng",
                     "https://www.zxgj.cn/g/jiaolv",
@@ -129,6 +133,7 @@ namespace Net_2kBit.Modules
 人格/性格测试：
 MBTI|艾森克
 大五|九型
+黑暗人格|道德九宫格
 精神心理量表：
 SCL90（综合）|SDS（抑郁）
 SAS（焦虑）|MDQ（双相）

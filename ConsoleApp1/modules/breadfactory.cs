@@ -84,7 +84,7 @@ namespace Net_2kBit.Modules
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                 }
-                                else
+                                else if (Global.time_now - reader.GetInt64("last_produce") >= speed1 && reader.GetInt32("yeast") + random > formula)
                                 {
                                     using (var msc1 = new MySqlConnection(Global.connectstring))
                                     {
@@ -187,7 +187,7 @@ namespace Net_2kBit.Modules
                                         if (reader.GetInt32("breads") + random < maxstorage)
                                         {
                                             cmd1.CommandText = "UPDATE bread SET breads = @breads WHERE gid = @gid;";
-                                            cmd1.Parameters["@breads"].Value = reader.GetInt32("breads") + random * Math.Pow(4, bread_diversity);
+                                            cmd1.Parameters["@breads"].Value = reader.GetInt32("breads") + random;
                                             cmd1.Parameters["@gid"].Value = groupid;
                                             await cmd1.ExecuteNonQueryAsync();
                                             await reader.CloseAsync();
