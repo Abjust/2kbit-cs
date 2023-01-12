@@ -1132,6 +1132,14 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                     {
                         WoodenFish.Hit(x.GroupId, x.Sender.Id);
                     }
+                    if (x.MessageChain.GetPlainMessage() == "功德榜")
+                    {
+                        WoodenFish.Leaderboard(x.GroupId, x.Sender.Id);
+                    }
+                    if (x.MessageChain.GetPlainMessage() == "封禁榜")
+                    {
+                        WoodenFish.BanLeaderboard(x.GroupId, x.Sender.Id);
+                    }
                     if (x.MessageChain.GetPlainMessage() == "1")
                     {
                         WoodenFish.Laugh(x.GroupId, x.Sender.Id);
@@ -1276,7 +1284,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w04a\r\n上次更新日期：2023/1/11\r\n更新内容：添加了电子木鱼功能；添加了精神状况监控功能；添加了整点报时（仅22点整）\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w04b\r\n上次更新日期：2023/1/12\r\n更新内容：电子木鱼新增功德榜、封禁榜；修复了主动复读功能的bug\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {

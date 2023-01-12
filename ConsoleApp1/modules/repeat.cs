@@ -146,13 +146,16 @@ namespace Net_2kBit.Modules
                                                 {
                                                     Connection = msc1
                                                 };
+                                                cmd1.Parameters.Add("@time_now", MySqlDbType.Int64);
+                                                cmd1.Parameters.Add("@qid", MySqlDbType.String);
+                                                cmd1.Parameters.Add("@gid", MySqlDbType.String);
                                                 if (reader.GetInt32("repeat_count") <= repeat_threshold)
                                                 {
                                                     cmd1.CommandText = "UPDATE repeatctrl SET last_repeat = @time_now, repeat_count = @count WHERE qid = @qid AND gid = @gid;";
-                                                    cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                                    cmd1.Parameters["@time_now"].Value = Global.time_now;
                                                     cmd1.Parameters.AddWithValue("@count", reader.GetInt32("repeat_count") + 1);
-                                                    cmd1.Parameters.AddWithValue("@qid", receiver.Sender.Id);
-                                                    cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
+                                                    cmd1.Parameters["@qid"].Value = receiver.Sender.Id;
+                                                    cmd1.Parameters["@gid"].Value = receiver.GroupId;
                                                     await cmd1.ExecuteNonQueryAsync();
                                                     try
                                                     {
@@ -180,6 +183,9 @@ namespace Net_2kBit.Modules
                                                         Console.WriteLine("群消息发送失败");
                                                     }
                                                     cmd1.CommandText = "UPDATE repeatctrl SET last_repeatctrl = @time_now, repeat_count = 0 WHERE qid = @qid AND gid = @gid;";
+                                                    cmd1.Parameters["@time_now"].Value = Global.time_now;
+                                                    cmd1.Parameters["@qid"].Value = receiver.Sender.Id;
+                                                    cmd1.Parameters["@gid"].Value = receiver.GroupId;
                                                     await cmd1.ExecuteNonQueryAsync();
                                                     await reader.CloseAsync();
                                                 }
@@ -249,13 +255,16 @@ namespace Net_2kBit.Modules
                                             {
                                                 Connection = msc1
                                             };
+                                            cmd1.Parameters.Add("@time_now", MySqlDbType.Int64);
+                                            cmd1.Parameters.Add("@qid", MySqlDbType.String);
+                                            cmd1.Parameters.Add("@gid", MySqlDbType.String);
                                             if (reader.GetInt32("repeat_count") <= repeat_threshold)
                                             {
                                                 cmd1.CommandText = "UPDATE repeatctrl SET last_repeat = @time_now, repeat_count = @count WHERE qid = @qid AND gid = @gid;";
-                                                cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                                cmd1.Parameters["@time_now"].Value = Global.time_now;
                                                 cmd1.Parameters.AddWithValue("@count", reader.GetInt32("repeat_count") + 1);
-                                                cmd1.Parameters.AddWithValue("@qid", receiver.Sender.Id);
-                                                cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
+                                                cmd1.Parameters["@qid"].Value = receiver.Sender.Id;
+                                                cmd1.Parameters["@gid"].Value = receiver.GroupId;
                                                 await cmd1.ExecuteNonQueryAsync();
                                                 try
                                                 {
@@ -276,6 +285,11 @@ namespace Net_2kBit.Modules
                                                    .Plain($" 你话太多了（恼）（你的消息将在 {repeat_cd} 秒内不被复读）")
                                                    .Build();
                                                     await receiver.SendMessageAsync(messageChain);
+                                                    cmd1.CommandText = "UPDATE repeatctrl SET last_repeatctrl = @time_now, repeat_count = 0 WHERE qid = @qid AND gid = @gid;";
+                                                    cmd1.Parameters["@time_now"].Value = Global.time_now;
+                                                    cmd1.Parameters["@qid"].Value = receiver.Sender.Id;
+                                                    cmd1.Parameters["@gid"].Value = receiver.GroupId;
+                                                    await cmd1.ExecuteNonQueryAsync();
                                                     await reader.CloseAsync();
                                                 }
                                                 catch
@@ -283,9 +297,9 @@ namespace Net_2kBit.Modules
                                                     Console.WriteLine("群消息发送失败");
                                                 }
                                                 cmd1.CommandText = "UPDATE repeatctrl SET last_repeatctrl = @time_now, repeat_count = 0 WHERE qid = @qid AND gid = @gid;";
-                                                cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
-                                                cmd1.Parameters.AddWithValue("@qid", receiver.Sender.Id);
-                                                cmd1.Parameters.AddWithValue("@gid", receiver.GroupId);
+                                                cmd1.Parameters["@time_now"].Value = Global.time_now;
+                                                cmd1.Parameters["@qid"].Value = receiver.Sender.Id;
+                                                cmd1.Parameters["@gid"].Value = receiver.GroupId;
                                                 await cmd1.ExecuteNonQueryAsync();
                                                 await reader.CloseAsync();
                                             }

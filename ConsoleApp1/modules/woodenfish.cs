@@ -298,7 +298,7 @@ namespace Net_2kBit.Modules
                                         {
                                             Console.WriteLine("群消息发送失败");
                                         }
-                                        cmd1.CommandText = "UPDATE woodenfish SET ban = 2, total_ban = @ban, dt = @time, hit_count = 0 WHERE uid = @uid";
+                                        cmd1.CommandText = "UPDATE woodenfish SET ban = 2, total_ban = @ban, gongde = @gongde, dt = @time, hit_count = 0 WHERE uid = @uid";
                                         cmd1.Parameters["@uid"].Value = executor;
                                         cmd1.Parameters.AddWithValue("@ban", reader.GetInt32("total_ban") + 1);
                                         cmd1.Parameters["@gongde"].Value = (ulong)(reader.GetUInt64("gongde") * 0.7);
@@ -436,11 +436,128 @@ namespace Net_2kBit.Modules
                         }
                     }
                 }
+            }
+        }
+        // 功德榜
+        public static async void Leaderboard(string group, string executor)
+        {
+            using (var msc = new MySqlConnection(Global.connectstring))
+            {
+                await msc.OpenAsync();
+                MySqlCommand cmd = new()
+                {
+                    Connection = msc
+                };
+                cmd.CommandText = "SELECT COUNT(*) uid FROM woodenfish;";
+                int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                if (i >= 1)
+                {
+                    List<string> uids = new();
+                    cmd.CommandText = "SELECT * FROM woodenfish ORDER BY gongde DESC;";
+                    MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                    while (reader.Read())
+                    {
+                        string uid = reader.GetString("uid");
+                        uids?.Add(uid);
+                    }
+                    await reader.CloseAsync();
+                    MessageChain messageChain = new MessageChainBuilder()
+                        .At(executor)
+                        .Plain("\n功德榜\n赛博账号 --- 功德")
+                        .Build();
+                    cmd.Parameters.Add("@uid", MySqlDbType.String);
+                    foreach (string uid in uids!)
+                    {
+                        cmd.CommandText = "SELECT * FROM woodenfish WHERE uid = @uid;";
+                        cmd.Parameters["@uid"].Value = uid;
+                        reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64("gongde") >= 1)
+                            {
+                                MessageChain messageChain1 = new MessageChainBuilder()
+                                .Plain($"\n{uid} --- {reader.GetUInt64("gongde")}")
+                                .Build();
+                                foreach (MessageBase message in messageChain1)
+                                {
+                                    messageChain.Add(message);
+                                }
+                            }
+                        }
+                        await reader.CloseAsync();
+                    }
+                    await reader.CloseAsync();
+                    await MessageManager.SendGroupMessageAsync(group, messageChain);
+                }
                 else
                 {
                     try
                     {
-                        await MessageManager.SendGroupMessageAsync(group, "宁踏马害没注册？快发送“给我木鱼”注册罢！");
+                        await MessageManager.SendGroupMessageAsync(group, "目前还没有人注册赛博账号！");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("群消息发送失败");
+                    }
+                }
+            }
+        }
+        // 封禁榜
+        public static async void BanLeaderboard(string group, string executor)
+        {
+            using (var msc = new MySqlConnection(Global.connectstring))
+            {
+                await msc.OpenAsync();
+                MySqlCommand cmd = new()
+                {
+                    Connection = msc
+                };
+                cmd.CommandText = "SELECT COUNT(*) uid FROM woodenfish;";
+                int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                if (i >= 1)
+                {
+                    List<string> uids = new();
+                    cmd.CommandText = "SELECT * FROM woodenfish ORDER BY total_ban DESC;";
+                    MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                    while (reader.Read())
+                    {
+                        string uid = reader.GetString("uid");
+                        uids?.Add(uid);
+                    }
+                    await reader.CloseAsync();
+                    MessageChain messageChain = new MessageChainBuilder()
+                        .At(executor)
+                        .Plain("\n封禁榜\n赛博账号 --- 累计封禁次数")
+                        .Build();
+                    cmd.Parameters.Add("@uid", MySqlDbType.String);
+                    foreach (string uid in uids!)
+                    {
+                        cmd.CommandText = "SELECT * FROM woodenfish WHERE uid = @uid;";
+                        cmd.Parameters["@uid"].Value = uid;
+                        reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                        while (reader.Read())
+                        {
+                            if (reader.GetInt32("total_ban") >= 1)
+                            {
+                                MessageChain messageChain1 = new MessageChainBuilder()
+                                .Plain($"\n{uid} --- {reader.GetUInt64("total_ban")}")
+                                .Build();
+                                foreach (MessageBase message in messageChain1)
+                                {
+                                    messageChain.Add(message);
+                                }
+                            }
+                        }
+                        await reader.CloseAsync();
+                    }
+                    await reader.CloseAsync();
+                    await MessageManager.SendGroupMessageAsync(group, messageChain);
+                }
+                else
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, "目前还没有人注册赛博账号！");
                     }
                     catch
                     {
