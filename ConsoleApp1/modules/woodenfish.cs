@@ -13,6 +13,8 @@ using Mirai.Net.Data.Messages;
 using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
 using MySql.Data.MySqlClient;
+using System.Linq;
+using System.Net.Sockets;
 
 namespace Net_2kBit.Modules
 {
@@ -131,19 +133,71 @@ namespace Net_2kBit.Modules
                                     }
                                 }
                                 string gongde;
+                                string expression = "";
                                 if (reader.GetDouble("ee") >= 1)
                                 {
-                                    gongde = $"ee{Math.Truncate(10000 * reader.GetDouble("ee")) / 10000}（约 {Math.Round(Math.Pow(10, Math.Truncate(10000 * reader.GetDouble("ee")) / 10000)) / 100} 兆）";
+                                    List<string> units = new()
+                                    {
+                                        "亿",
+                                        "兆",
+                                        "京",
+                                        "垓",
+                                        "秭",
+                                        "穰",
+                                        "沟",
+                                        "涧",
+                                        "正",
+                                        "载"
+                                    };
+                                    double ee_with_unit = reader.GetDouble("ee");
+                                    int unit = 0;
+                                    for (int j = 0; ;)
+                                    {
+                                        if (Math.Pow(10, ee_with_unit) >= 48)
+                                        {
+                                            expression = $"10^10^{Math.Truncate(10000 * reader.GetDouble("ee")) / 10000}";
+                                            break;
+                                        }
+                                        else if (Math.Pow(10, ee_with_unit) - 8 >= Math.Log10(10000))
+                                        {
+                                            if ((Math.Pow(10, ee_with_unit) - 8) / Math.Log10(10000) >= units.Count)
+                                            {
+                                                Console.WriteLine("1");
+                                                unit = units.Count - 1;
+                                                expression = $"{Math.Truncate(Math.Pow(10, Math.Pow(10, ee_with_unit) - (8 + unit * 4))) / 10000} {units[unit]}";
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                unit = (int)Math.Floor((Math.Pow(10, ee_with_unit) - 8) / Math.Log10(10000)) - 1;
+                                                expression = $"{Math.Truncate(Math.Pow(10, Math.Pow(10, ee_with_unit) - (8 + unit * 4))) / 10000} {units[unit]}";
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            expression = $"{Math.Truncate(Math.Pow(10, Math.Pow(10, ee_with_unit - 8))) / 10000} {units[j]}";
+                                            break;
+                                        }
+                                    }
+                                    gongde = $"ee{Math.Truncate(10000 * reader.GetDouble("ee")) / 10000}（约 {expression}）";
                                 }
                                 else if (reader.GetDouble("e") >= 1)
                                 {
-                                    gongde = $"e{Math.Truncate(10000 * reader.GetDouble("e")) / 10000}（约 {Math.Round(Math.Pow(10, Math.Truncate(10000 * reader.GetDouble("e")) / 10000)) / 10000} 万）";
+                                    if (reader.GetDouble("e") >= 8)
+                                    {
+                                        gongde = $"e{Math.Truncate(10000 * reader.GetDouble("e")) / 10000}（约 {Math.Round(Math.Pow(10, Math.Truncate(10000 * reader.GetDouble("e")) / 10000)) / Math.Pow(10, 8)} 亿）";
+                                    }
+                                    else
+                                    {
+                                        gongde = $"e{Math.Truncate(10000 * reader.GetDouble("e")) / 10000}（约 {Math.Round(Math.Pow(10, Math.Truncate(10000 * reader.GetDouble("e")) / 10000)) / 10000} 万）";
+                                    }
                                 }
                                 else
                                 {
                                     gongde = $"{reader.GetInt64("gongde")}";
                                 }
-                                if (Global.time_now - (reader.GetInt64("info_time")) <= 10 && reader.GetInt32("info_count") > 5)
+                                if (Global.time_now - reader.GetInt64("info_time") <= 10 && reader.GetInt32("info_count") > 5)
                                 {
                                     try
                                     {
