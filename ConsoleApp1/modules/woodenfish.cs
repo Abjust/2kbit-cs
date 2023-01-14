@@ -133,7 +133,7 @@ namespace Net_2kBit.Modules
                                 string gongde;
                                 if (reader.GetDouble("ee") >= 1)
                                 {
-                                    gongde = $"ee{Math.Truncate(10000 * reader.GetDouble("ee")) / 10000}（约 {Math.Round(Math.Pow(10, Math.Truncate(10000 * reader.GetDouble("ee")) / 10000)) / 100} 亿）";
+                                    gongde = $"ee{Math.Truncate(10000 * reader.GetDouble("ee")) / 10000}（约 {Math.Round(Math.Pow(10, Math.Truncate(10000 * reader.GetDouble("ee")) / 10000)) / 100} 兆）";
                                 }
                                 else if (reader.GetDouble("e") >= 1)
                                 {
@@ -495,6 +495,12 @@ namespace Net_2kBit.Modules
                                     cmd1.Parameters.AddWithValue("@e", reader.GetDouble("e") - reader.GetInt32("level") + 2);
                                     cmd1.Parameters.AddWithValue("@uid", executor);
                                     await cmd1.ExecuteNonQueryAsync();
+                                    await cmd1.ExecuteNonQueryAsync();
+                                    MessageChain messageChain = new MessageChainBuilder()
+                                        .At(executor)
+                                        .Plain(" 木鱼升级成功辣（喜）")
+                                        .Build();
+                                    await MessageManager.SendGroupMessageAsync(group, messageChain);
                                 }
                             }
                             else
