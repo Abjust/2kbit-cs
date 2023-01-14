@@ -53,18 +53,19 @@ namespace Net_2kBit.Modules
                                     };
                                     status = "正常";
                                     word = "【敲电子木鱼，见机甲佛祖，取赛博真经】";
+                                    cmd1.Parameters.Add("@uid", MySqlDbType.String);
                                     if (Math.Log10(reader.GetInt64("gongde")) >= 1)
                                     {
                                         cmd1.CommandText = "UPDATE woodenfish SET e = @e, gongde = 0 WHERE uid = @uid";
                                         cmd1.Parameters.AddWithValue("@e", Math.Log10(Math.Pow(10, reader.GetDouble("e")) + reader.GetInt64("gongde")));
-                                        cmd1.Parameters.AddWithValue("@uid", executor);
+                                        cmd1.Parameters["@uid"].Value = executor;
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                     if (Math.Log10(reader.GetDouble("e")) >= 1)
                                     {
                                         cmd1.CommandText = "UPDATE woodenfish SET ee = @ee, e = 0 WHERE uid = @uid";
                                         cmd1.Parameters.AddWithValue("@ee", Math.Log10(Math.Pow(10, reader.GetDouble("ee")) + reader.GetDouble("e")));
-                                        cmd1.Parameters.AddWithValue("@uid", executor);
+                                        cmd1.Parameters["@uid"].Value = executor;
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                 }
