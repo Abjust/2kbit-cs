@@ -168,9 +168,11 @@ CREATE TABLE IF NOT EXISTS woodenfish (
   `id` int NOT NULL AUTO_INCREMENT,
   `uid` varchar(10) NOT NULL COMMENT '赛博账号',
   `time` bigint NOT NULL COMMENT '上次计算时间',
-  `level` int NOT NULL DEFAULT '1' COMMENT '木鱼等级',
-  `exp` bigint unsigned NOT NULL DEFAULT '1' COMMENT '木鱼经验',
-  `gongde` bigint unsigned NOT NULL COMMENT '功德',
+  `level` int NOT NULL DEFAULT '0' COMMENT '木鱼等级',
+  `gongde` bigint NOT NULL DEFAULT '0' COMMENT '功德',
+  `e` double NOT NULL DEFAULT '0' COMMENT 'log10值',
+  `ee` double NOT NULL DEFAULT '0' COMMENT 'log10^10值',
+  `nirvana` double NOT NULL DEFAULT '1' COMMENT '涅槃重生次数',
   `ban` int NOT NULL DEFAULT '0' COMMENT '封禁状态',
   `dt` bigint NOT NULL DEFAULT '946656000' COMMENT '封禁结束时间',
   `end_time` bigint NOT NULL DEFAULT '946656000' COMMENT '最近一次敲木鱼时间',
@@ -179,6 +181,12 @@ CREATE TABLE IF NOT EXISTS woodenfish (
   `info_count` int NOT NULL DEFAULT '0' COMMENT '信息查询次数',
   `info_ctrl` bigint NOT NULL DEFAULT '946656000' COMMENT '信息查询限制结束时间',
   `total_ban` int NOT NULL DEFAULT '0' COMMENT '累计封禁次数',
+  PRIMARY KEY (`id`));
+CREATE TABLE IF NOT EXISTS mentalhealth (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `qid` varchar(10) NOT NULL,
+  `attempts` int NOT NULL DEFAULT '0',
+  `last_record` bigint NOT NULL DEFAULT '946656000',
   PRIMARY KEY (`id`));
 INSERT IGNORE INTO material (id, gid) SELECT id, gid FROM bread";
                 await cmd.ExecuteNonQueryAsync();
@@ -1120,17 +1128,25 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         await MessageManager.SendGroupMessageAsync(x.GroupId, "因HanBot API存在问题，同步功能被暂时禁用！");
                     }
                     // 电子木鱼
-                    if (x.MessageChain.GetPlainMessage() == "我的木鱼")
+                    if (x.MessageChain.GetPlainMessage() == "我的木鱼" || x.MessageChain.GetPlainMessage() == "我的木魚")
                     {
                         WoodenFish.Info(x.GroupId, x.Sender.Id);
                     }
-                    if (x.MessageChain.GetPlainMessage() == "给我木鱼")
+                    if (x.MessageChain.GetPlainMessage() == "给我木鱼" || x.MessageChain.GetPlainMessage() == "給我木魚")
                     {
                         WoodenFish.Register(x.GroupId, x.Sender.Id);
                     }
-                    if (x.MessageChain.GetPlainMessage() == "敲木鱼")
+                    if (x.MessageChain.GetPlainMessage() == "敲木鱼" || x.MessageChain.GetPlainMessage() == "敲木魚")
                     {
                         WoodenFish.Hit(x.GroupId, x.Sender.Id);
+                    }
+                    if (x.MessageChain.GetPlainMessage() == "升级木鱼" || x.MessageChain.GetPlainMessage() == "升級木魚")
+                    {
+                        WoodenFish.Upgrade(x.GroupId, x.Sender.Id);
+                    }
+                    if (x.MessageChain.GetPlainMessage() == "涅槃重生")
+                    {
+                        WoodenFish.Nirvana(x.GroupId, x.Sender.Id);
                     }
                     if (x.MessageChain.GetPlainMessage() == "功德榜")
                     {
@@ -1284,7 +1300,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w04b\r\n上次更新日期：2023/1/12\r\n更新内容：电子木鱼新增功德榜、封禁榜；修复了主动复读功能的bug\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w05a\r\n上次更新日期：2023/1/14\r\n更新内容：功德现在会用e（log10值）和ee（log10^10值）计算了；现在升级木鱼将消耗功德而非经验；删除了经验这个参数；现在可以涅槃重生了；修复了其他的bug\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
@@ -1310,7 +1326,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
             {
                 Task.Run(async () => await BreadFactory.MaterialProduce()),
                 Task.Run(async () => await BreadFactory.BreadProduce()),
-                Task.Run(async () => await WoodenFish.ExpUpgrade()),
+                Task.Run(async () => await WoodenFish.GetExp()),
                 Task.Run(async () => await Announce.Notification())
             };
             await Task.WhenAll(Tasks);

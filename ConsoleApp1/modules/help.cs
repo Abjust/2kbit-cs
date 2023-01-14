@@ -36,6 +36,7 @@ namespace Net_2kBit.Modules
 6.面包厂功能
 7.获取源码
 8.数学计算器
+9.电子木鱼
 详情请用/help指令");
                     }
                     catch
@@ -53,7 +54,8 @@ namespace Net_2kBit.Modules
                     "5",
                     "6",
                     "7",
-                    "8"
+                    "8",
+                    "9"
                 };
                 var contents = new List<string>
                 {
@@ -87,7 +89,17 @@ namespace Net_2kBit.Modules
 升级生产速度（满级后）：/upgrade_speed
 升级产量（满级后）：/upgrade_output",
                     "https://github.com/Abjust/2kbit-cs",
-                    "使用/calc可以显示计算器说明"
+                    "使用/calc可以显示计算器说明",
+                    @"电子木鱼
+你可以：
+给我木鱼 - 注册赛博账号
+我的木鱼 - 获取电子木鱼信息
+敲木鱼 - 获取功德
+升级木鱼 - 升级电子木鱼等级
+涅槃重生 - 重置电子木鱼，但获得些许加成
+功德榜 - 查看全服功德排名
+封禁榜 - 查看全服封禁排名
+扣“1” - 扣掉100功德让佛祖陪你笑100次"
                 };
                 if (receiver.MessageChain.GetPlainMessage().StartsWith("/help") == true)
                 {
@@ -148,7 +160,8 @@ namespace Net_2kBit.Modules
 [5]量表测试
 [6]面包厂
 [7]获取源码
-[8]数学计算器");
+[8]数学计算器
+[9]电子木鱼");
                         }
                         catch
                         {

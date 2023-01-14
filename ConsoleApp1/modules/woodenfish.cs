@@ -53,12 +53,20 @@ namespace Net_2kBit.Modules
                                     };
                                     status = "正常";
                                     word = "【敲电子木鱼，见机甲佛祖，取赛博真经】";
-                                    ulong gongde = reader.GetUInt64("gongde") + (ulong)((Global.time_now - reader.GetInt64("time")) / Math.Pow(reader.GetInt32("level"), -1) * 10);
-                                    cmd1.CommandText = "UPDATE woodenfish SET time = @time_now , gongde = @gongde WHERE uid = @uid";
-                                    cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
-                                    cmd1.Parameters.AddWithValue("@gongde", gongde);
-                                    cmd1.Parameters.AddWithValue("@uid", executor);
-                                    await cmd1.ExecuteNonQueryAsync();
+                                    if (Math.Log10(reader.GetInt64("gongde")) >= 1)
+                                    {
+                                        cmd1.CommandText = "UPDATE woodenfish SET e = @e, gongde = 0 WHERE uid = @uid";
+                                        cmd1.Parameters.AddWithValue("@e", Math.Log10(Math.Pow(10, reader.GetDouble("e")) + reader.GetInt64("gongde")));
+                                        cmd1.Parameters.AddWithValue("@uid", executor);
+                                        await cmd1.ExecuteNonQueryAsync();
+                                    }
+                                    if (Math.Log10(reader.GetDouble("e")) >= 1)
+                                    {
+                                        cmd1.CommandText = "UPDATE woodenfish SET ee = @ee, e = 0 WHERE uid = @uid";
+                                        cmd1.Parameters.AddWithValue("@ee", Math.Log10(Math.Pow(10, reader.GetDouble("ee")) + reader.GetDouble("e")));
+                                        cmd1.Parameters.AddWithValue("@uid", executor);
+                                        await cmd1.ExecuteNonQueryAsync();
+                                    }
                                 }
                             }
                             else if (reader.GetInt32("ban") == 1)
@@ -121,6 +129,19 @@ namespace Net_2kBit.Modules
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                 }
+                                string gongde;
+                                if (reader.GetDouble("ee") >= 1)
+                                {
+                                    gongde = $"ee{Math.Truncate(10000 * reader.GetDouble("ee")) / 10000}（约 {Math.Round(Math.Pow(10, Math.Truncate(10000 * reader.GetDouble("ee") / 10000))) / 100} 亿）";
+                                }
+                                else if (reader.GetDouble("e") >= 1)
+                                {
+                                    gongde = $"e{Math.Truncate(10000 * reader.GetDouble("e")) / 10000}（约 {Math.Round(Math.Pow(10, Math.Truncate(10000 * reader.GetDouble("e")) / 10000)) / 10000} 万）";
+                                }
+                                else
+                                {
+                                    gongde = $"{reader.GetInt64("gongde")}";
+                                }
                                 if (Global.time_now - (reader.GetInt64("info_time")) <= 10 && reader.GetInt32("info_count") > 5)
                                 {
                                     try
@@ -158,9 +179,9 @@ namespace Net_2kBit.Modules
 赛博账号：{executor}
 账号状态：{status}
 木鱼等级：{reader.GetInt32("level")}
-木鱼经验：{reader.GetUInt64("exp")} / {(ulong)(100 * Math.Pow(1.14, reader.GetInt32("level") - 1))}
-当前速度：{Math.Round(Math.Pow(reader.GetInt32("level"), -1) * 10, 2)} 秒/周期
-当前功德：{reader.GetUInt64("gongde")}
+涅槃值：{reader.GetDouble("nirvana")}
+当前速度：{(int)Math.Round(60 * Math.Pow(0.95, reader.GetInt32("level")))} 秒/周期
+当前功德：{gongde}
 {word}")
                                             .Build();
                                         await MessageManager.SendGroupMessageAsync(group, messageChain);
@@ -204,9 +225,8 @@ namespace Net_2kBit.Modules
                 if (i == 0)
                 {
                     Random r = new();
-                    cmd.CommandText = "INSERT INTO woodenfish(uid, time, gongde) VALUES (@uid, @time_now, @gongde)";
+                    cmd.CommandText = "INSERT INTO woodenfish(uid, time) VALUES (@uid, @time_now)";
                     cmd.Parameters.AddWithValue("@time_now", Global.time_now);
-                    cmd.Parameters.AddWithValue("@gongde", r.Next(1000, 2001));
                     await cmd.ExecuteNonQueryAsync();
                     try
                     {
@@ -263,8 +283,8 @@ namespace Net_2kBit.Modules
                                     Connection = msc1
                                 };
                                 cmd1.Parameters.Add("@uid", MySqlDbType.String);
-                                cmd1.Parameters.Add("@gongde", MySqlDbType.UInt64);
-                                if (Global.time_now - reader.GetInt64("end_time") <= 5)
+                                cmd1.Parameters.Add("@gongde", MySqlDbType.Int64);
+                                if (Global.time_now - reader.GetInt64("end_time") <= 3)
                                 {
                                     cmd1.CommandText = "UPDATE woodenfish SET hit_count = @count WHERE uid = @uid";
                                     cmd1.Parameters.AddWithValue("@count", reader.GetInt32("hit_count") + 1);
@@ -284,7 +304,7 @@ namespace Net_2kBit.Modules
                                 while (reader.Read())
                                 {
                                     Thread.Sleep(250);
-                                    if (Global.time_now - reader.GetInt64("end_time") <= 5 && reader.GetInt32("hit_count") > 5 && reader.GetInt32("total_ban") < 19)
+                                    if (Global.time_now - reader.GetInt64("end_time") <= 3 && reader.GetInt32("hit_count") > 5 && reader.GetInt32("total_ban") < 9)
                                     {
                                         try
                                         {
@@ -301,21 +321,23 @@ namespace Net_2kBit.Modules
                                         cmd1.CommandText = "UPDATE woodenfish SET ban = 2, total_ban = @ban, gongde = @gongde, dt = @time, hit_count = 0 WHERE uid = @uid";
                                         cmd1.Parameters["@uid"].Value = executor;
                                         cmd1.Parameters.AddWithValue("@ban", reader.GetInt32("total_ban") + 1);
-                                        cmd1.Parameters["@gongde"].Value = (ulong)(reader.GetUInt64("gongde") * 0.7);
+                                        cmd1.Parameters["@gongde"].Value = (long)(reader.GetInt64("gongde") - reader.GetInt64("gongde") * 0.3);
+                                        cmd1.Parameters.AddWithValue("@ee", reader.GetDouble("ee") - reader.GetDouble("ee") * 0.3);
+                                        cmd1.Parameters.AddWithValue("@e", reader.GetDouble("e") - reader.GetDouble("e") * 0.3);
                                         cmd1.Parameters.AddWithValue("@time", Global.time_now + 3600);
                                         await cmd1.ExecuteNonQueryAsync();
                                         break;
                                     }
-                                    else if (Global.time_now - reader.GetInt64("end_time") <= 5 && reader.GetInt32("hit_count") > 5 && reader.GetInt32("total_ban") >= 19)
+                                    else if (Global.time_now - reader.GetInt64("end_time") <= 5 && reader.GetInt32("hit_count") > 5 && reader.GetInt32("total_ban") >= 9)
                                     {
                                         try
                                         {
                                             MessageChain messageChain = new MessageChainBuilder()
                                             .At(executor)
-                                            .Plain($" 多次DoS佛祖，死不悔改，罪加一等（恼）（你被永久封禁，等级重置，经验、功德清零）")
+                                            .Plain($" 多次DoS佛祖，死不悔改，罪加一等（恼）（你被永久封禁，等级、涅槃值重置，功德清零）")
                                             .Build();
                                             await MessageManager.SendGroupMessageAsync(group, messageChain);
-                                            cmd1.CommandText = "UPDATE woodenfish SET ban = 1, level = 1, exp = 0, gongde = 0, total_ban = 20, hit_count = 0 WHERE uid = @uid";
+                                            cmd1.CommandText = "UPDATE woodenfish SET ban = 1, level = 0, nirvana = 1, gongde = 0, ee = 0, e = 0, total_ban = 10, hit_count = 0 WHERE uid = @uid";
                                             cmd1.Parameters["@uid"].Value = executor;
                                             await cmd1.ExecuteNonQueryAsync();
                                             break;
@@ -335,7 +357,7 @@ namespace Net_2kBit.Modules
                                                 .Build();
                                             await MessageManager.SendGroupMessageAsync(group, messageChain);
                                             cmd1.CommandText = "UPDATE woodenfish SET gongde = @gongde WHERE uid = @uid";
-                                            cmd1.Parameters["@gongde"].Value = reader.GetUInt64("gongde") + (ulong)random;
+                                            cmd1.Parameters["@gongde"].Value = reader.GetInt64("gongde") + random;
                                             cmd1.Parameters["@uid"].Value = executor;
                                             await cmd1.ExecuteNonQueryAsync();
                                             break;
@@ -397,10 +419,8 @@ namespace Net_2kBit.Modules
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     while (reader.Read())
                     {
-                        if (reader.GetInt32("ban") == 0 && reader.GetUInt64("gongde") >= 100)
+                        if (reader.GetInt32("ban") == 0 && Math.Pow(10, reader.GetInt64("e")) >= 100)
                         {
-                            Random r = new();
-                            int random = r.Next(1, 6);
                             using (var msc1 = new MySqlConnection(Global.connectstring))
                             {
                                 await msc1.OpenAsync();
@@ -410,15 +430,16 @@ namespace Net_2kBit.Modules
                                 };
                                 MessageChain messageChain = new MessageChainBuilder()
                                 .At(executor)
-                                .Plain($" 哈*{reader.GetUInt64("gongde")}")
+                                .Plain(" 哈*100")
                                 .Build();
                                 await MessageManager.SendGroupMessageAsync(group, messageChain);
-                                cmd1.CommandText = "UPDATE woodenfish SET gongde = 0 WHERE uid = @uid";
+                                cmd1.CommandText = "UPDATE woodenfish SET e = @e WHERE uid = @uid";
+                                cmd1.Parameters.AddWithValue("@e", Math.Log10(Math.Pow(10, reader.GetInt64("e")) - 100));
                                 cmd1.Parameters.AddWithValue("@uid", executor);
                                 await cmd1.ExecuteNonQueryAsync();
                             }
                         }
-                        else if (reader.GetInt32("gongde") < 100)
+                        else if (Math.Pow(10, reader.GetInt64("e")) < 100)
                         {
                             MessageChain messageChain = new MessageChainBuilder()
                                 .At(executor)
@@ -438,6 +459,166 @@ namespace Net_2kBit.Modules
                 }
             }
         }
+        // 升级木鱼
+        public static async void Upgrade(string group, string executor)
+        {
+            using (var msc = new MySqlConnection(Global.connectstring))
+            {
+                await msc.OpenAsync();
+                MySqlCommand cmd = new()
+                {
+                    Connection = msc
+                };
+                cmd.CommandText = "SELECT COUNT(*) uid FROM woodenfish WHERE uid = @uid;";
+                cmd.Parameters.AddWithValue("@uid", executor);
+                int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                if (i == 1)
+                {
+                    cmd.CommandText = "SELECT * FROM woodenfish WHERE uid = @uid;";
+                    MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                    while (reader.Read())
+                    {
+                        if (reader.GetInt32("ban") == 0 && Math.Pow(10, reader.GetDouble("ee")) + reader.GetDouble("e") >= reader.GetInt32("level") + 2)
+                        {
+                            if (reader.GetDouble("e") >= reader.GetInt32("level") + 2)
+                            {
+                                using (var msc1 = new MySqlConnection(Global.connectstring))
+                                {
+                                    await msc1.OpenAsync();
+                                    MySqlCommand cmd1 = new()
+                                    {
+                                        Connection = msc1
+                                    };
+                                    cmd1.CommandText = "UPDATE woodenfish SET level = @level, e = @e WHERE uid = @uid";
+                                    cmd1.Parameters.AddWithValue("@level", reader.GetInt32("level") + 1);
+                                    cmd1.Parameters.AddWithValue("@e", reader.GetDouble("e") - reader.GetInt32("level") + 2);
+                                    cmd1.Parameters.AddWithValue("@uid", executor);
+                                    await cmd1.ExecuteNonQueryAsync();
+                                }
+                            }
+                            else
+                            {
+                                using (var msc1 = new MySqlConnection(Global.connectstring))
+                                {
+                                    await msc1.OpenAsync();
+                                    MySqlCommand cmd1 = new()
+                                    {
+                                        Connection = msc1
+                                    };
+                                    cmd1.CommandText = "UPDATE woodenfish SET level = @level, ee = @ee, e = 0 WHERE uid = @uid";
+                                    cmd1.Parameters.AddWithValue("@level", reader.GetInt32("level") + 1);
+                                    cmd1.Parameters.AddWithValue("@ee", Math.Log10(Math.Pow(10, reader.GetDouble("ee")) + reader.GetDouble("e") - reader.GetInt32("level") + 2));
+                                    cmd1.Parameters.AddWithValue("@uid", executor);
+                                    await cmd1.ExecuteNonQueryAsync();
+                                    MessageChain messageChain = new MessageChainBuilder()
+                                        .At(executor)
+                                        .Plain(" 木鱼升级成功辣（喜）")
+                                        .Build();
+                                    await MessageManager.SendGroupMessageAsync(group, messageChain);
+                                }
+                            }
+                        }
+                        else if (Math.Pow(10, reader.GetDouble("ee")) + reader.GetDouble("e") < reader.GetInt32("level") + 2)
+                        {
+                            MessageChain messageChain = new MessageChainBuilder()
+                                .At(executor)
+                                .Plain(" 宁踏马功德不够，升级个毛啊（恼）")
+                                .Build();
+                            await MessageManager.SendGroupMessageAsync(group, messageChain);
+                        }
+                        else
+                        {
+                            MessageChain messageChain = new MessageChainBuilder()
+                                .At(executor)
+                                .Plain(" 宁踏马被佛祖封号辣（恼）")
+                                .Build();
+                            await MessageManager.SendGroupMessageAsync(group, messageChain);
+                        }
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, "宁踏马害没注册？快发送“给我木鱼”注册罢！");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("群消息发送失败");
+                    }
+                }
+            }
+        }
+        // 涅槃重生
+        public static async void Nirvana(string group, string executor)
+        {
+            using (var msc = new MySqlConnection(Global.connectstring))
+            {
+                await msc.OpenAsync();
+                MySqlCommand cmd = new()
+                {
+                    Connection = msc
+                };
+                cmd.CommandText = "SELECT COUNT(*) uid FROM woodenfish WHERE uid = @uid;";
+                cmd.Parameters.AddWithValue("@uid", executor);
+                int i = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                if (i == 1)
+                {
+                    cmd.CommandText = "SELECT * FROM woodenfish WHERE uid = @uid;";
+                    MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                    while (reader.Read())
+                    {
+                        if (reader.GetInt32("ban") == 0 && reader.GetDouble("ee") >= 10 * reader.GetDouble("nirvana"))
+                        {
+                            using (var msc1 = new MySqlConnection(Global.connectstring))
+                            {
+                                await msc1.OpenAsync();
+                                MySqlCommand cmd1 = new()
+                                {
+                                    Connection = msc1
+                                };
+                                cmd1.CommandText = "UPDATE woodenfish SET nirvana = @nirvana, level = 0, ee = 0, e = 0, gongde = 0 WHERE uid = @uid";
+                                cmd1.Parameters.AddWithValue("@nirvana", reader.GetDouble("nirvana") + 0.05);
+                                cmd1.Parameters.AddWithValue("@uid", executor);
+                                await cmd1.ExecuteNonQueryAsync();
+                                MessageChain messageChain = new MessageChainBuilder()
+                                .At(executor)
+                                .Plain(" 涅槃重生，功德圆满（喜）")
+                                .Build();
+                                await MessageManager.SendGroupMessageAsync(group, messageChain);
+                            }
+                        }
+                        else if (reader.GetDouble("ee") < 10 * reader.GetDouble("nirvana"))
+                        {
+                            MessageChain messageChain = new MessageChainBuilder()
+                                .At(executor)
+                                .Plain(" 宁踏马功德不够，涅槃重生个毛啊（恼）")
+                                .Build();
+                            await MessageManager.SendGroupMessageAsync(group, messageChain);
+                        }
+                        else
+                        {
+                            MessageChain messageChain = new MessageChainBuilder()
+                                .At(executor)
+                                .Plain(" 宁踏马被佛祖封号辣（恼）")
+                                .Build();
+                            await MessageManager.SendGroupMessageAsync(group, messageChain);
+                        }
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        await MessageManager.SendGroupMessageAsync(group, "宁踏马害没注册？快发送“给我木鱼”注册罢！");
+                    }
+                    catch
+                    {
+                        Console.WriteLine("群消息发送失败");
+                    }
+                }
+            }
+        }
         // 功德榜
         public static async void Leaderboard(string group, string executor)
         {
@@ -453,12 +634,37 @@ namespace Net_2kBit.Modules
                 if (i >= 1)
                 {
                     List<string> uids = new();
-                    cmd.CommandText = "SELECT * FROM woodenfish ORDER BY gongde DESC;";
+                    cmd.CommandText = "SELECT * FROM woodenfish ORDER BY ee DESC;";
                     MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                     while (reader.Read())
                     {
-                        string uid = reader.GetString("uid");
-                        uids?.Add(uid);
+                        if (reader.GetDouble("ee") >= 1)
+                        {
+                            string uid = reader.GetString("uid");
+                            uids?.Add(uid);
+                        }
+                    }
+                    await reader.CloseAsync();
+                    cmd.CommandText = "SELECT * FROM woodenfish ORDER BY e DESC;";
+                    reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                    while (reader.Read())
+                    {
+                        if (reader.GetDouble("e") >= 1 && reader.GetDouble("ee") < 1)
+                        {
+                            string uid = reader.GetString("uid");
+                            uids?.Add(uid);
+                        }
+                    }
+                    await reader.CloseAsync();
+                    cmd.CommandText = "SELECT * FROM woodenfish ORDER BY gongde DESC;";
+                    reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                    while (reader.Read())
+                    {
+                        if (reader.GetDouble("e") < 1 && reader.GetDouble("ee") < 1)
+                        {
+                            string uid = reader.GetString("uid");
+                            uids?.Add(uid);
+                        }
                     }
                     await reader.CloseAsync();
                     MessageChain messageChain = new MessageChainBuilder()
@@ -473,15 +679,38 @@ namespace Net_2kBit.Modules
                         reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
                         while (reader.Read())
                         {
-                            if (reader.GetUInt64("gongde") >= 1)
+                            if (reader.GetDouble("ee") >= 1)
                             {
                                 MessageChain messageChain1 = new MessageChainBuilder()
-                                .Plain($"\n{uid} --- {reader.GetUInt64("gongde")}")
+                                .Plain($"\n{uid} --- ee{Math.Truncate(10000 * reader.GetDouble("ee")) / 10000}")
                                 .Build();
                                 foreach (MessageBase message in messageChain1)
                                 {
                                     messageChain.Add(message);
                                 }
+                                break;
+                            }
+                            else if (reader.GetDouble("e") >= 1 && reader.GetDouble("ee") < 1)
+                            {
+                                MessageChain messageChain1 = new MessageChainBuilder()
+                                .Plain($"\n{uid} --- e{Math.Truncate(10000 * reader.GetDouble("e")) / 10000}")
+                                .Build();
+                                foreach (MessageBase message in messageChain1)
+                                {
+                                    messageChain.Add(message);
+                                }
+                                break;
+                            }
+                            else if (reader.GetInt64("gongde") >= 1 && reader.GetDouble("e") < 1 && reader.GetDouble("ee") < 1)
+                            {
+                                MessageChain messageChain1 = new MessageChainBuilder()
+                                .Plain($"\n{uid} --- {reader.GetInt64("gongde")}")
+                                .Build();
+                                foreach (MessageBase message in messageChain1)
+                                {
+                                    messageChain.Add(message);
+                                }
+                                break;
                             }
                         }
                         await reader.CloseAsync();
@@ -540,7 +769,7 @@ namespace Net_2kBit.Modules
                             if (reader.GetInt32("total_ban") >= 1)
                             {
                                 MessageChain messageChain1 = new MessageChainBuilder()
-                                .Plain($"\n{uid} --- {reader.GetUInt64("total_ban")}")
+                                .Plain($"\n{uid} --- {reader.GetInt64("total_ban")}")
                                 .Build();
                                 foreach (MessageBase message in messageChain1)
                                 {
@@ -566,7 +795,7 @@ namespace Net_2kBit.Modules
                 }
             }
         }
-        public static async Task ExpUpgrade()
+        public static async Task GetExp()
         {
             using (var msc = new MySqlConnection(Global.connectstring))
             {
@@ -576,72 +805,61 @@ namespace Net_2kBit.Modules
                     Connection = msc
                 };
                 List<string> uids = new();
+                cmd.CommandText = "SELECT * FROM woodenfish;";
+                MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    string uid = reader.GetString("uid");
+                    if (uids == null || !uids.Contains(uid))
+                    {
+                        uids?.Add(uid);
+                    }
+                }
+                await reader.CloseAsync();
                 cmd.Parameters.Add("@uid", MySqlDbType.String);
                 while (true)
                 {
-                    cmd.CommandText = "SELECT * FROM woodenfish;";
-                    MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
-                    while (await reader.ReadAsync())
-                    {
-                        string uid = reader.GetString("uid");
-                        if (uids == null || !uids.Contains(uid))
-                        {
-                            uids?.Add(uid);
-                        }
-                    }
-                    await reader.CloseAsync();
+                    Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                     if (uids != null)
                     {
                         foreach (string uid in uids)
                         {
-                            int exp = 0;
                             cmd.CommandText = "SELECT * FROM woodenfish WHERE uid = @uid;";
                             cmd.Parameters["@uid"].Value = uid;
                             reader = (MySqlDataReader)await cmd.ExecuteReaderAsync();
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                             {
-                                if (reader.GetInt32("ban") == 0)
+                                int cycle_speed;
+                                if (60 * Math.Pow(0.95, reader.GetInt32("level")) <= 1)
                                 {
-                                    Random r = new();
-                                    exp = r.Next(1, 6);
-                                    if (reader.GetUInt64("exp") >= (ulong)(100 * Math.Pow(1.14, reader.GetInt32("level") - 1)))
+                                    cycle_speed = 1;
+                                }
+                                else
+                                {
+                                    cycle_speed = (int)Math.Round(60 * Math.Pow(0.95, reader.GetInt32("level")));
+                                }
+                                if (reader.GetInt32("ban") == 0 && Global.time_now - reader.GetInt64("time") >= cycle_speed)
+                                {
+                                    using (var msc1 = new MySqlConnection(Global.connectstring))
                                     {
-                                        exp = r.Next(1, 6);
-                                        using (var msc1 = new MySqlConnection(Global.connectstring))
+                                        await msc1.OpenAsync();
+                                        MySqlCommand cmd1 = new()
                                         {
-                                            await msc1.OpenAsync();
-                                            MySqlCommand cmd1 = new()
-                                            {
-                                                Connection = msc1
-                                            };
-                                            cmd1.CommandText = "UPDATE woodenfish SET level = @level, exp = @exp WHERE uid = @uid";
-                                            cmd1.Parameters.AddWithValue("@level", reader.GetInt32("level") + 1);
-                                            cmd1.Parameters.AddWithValue("@exp", exp);
-                                            cmd1.Parameters.AddWithValue("@uid", uid);
-                                            await cmd1.ExecuteNonQueryAsync();
-                                        }
+                                            Connection = msc1
+                                        };
+                                        cmd1.CommandText = "UPDATE woodenfish SET time = @time_now, e = @e WHERE uid = @uid";
+                                        cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
+                                        cmd1.Parameters.AddWithValue("@e", reader.GetInt64("e") * reader.GetDouble("nirvana") + Math.Log10(reader.GetInt32("level")));
+                                        cmd1.Parameters.AddWithValue("@uid", uid);
+                                        await cmd1.ExecuteNonQueryAsync();
                                     }
-                                    else
-                                    {
-                                        using (var msc1 = new MySqlConnection(Global.connectstring))
-                                        {
-                                            await msc1.OpenAsync();
-                                            MySqlCommand cmd1 = new()
-                                            {
-                                                Connection = msc1
-                                            };
-                                            cmd1.CommandText = "UPDATE woodenfish SET exp = @exp WHERE uid = @uid";
-                                            cmd1.Parameters.AddWithValue("@exp", reader.GetUInt64("exp") + (ulong)exp);
-                                            cmd1.Parameters.AddWithValue("@uid", uid);
-                                            await cmd1.ExecuteNonQueryAsync();
-                                        }
-                                    }
+                                    break;
                                 }
                             }
-                            reader.Close();
+                            await reader.CloseAsync();
                         }
                     }
-                    Thread.Sleep(1500);
+                    Thread.Sleep(500);
                 }
             }
         }

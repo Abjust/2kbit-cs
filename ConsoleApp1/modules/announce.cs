@@ -14,8 +14,6 @@ using Mirai.Net.Data.Messages.Receivers;
 using Mirai.Net.Data.Shared;
 using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
-using MySqlX.XDevAPI.Common;
-using System;
 
 namespace Net_2kBit.Modules
 {
@@ -86,22 +84,39 @@ namespace Net_2kBit.Modules
         {
             while (true)
             {
-                TimeSpan timeSpan = new TimeSpan(14, 0, 0);
-                DateTime utc = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds, DateTimeKind.Utc);
-                DateTime time_now = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
-                if (TimeZoneInfo.ConvertTime(utc, TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time")) == time_now)
+                List<int[]> schedules = new()
                 {
-                    IEnumerable<Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
-                    foreach (Group group in groups)
+                    new int[] {14, 0, 0},
+                    new int[] {3, 45, 0}
+                };
+                List<string> words = new()
+                {
+                    "同志们，该准备休息了，身体是革命的本钱！",
+                    "1145141919810！"
+                };
+                foreach (int[] schedule in schedules)
+                {
+                    TimeSpan timeSpan = new TimeSpan(schedule[0], schedule[1], schedule[2]);
+                    DateTime utc = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds, DateTimeKind.Utc);
+                    DateTime time_now = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+                    if (TimeZoneInfo.ConvertTime(utc, TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time")) == time_now)
                     {
-                        try
+                        IEnumerable<Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
+                        foreach (Group group in groups)
                         {
-                            await MessageManager.SendGroupMessageAsync(group, "同志们，该准备休息了，身体是革命的本钱！");
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(group, words[schedules.IndexOf(schedule)]);
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
                         }
-                        catch
-                        {
-                            Console.WriteLine("群消息发送失败");
-                        }
+                    }
+                    else
+                    {
+                        continue;
                     }
                 }
                 Thread.Sleep(500);

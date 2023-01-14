@@ -199,21 +199,15 @@ namespace Net_2kBit.Modules
                                     int sum = 0;
                                     for (int i = 0; i < fields.Length - 1; i++)
                                     {
-                                        fields[i] = rnd.Next(1, number - sum);
+                                        double exponent = 0.5 - (i * (0.5 / bread_types.Count));
+                                        fields[i] = rnd.Next(1, (int)Math.Floor((number - sum) * (1 - exponent)));
                                         sum += fields[i];
                                     }
                                     fields[fields.Length - 1] = number - sum;
                                     string text = "";
                                     for (int i = 0; i < bread_types.Count; i++)
                                     {
-                                        if (i == 0)
-                                        {
-                                            text = $"\n{bread_types[i]}*{fields[i]}";
-                                        }
-                                        else
-                                        {
-                                            text += $"\n{bread_types[i]}*{fields[i]}";
-                                        }
+                                        text += $"\n{bread_types[i]}*{fields[i]}";
                                     }
                                     MessageChain? messageChain = new MessageChainBuilder()
                                    .At(executor)
@@ -308,17 +302,31 @@ namespace Net_2kBit.Modules
                     }
                     else
                     {
-                        MessageChain? messageChain = new MessageChainBuilder()
+                        if (number >= 1)
+                        {
+                            MessageChain? messageChain = new MessageChainBuilder()
                                .At(executor)
                                .Plain($" 🍞*{number}")
                                .Build();
-                        try
-                        {
-                            await MessageManager.SendGroupMessageAsync(group, messageChain);
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(group, messageChain);
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
                         }
-                        catch
+                        else
                         {
-                            Console.WriteLine("群消息发送失败");
+                            try
+                            {
+                                await MessageManager.SendGroupMessageAsync(group, "这样的数字是没有意义的。。。");
+                            }
+                            catch
+                            {
+                                Console.WriteLine("群消息发送失败");
+                            }
                         }
                     }
                 }
