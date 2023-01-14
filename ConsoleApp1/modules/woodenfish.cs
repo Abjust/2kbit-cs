@@ -132,7 +132,7 @@ namespace Net_2kBit.Modules
                                 string gongde;
                                 if (reader.GetDouble("ee") >= 1)
                                 {
-                                    gongde = $"ee{Math.Truncate(10000 * reader.GetDouble("ee")) / 10000}（约 {Math.Round(Math.Pow(10, Math.Truncate(10000 * reader.GetDouble("ee") / 10000))) / 100} 亿）";
+                                    gongde = $"ee{Math.Truncate(10000 * reader.GetDouble("ee")) / 10000}（约 {Math.Round(Math.Pow(10, Math.Truncate(10000 * reader.GetDouble("ee")) / 10000)) / 100} 亿）";
                                 }
                                 else if (reader.GetDouble("e") >= 1)
                                 {

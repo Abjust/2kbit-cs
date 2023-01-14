@@ -1300,7 +1300,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w05a\r\n上次更新日期：2023/1/14\r\n更新内容：功德现在会用e（log10值）和ee（log10^10值）计算了；现在升级木鱼将消耗功德而非经验；删除了经验这个参数；现在可以涅槃重生了；修复了其他的bug\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w05b\r\n上次更新日期：2023/1/14\r\n更新内容：修复了功德达ee者约数不能精确到4位小数的bug\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
