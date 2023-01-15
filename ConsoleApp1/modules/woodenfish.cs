@@ -13,8 +13,6 @@ using Mirai.Net.Data.Messages;
 using Mirai.Net.Sessions.Http.Managers;
 using Mirai.Net.Utils.Scaffolds;
 using MySql.Data.MySqlClient;
-using System.Linq;
-using System.Net.Sockets;
 
 namespace Net_2kBit.Modules
 {
@@ -56,7 +54,7 @@ namespace Net_2kBit.Modules
                                     status = "正常";
                                     word = "【敲电子木鱼，见机甲佛祖，取赛博真经】";
                                     cmd1.Parameters.Add("@uid", MySqlDbType.String);
-                                    if (Math.Log10(reader.GetInt64("gongde")) >= 1)
+                                    if (Math.Log10(reader.GetInt64("gongde")) >= 1 && reader.GetDouble("e") <= 200)
                                     {
                                         cmd1.CommandText = "UPDATE woodenfish SET e = @e, gongde = 0 WHERE uid = @uid";
                                         cmd1.Parameters.AddWithValue("@e", Math.Log10(Math.Pow(10, reader.GetDouble("e")) + reader.GetInt64("gongde")));
@@ -147,13 +145,21 @@ namespace Net_2kBit.Modules
                                         "沟",
                                         "涧",
                                         "正",
-                                        "载"
+                                        "载",
+                                        "极",
+                                        "恒河沙",
+                                        "阿僧祇",
+                                        "那由他",
+                                        "不可思议",
+                                        "无量",
+                                        "大数",
+                                        "全仕祥"
                                     };
                                     double ee_with_unit = reader.GetDouble("ee");
                                     int unit = 0;
                                     for (int j = 0; ;)
                                     {
-                                        if (Math.Pow(10, ee_with_unit) >= 48)
+                                        if (Math.Pow(10, ee_with_unit) >= (8 + units.Count * 4))
                                         {
                                             expression = $"10^10^{Math.Truncate(10000 * reader.GetDouble("ee")) / 10000}";
                                             break;
@@ -169,8 +175,8 @@ namespace Net_2kBit.Modules
                                             }
                                             else
                                             {
-                                                unit = (int)Math.Floor((Math.Pow(10, ee_with_unit) - 8) / Math.Log10(10000)) - 1;
-                                                expression = $"{Math.Truncate(Math.Pow(10, Math.Pow(10, ee_with_unit) - (8 + unit * 4))) / 10000} {units[unit]}";
+                                                unit = (int)Math.Floor((Math.Pow(10, ee_with_unit) - 8) / Math.Log10(10000));
+                                                expression = $"{Math.Truncate(Math.Pow(10, Math.Pow(10, ee_with_unit) - (8 + (unit - 1) * 4))) / 10000} {units[unit]}";
                                                 break;
                                             }
                                         }
@@ -908,10 +914,10 @@ namespace Net_2kBit.Modules
                                         {
                                             Connection = msc1
                                         };
-                                        cmd1.CommandText = "UPDATE woodenfish SET time = @time_now, e = @e WHERE uid = @uid";
                                         cmd1.Parameters.AddWithValue("@time_now", Global.time_now);
-                                        cmd1.Parameters.AddWithValue("@e", reader.GetInt64("e") * reader.GetDouble("nirvana") + Math.Log10(reader.GetInt32("level")));
                                         cmd1.Parameters.AddWithValue("@uid", uid);
+                                        cmd1.CommandText = "UPDATE woodenfish SET time = @time_now, e = @e WHERE uid = @uid";
+                                        cmd1.Parameters.AddWithValue("@e", (reader.GetDouble("e") * Math.Pow(Math.E, reader.GetDouble("nirvana"))) + Math.Log10(reader.GetDouble("level")));
                                         await cmd1.ExecuteNonQueryAsync();
                                     }
                                     break;

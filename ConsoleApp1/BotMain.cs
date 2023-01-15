@@ -1300,7 +1300,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w05e\r\n上次更新日期：2023/1/14\r\n更新内容：修复了科学计数法转换成大数单位后，表达数字比实际数字大的bug\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w05f\r\n上次更新日期：2023/1/15\r\n更新内容：修改了功德的增长公式；修复了些许其他bug\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {

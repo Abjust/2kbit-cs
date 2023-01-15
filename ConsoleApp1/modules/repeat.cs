@@ -108,6 +108,9 @@ namespace Net_2kBit.Modules
                 {
                     foreach (string item in repeatwords)
                     {
+                        MessageChain compare = new MessageChainBuilder()
+                            .Plain(item)
+                            .Build();
                         if (item.Contains("faceid:"))
                         {
                             string face_id = item.Replace("faceid:", ""); ;
@@ -220,7 +223,7 @@ namespace Net_2kBit.Modules
                                 }
                             }
                         }
-                        else if (item.Equals(receiver.MessageChain.GetPlainMessage()))
+                        else if (compare[0].Equals(receiver.MessageChain[1]))
                         {
                             Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                             using (var msc = new MySqlConnection(Global.connectstring))
