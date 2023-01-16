@@ -411,6 +411,8 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
             {
                 if ((Global.ignores == null || !Global.ignores.Contains($"{x.GroupId}_{x.Sender.Id}")) && (Global.g_ignores == null || !Global.g_ignores.Contains(x.Sender.Id)))
                 {
+                    Random random1 = new();
+                    Thread.Sleep(random1.Next(1, 1751));
                     // 面包厂相关
                     string[] text1 = x.MessageChain.GetPlainMessage().Split(" ");
                     if (text1.Length == 2)
@@ -1425,7 +1427,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w06a\r\n上次更新日期：2023/1/16\r\n更新内容：新增http状态码查询功能；修复了些许其他bug\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w06b\r\n上次更新日期：2023/1/16\r\n更新内容：给群消息处理加了≤1750ms的随机延迟，更加拟人\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {
