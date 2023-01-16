@@ -1427,7 +1427,7 @@ CHANGE COLUMN `bread_diversity` `factory_mode` TINYINT NOT NULL DEFAULT '0' COMM
                         try
                         {
                             await MessageManager.SendGroupMessageAsync(x.GroupId,
-                            $"机器人版本：b_23w06b\r\n上次更新日期：2023/1/16\r\n更新内容：给群消息处理加了≤1750ms的随机延迟，更加拟人\r\n---------\r\n{splashes[random]}");
+                            $"机器人版本：b_23w06c\r\n上次更新日期：2023/1/16\r\n更新内容：修复了计划任务（整点报时）无法按计划运行的bug\r\n---------\r\n{splashes[random]}");
                         }
                         catch
                         {

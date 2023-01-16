@@ -87,19 +87,21 @@ namespace Net_2kBit.Modules
                 List<int[]> schedules = new()
                 {
                     new int[] {14, 0, 0},
-                    new int[] {3, 45, 0}
+                    new int[] {3, 45, 0},
+                    new int[] {11, 19, 0}
                 };
                 List<string> words = new()
                 {
                     "同志们，该准备休息了，身体是革命的本钱！",
-                    "1145141919810！"
+                    "1145141919810！",
+                    "哼哼哼，啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊"
                 };
                 foreach (int[] schedule in schedules)
                 {
                     TimeSpan timeSpan = new TimeSpan(schedule[0], schedule[1], schedule[2]);
-                    DateTime utc = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds, DateTimeKind.Utc);
-                    DateTime time_now = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
-                    if (TimeZoneInfo.ConvertTime(utc, TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time")) == time_now)
+                    DateTime utc = new(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds, DateTimeKind.Utc);
+                    DateTime time_now = new(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second, DateTimeKind.Local);
+                    if (utc == TimeZoneInfo.ConvertTime(time_now, TimeZoneInfo.FindSystemTimeZoneById("UTC")))
                     {
                         IEnumerable<Group> groups = AccountManager.GetGroupsAsync().GetAwaiter().GetResult();
                         foreach (Group group in groups)
@@ -113,10 +115,6 @@ namespace Net_2kBit.Modules
                                 Console.WriteLine("群消息发送失败");
                             }
                         }
-                    }
-                    else
-                    {
-                        continue;
                     }
                 }
                 Thread.Sleep(500);
