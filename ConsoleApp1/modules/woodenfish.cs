@@ -182,7 +182,7 @@ namespace Net_2kBit.Modules
                                         }
                                         else
                                         {
-                                            expression = $"{Math.Truncate(Math.Pow(10, Math.Pow(10, ee_with_unit - 8))) / 10000} {units[j]}";
+                                            expression = $"{Math.Truncate(Math.Pow(10, Math.Pow(10, ee_with_unit))) / 10000 / 10000} {units[j]}";
                                             break;
                                         }
                                     }

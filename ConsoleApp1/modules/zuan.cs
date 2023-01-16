@@ -63,7 +63,7 @@ namespace Net_2kBit.Modules
                 .Plain(" 你就是歌姬吧")
                 .Build();
             Global.time_now = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-            if ((message != null && message[1] == messageChain[0] && message[2] == messageChain[1]) || (@event != null && @event is NudgeEvent))
+            if ((message != null && message.Count >= 3 && message[1] == messageChain[0] && message[2] == messageChain[1]) || (@event != null && @event is NudgeEvent))
             {
                 if (Global.time_now - last_zuanctrl >= zuan_cd)
                 {
